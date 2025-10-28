@@ -1,35 +1,50 @@
-# 🚀 Giải Pháp Thay Thế Hadoop Cho Bước 4 (K-means Clustering)
+# 🚀 So Sánh Các Phương Pháp K-means Clustering
 
 ## 📊 Tổng Quan
 
-Bước 4 hiện tại sử dụng Hadoop MapReduce để chạy K-means clustering trên 180M rows (~33GB hadoop_input.txt). Đây là bottleneck lớn nhất trong pipeline.
+Project hiện tại sử dụng **Apache Spark** để chạy K-means clustering trên 180M rows (~33GB dữ liệu đã normalize). Đây là giải pháp tối ưu nhất cho distributed computing với API hiện đại.
 
-**Vấn đề với Hadoop:**
-- Overhead cao từ HDFS I/O (upload/download qua network)
-- Serialize/deserialize dữ liệu mỗi iteration
+Document này so sánh các phương pháp khác nhau để giúp bạn lựa chọn giải pháp phù hợp.
+
+**Lý do chọn Spark (hiện tại):**
+- ⚡ In-memory processing nhanh hơn Hadoop 10-100x
+- 🎯 API hiện đại (PySpark DataFrame)
+- 💾 Lưu trữ trên HDFS (tuân thủ quy định không lưu local)
+- 🛡️ Fault-tolerant, production-ready
+- 📈 Scalable - dễ dàng thêm nodes
+- Thời gian xử lý: **15-30 phút**
+
+**Vấn đề với Hadoop MapReduce (legacy):**
+- Overhead cao từ HDFS I/O mỗi iteration
+- Phải serialize/deserialize dữ liệu liên tục
 - Shuffle phase chậm giữa mapper và reducer
-- Không tận dụng tối đa RAM của single machine
-- Thời gian xử lý: **1-2 giờ** cho 15 iterations
+- Disk-based, không tận dụng RAM hiệu quả
+- Thời gian xử lý: **1-2 giờ** (chậm hơn Spark 4-8x)
 
 ---
 
-## 🔥 Giải Pháp 1: MiniBatch K-Means (Scikit-learn)
+## 🔥 Giải Pháp 1: Apache Spark MLlib (Đang sử dụng)
 
-**Nhanh nhất và đơn giản nhất - KHUYẾN NGHỊ cho hầu hết trường hợp**
+**Hiện đang được sử dụng trong project - Tốt nhất cho distributed computing**
 
-### Tại sao nhanh hơn?
-- Chỉ load một phần dữ liệu vào RAM mỗi lần (streaming)
-- Tận dụng optimized C/Cython code
-- Không có network overhead
-- Converge nhanh hơn (~5-8 iterations thay vì 15)
+### Tại sao chọn Spark?
+- In-memory processing nhanh hơn Hadoop 10-100x
+- Tương thích với HDFS (tuân thủ quy định không lưu local)
+- API hiện đại, dễ maintain hơn MapReduce
+- Scalable - thêm nodes để tăng performance
+- Fault-tolerant - production ready
 
-### Implementation
+### Implementation (Hiện tại)
 
-```python path=null start=null
-# step4_minibatch_kmeans.py
-import polars as pl
-import numpy as np
-from sklearn.cluster import MiniBatchKMeans
+Xem: `scripts/spark/kmeans_spark.py`
+
+```python path=/home/ultimatebrok/Downloads/Final/scripts/spark/kmeans_spark.py start=1
+#!/usr/bin/env python3
+# K-means clustering using PySpark on HDFS
+import sys
+from pyspark.sql import SparkSession
+from pyspark.ml.clustering import KMeans
+from pyspark.ml.feature import VectorAssembler
 from time import time
 
 print("Step 4: MiniBatch K-Means (Scikit-learn)")

@@ -2,6 +2,8 @@
 
 Pipeline phân tích dữ liệu HI-Large_Trans.csv sử dụng Polars và Apache Spark (PySpark).
 
+> 📚 **Xem chi tiết**: [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md) - Hướng dẫn đầy đủ và kiến trúc hệ thống
+
 ## ⚡ Nâng cấp từ Hadoop sang Spark
 
 Project đã được cập nhật để sử dụng **Apache Spark** thay vì Hadoop MapReduce, giúp:
@@ -10,127 +12,248 @@ Project đã được cập nhật để sử dụng **Apache Spark** thay vì H
 - 📝 **Code đơn giản hơn** (PySpark API)
 - 🚀 **Scale tốt hơn** với big data
 
-## Cấu trúc thư mục (ADHD-friendly)
+## Cấu trúc thư mục
 
 ```
-data/
-  raw/                # Input gốc (CSV lớn)
-  processed/          # Temp files (xóa sau khi upload HDFS)
-  results/            # Kết quả tải về từ HDFS (tùy chọn)
-docs/                 # Tài liệu
-logs/                 # Log pipeline
-scripts/
-  polars/             # Data processing với Polars
-    └─ explore_fast.py, prepare_polars.py, init_centroids.py,
-       assign_clusters_polars.py, analyze_polars.py
-  spark/              # PySpark K-means implementation
-    └─ setup_hdfs.sh, run_spark.sh, kmeans_spark.py,
-       download_from_hdfs.sh
-  pipeline/           # Pipeline orchestration
-    └─ full_pipeline_spark.sh, clean_spark.sh, reset_pipeline.sh
-  setup/              # Installation scripts
-    └─ install_spark.sh
-archive/              # Legacy Hadoop code (không dùng)
+Final/
+├── data/
+│   ├── raw/                    # CSV gốc (HI-Large_Trans.csv)
+│   ├── processed/              # Temp files (tự động xóa sau upload HDFS)
+│   └── results/                # Kết quả từ HDFS (tùy chọn tải về)
+├── docs/
+│   ├── HADOOP_ALTERNATIVES.md  # So sánh các phương pháp clustering
+│   └── Polars_Hadoop_HI_Large.md  # Legacy Hadoop workflow
+├── logs/                       # Pipeline execution logs
+├── scripts/
+│   ├── polars/                 # Data processing với Polars
+│   │   ├── explore_fast.py
+│   │   ├── prepare_polars.py
+│   │   ├── init_centroids.py
+│   │   ├── assign_clusters_polars.py
+│   │   └── analyze_polars.py
+│   ├── spark/                  # PySpark implementation
+│   │   ├── setup_hdfs.sh
+│   │   ├── run_spark.sh
+│   │   ├── kmeans_spark.py
+│   │   └── download_from_hdfs.sh
+│   ├── pipeline/               # Pipeline orchestration
+│   │   ├── full_pipeline_spark.sh
+│   │   ├── clean_spark.sh
+│   │   └── reset_pipeline.sh
+│   └── setup/                  # Installation
+│       └── install_spark.sh
+├── archive/
+│   └── hadoop/                 # Legacy MapReduce code
+├── CHANGELOG.md
+└── README.md
 ```
 
-## Cài đặt Apache Spark
+## Cài đặt
+
+### Apache Spark
 
 ```bash
-# Chạy script cài đặt (CachyOS/Arch Linux)
+# Cài đặt Spark (CachyOS/Arch Linux)
 ./scripts/setup/install_spark.sh
 
-# Sau khi cài đặt, reload shell
+# Reload shell để áp dụng biến môi trường
 source ~/.zshrc
 
 # Kiểm tra cài đặt
 spark-submit --version
 ```
 
-## Chuẩn bị dữ liệu
-
-- Đặt file CSV vào: `data/raw/HI-Large_Trans.csv`
-
-## ⚠️ QUAN TRỌNG: Dữ liệu chỉ lưu trên HDFS
-
-Project này **KHÔNG lưu dữ liệu lớn ở local**. Tất cả dữ liệu đều được xử lý và lưu trên HDFS.
-
-### Quy trình làm việc:
+### Python Dependencies
 
 ```bash
-# 1) Chuẩn bị dữ liệu (tạo temp file)
-cd scripts/polars
-python prepare_polars.py
-python init_centroids.py
+# Kích hoạt virtual environment (nếu có)
+source .venv/bin/activate
 
-# 2) Upload lên HDFS và XÓA temp files local
-../spark/setup_hdfs.sh
-
-# 3) Chạy Spark trên HDFS (YARN/cluster)
-../spark/run_spark.sh
-
-# 4) (Tuỳ chọn) Tải kết quả về để phân tích
-../spark/download_from_hdfs.sh
+# Cài đặt packages
+pip install polars numpy pyspark
 ```
 
-**Lưu ý:**
-- Temp files sẽ tự động bị XÓA sau khi upload lên HDFS
-- Dữ liệu chỉ tồn tại trên HDFS, không trên local
-- Bạn có thể sửa `HDFS_BASE` trong các script nếu dùng cluster khác
+## Chuẩn bị dữ liệu
+
+Đặt file CSV gốc vào thư mục raw:
+
+```bash
+cp /path/to/HI-Large_Trans.csv data/raw/
+```
+
+## ⚠️ QUAN TRỌNG: HDFS-Only Workflow
+
+Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
+
+### Workflow:
+
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│ Raw CSV     │ ───> │ Temp Files   │ ───> │ HDFS        │
+│ (data/raw/) │      │ (tạm thời)   │      │ (permanent) │
+└─────────────┘      └──────────────┘      └─────────────┘
+                            │                      │
+                            │ (auto delete)        │
+                            ▼                      ▼
+                      [Xóa ngay sau            [Spark
+                       khi upload]              processing]
+```
+
+### Cách thức hoạt động:
+
+1. **Polars** đọc CSV gốc và tạo temp files trong `data/processed/`
+2. **setup_hdfs.sh** upload files lên HDFS và **tự động xóa** temp files
+3. **Spark** xử lý dữ liệu trực tiếp trên HDFS (distributed)
+4. Kết quả được lưu trên HDFS tại `/user/spark/hi_large/`
+5. *(Tùy chọn)* Tải kết quả nhỏ về `data/results/` để phân tích
+
+### Lưu ý:
+
+- ✅ Temp files tự động bị xóa sau khi upload HDFS
+- ✅ Dữ liệu chính chỉ tồn tại trên HDFS
+- ✅ Chỉ lưu kết quả phân tích nhỏ ở local (centroid, logs)
+- ⚠️ Có thể sửa `HDFS_BASE` trong scripts nếu dùng cluster khác
 
 ## Chạy Pipeline
 
+### Quick Start
+
 ```bash
-# Toàn bộ pipeline với PySpark + HDFS
+# Chạy toàn bộ pipeline tự động
 ./scripts/pipeline/full_pipeline_spark.sh
 ```
 
-Log sẽ lưu tại `logs/pipeline_log_*.md`.
+Pipeline sẽ tự động:
+1. Khám phá dữ liệu với Polars
+2. Chuẩn bị features và normalize
+3. Khởi tạo centroids
+4. Upload lên HDFS (và xóa temp files)
+5. Chạy K-means trên Spark
+6. Tải kết quả và phân tích
 
-**Hadoop legacy code đã được archive** - không còn sử dụng nữa.
-
-## Clean Project
+### Manual Steps (nếu cần debug)
 
 ```bash
-# Dọn dẹp toàn bộ để chạy lại từ đầu
+# 1. Khám phá dữ liệu
+python scripts/polars/explore_fast.py
+
+# 2. Chuẩn bị features (tạo temp files)
+python scripts/polars/prepare_polars.py
+
+# 3. Khởi tạo centroids (tạo temp files)
+python scripts/polars/init_centroids.py
+
+# 4. Upload lên HDFS và XÓA temp files
+scripts/spark/setup_hdfs.sh
+
+# 5. Chạy Spark K-means trên HDFS
+scripts/spark/run_spark.sh
+
+# 6. (Tùy chọn) Tải kết quả về
+scripts/spark/download_from_hdfs.sh
+
+# 7. Gán clusters
+python scripts/polars/assign_clusters_polars.py
+
+# 8. Phân tích kết quả
+python scripts/polars/analyze_polars.py
+```
+
+### Logs
+
+Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
+
+## Dọn dẹp Project
+
+```bash
+# Xóa tất cả temp files, logs, và checkpoints
 ./scripts/pipeline/clean_spark.sh
 
-# Sau đó chạy lại pipeline
+# Reset chỉ pipeline checkpoints (giữ lại data)
+./scripts/pipeline/reset_pipeline.sh
+
+# Sau khi clean, chạy lại pipeline
 ./scripts/pipeline/full_pipeline_spark.sh
 ```
 
 ## Dữ liệu trên HDFS
 
-Tất cả dữ liệu được lưu trên HDFS tại: `/user/spark/hi_large/`
-
-- `input/hadoop_input.txt` - Dữ liệu đã normalize
-- `centroids.txt` - Centroids ban đầu  
-- `output_centroids/` - Centroids cuối cùng từ Spark
-- Kết quả được tải về `data/results/` khi cần phân tích
-
-## Pipeline Steps
-
-1. **`scripts/polars/explore_fast.py`** - Khám phá dữ liệu
-2. **`scripts/polars/prepare_polars.py`** - Feature engineering (tạo temp file)
-3. **`scripts/polars/init_centroids.py`** - Khởi tạo centroids (temp file)
-4. **`scripts/spark/setup_hdfs.sh`** - Upload lên HDFS & xóa temp files 💾
-5. **`scripts/spark/run_spark.sh`** - K-means với PySpark trên HDFS ⚡
-6. **`scripts/spark/download_from_hdfs.sh`** - Tải kết quả về (tùy chọn)
-7. **`scripts/polars/assign_clusters_polars.py`** - Gán nhãn cluster
-8. **`scripts/polars/analyze_polars.py`** - Phân tích kết quả
-
-## Kiến trúc: HDFS-Only Workflow
+### Cấu trúc HDFS:
 
 ```
-[Temp Local] --> [Upload + Delete] --> [Spark on HDFS] --> [Results on HDFS]
-      │                   │                     │                    │
-   Polars          setup_hdfs.sh           PySpark         (download nếu cần)
-  (temp file)      (xóa ngay)           (in-memory)      
+/user/spark/hi_large/
+├── input/
+│   └── hadoop_input.txt      # Dữ liệu đã normalize (~33GB)
+├── centroids.txt             # K centroids ban đầu
+└── output_centroids/         # Final centroids từ Spark
+    └── part-00000
 ```
 
-- ✅ **KHÔNG lưu dữ liệu lớn local** - Temp files tự động xóa
-- ✅ **Dữ liệu chỉ trên HDFS** - Tuân thủ quy tắc lưu trữ
-- ✅ **Distributed processing** - Spark xử lý song song
+### Kiểm tra dữ liệu:
+
+```bash
+# Xem cấu trúc
+hdfs dfs -ls /user/spark/hi_large/
+
+# Kiểm tra kích thước
+hdfs dfs -du -h /user/spark/hi_large/
+
+# Xem nội dung centroids
+hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
+```
+
+### Download kết quả (tùy chọn):
+
+Kết quả nhỏ được tải về `data/results/` để phân tích local.
+
+## Chi tiết Pipeline Steps
+
+| Bước | Script | Mô tả | Thời gian |
+|------|--------|-------|----------|
+| 1 | `scripts/polars/explore_fast.py` | Khám phá dữ liệu nhanh | ~30s |
+| 2 | `scripts/polars/prepare_polars.py` | Feature engineering & normalize | ~10 phút |
+| 3 | `scripts/polars/init_centroids.py` | Khởi tạo K centroids | ~30s |
+| 4 | `scripts/spark/setup_hdfs.sh` | Upload HDFS & xóa temp files | ~5 phút |
+| 5 | `scripts/spark/run_spark.sh` | K-means trên Spark (HDFS) | ~15-30 phút |
+| 6 | `scripts/spark/download_from_hdfs.sh` | Tải centroids từ HDFS | ~30s |
+| 7 | `scripts/polars/assign_clusters_polars.py` | Gán clusters cho data | ~10 phút |
+| 8 | `scripts/polars/analyze_polars.py` | Phân tích & báo cáo | ~2 phút |
+
+**Tổng thời gian**: ~40-60 phút (tùy cluster configuration)
+
+## Kiến trúc hệ thống
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                     HDFS-Only Workflow                           │
+└──────────────────────────────────────────────────────────────────┘
+
+    RAW CSV              POLARS              HDFS             SPARK
+       │                   │                  │                │
+   ┌───▼────┐         ┌───▼────┐        ┌───▼────┐       ┌───▼────┐
+   │16GB CSV│────────>│ Temp   │───────>│ 33GB   │──────>│K-means │
+   │data/raw│         │ Files  │ upload │Storage │ read  │Cluster │
+   └────────┘         └────────┘        └────────┘       └────────┘
+                           │                                   │
+                           │ (auto delete)                     │
+                           ▼                                   ▼
+                      [Xóa ngay]                       [Results HDFS]
+                                                              │
+                                                              │
+                                                              ▼
+                                                      ┌────────────────┐
+                                                      │  data/results/ │
+                                                      │  (small files) │
+                                                      └────────────────┘
+```
+
+### Đặc điểm:
+
+- ✅ **KHÔNG lưu dữ liệu lớn local** - Temp files tự động xóa sau upload
+- ✅ **Storage chỉ trên HDFS** - Tuân thủ quy định không lưu local  
+- ✅ **Distributed processing** - Spark xử lý song song trên cluster
 - ✅ **Scalable** - Thêm nodes để tăng performance
+- ✅ **Fault-tolerant** - HDFS replication đảm bảo an toàn dữ liệu
 
 ## So sánh Hadoop vs Spark
 
@@ -142,9 +265,17 @@ Tất cả dữ liệu được lưu trên HDFS tại: `/user/spark/hi_large/`
 | **Code** | Dài (mapper/reducer) | Ngắn gọn (PySpark API) |
 | **Phù hợp** | Batch processing lớn | Iterative algorithms |
 
-## Lợi ích khi dùng Spark
+## Lợi ích Apache Spark
 
-- ⚡ **Nhanh hơn 10-100x** với iterative algorithms như K-means
-- 💾 **In-memory processing** - giảm I/O disk
-- 🎯 **API đơn giản** - code ngắn gọn hơn
-- 🔧 **Dễ debug** - chạy local không cần cluster
+| Tiêu chí | Lợi ích |
+|----------|--------|
+| ⚡ **Tốc độ** | Nhanh hơn Hadoop 10-100x với K-means (in-memory) |
+| 💾 **Memory** | In-memory processing giảm I/O disk |
+| 🎯 **API** | PySpark DataFrame API đơn giản, dễ học |
+| 🔧 **Debug** | Local mode không cần cluster để test |
+| 📈 **Scale** | Horizontal scaling - thêm nodes dễ dàng |
+| 🛡️ **Production** | Fault-tolerant, mature ecosystem |
+
+### So sánh với các phương pháp khác:
+
+Xem chi tiết tại: [`docs/HADOOP_ALTERNATIVES.md`](docs/HADOOP_ALTERNATIVES.md)
