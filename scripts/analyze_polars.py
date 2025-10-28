@@ -1,10 +1,15 @@
 # analyze_polars.py
 import polars as pl
 import numpy as np
+import os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DATA_RAW = os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
+DATA_RESULTS = os.path.join(ROOT_DIR, 'data', 'results')
 
 print("Loading results...")
-clusters = np.loadtxt('clustered_results.txt', dtype=int)
-df_original = pl.read_csv('HI-Large_Trans.csv')
+clusters = np.loadtxt(os.path.join(DATA_RESULTS, 'clustered_results.txt'), dtype=int)
+df_original = pl.read_csv(DATA_RAW)
 
 # Add cluster column
 df_result = df_original.with_columns(pl.Series('cluster', clusters))
@@ -52,7 +57,8 @@ if len(high_risk) > 0:
     print(f"\n📤 Exporting suspicious transactions from clusters: {high_risk_ids}")
     
     suspicious = df_result.filter(pl.col('cluster').is_in(high_risk_ids))
-    suspicious.write_csv('suspicious_transactions.csv')
-    print(f"   ✅ Saved {len(suspicious):,} suspicious transactions")
+    suspicious_path = os.path.join(DATA_RESULTS, 'suspicious_transactions.csv')
+    suspicious.write_csv(suspicious_path)
+    print(f"   ✅ Saved {len(suspicious):,} suspicious transactions to data/results/suspicious_transactions.csv")
 
 print("\n✅ Analysis complete!")

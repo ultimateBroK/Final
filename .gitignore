@@ -1,9 +1,13 @@
-HI-Large_Trans.csv
+data/raw/HI-Large_Trans.csv
 
 .venv
 
 .vscode
 .pipeline_checkpoints
+logs/
+data/processed/
+data/results/
+# keep docs tracked
 .DS_Store
 .env
 .env.local

@@ -3,11 +3,15 @@
 
 echo "=== Polars + Hadoop Pipeline for HI-Large_Trans.csv ==="
 
+# Resolve directories
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+DATA_PROCESSED="$ROOT_DIR/../data/processed"
+
 # Upload to HDFS
 echo "Uploading to HDFS..."
 hdfs dfs -mkdir -p /user/hadoop/hi_large/input
-hdfs dfs -put -f hadoop_input.txt /user/hadoop/hi_large/input/
-hdfs dfs -put -f centroids.txt /user/hadoop/hi_large/
+hdfs dfs -put -f "$DATA_PROCESSED/hadoop_input.txt" /user/hadoop/hi_large/input/
+hdfs dfs -put -f "$DATA_PROCESSED/centroids.txt" /user/hadoop/hi_large/
 
 # Get CPU cores for tuning
 CPU_CORES=$(nproc)
@@ -44,7 +48,7 @@ for i in $(seq 1 $MAX_ITER); do
     -D mapreduce.task.io.sort.factor=100 \
     -D mapreduce.map.output.compress=true \
     -D mapreduce.map.output.compress.codec=org.apache.hadoop.io.compress.SnappyCodec \
-    -files mapper.py,reducer.py,centroids.txt \
+    -files mapper.py,reducer.py,$DATA_PROCESSED/centroids.txt#centroids.txt \
     -mapper "python3 mapper.py" \
     -reducer "python3 reducer.py" \
     -input /user/hadoop/hi_large/input/hadoop_input.txt \
@@ -56,27 +60,27 @@ for i in $(seq 1 $MAX_ITER); do
   fi
   
   # Download new centroids (merge all part files)
-  hdfs dfs -getmerge /user/hadoop/hi_large/output_iter_$i centroids_new.txt
+  hdfs dfs -getmerge /user/hadoop/hi_large/output_iter_$i "$DATA_PROCESSED/centroids_new.txt"
   
   # Check convergence
   if [ $i -gt 1 ]; then
-    diff centroids.txt centroids_new.txt > /dev/null 2>&1
+    diff "$DATA_PROCESSED/centroids.txt" "$DATA_PROCESSED/centroids_new.txt" > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo "✅ Converged at iteration $i!"
-      mv centroids_new.txt final_centroids.txt
+      mv "$DATA_PROCESSED/centroids_new.txt" "$DATA_PROCESSED/final_centroids.txt"
       break
     fi
   fi
   
   # Update centroids
-  mv centroids_new.txt centroids.txt
-  hdfs dfs -put -f centroids.txt /user/hadoop/hi_large/
+  mv "$DATA_PROCESSED/centroids_new.txt" "$DATA_PROCESSED/centroids.txt"
+  hdfs dfs -put -f "$DATA_PROCESSED/centroids.txt" /user/hadoop/hi_large/
 done
 
 # Save final centroids
-if [ ! -f final_centroids.txt ]; then
-  cp centroids.txt final_centroids.txt
+if [ ! -f "$DATA_PROCESSED/final_centroids.txt" ]; then
+  cp "$DATA_PROCESSED/centroids.txt" "$DATA_PROCESSED/final_centroids.txt"
 fi
 
 echo ""
-echo "✅ Training complete! Final centroids in final_centroids.txt"
+echo "✅ Training complete! Final centroids in data/processed/final_centroids.txt"

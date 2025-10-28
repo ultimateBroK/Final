@@ -1,7 +1,8 @@
 #!/bin/bash
 # Helper script to reset pipeline checkpoints
 
-CHECKPOINT_DIR=".pipeline_checkpoints"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+CHECKPOINT_DIR="$ROOT_DIR/.pipeline_checkpoints"
 
 if [ "$1" == "all" ]; then
     rm -rf "$CHECKPOINT_DIR"

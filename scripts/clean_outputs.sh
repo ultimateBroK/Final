@@ -4,13 +4,17 @@
 
 echo "=== CLEANING PIPELINE OUTPUTS ==="
 
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+DATA_PROCESSED="$ROOT_DIR/data/processed"
+DATA_RESULTS="$ROOT_DIR/data/results"
+
 # 1. Local output files
 echo "Removing local output files..."
-rm -f hadoop_input.txt
-rm -f centroids.txt
-rm -f centroids_new.txt
-rm -f final_centroids.txt
-rm -f clustered_results.txt
+rm -f "$DATA_PROCESSED/hadoop_input.txt"
+rm -f "$DATA_PROCESSED/centroids.txt"
+rm -f "$DATA_PROCESSED/centroids_new.txt"
+rm -f "$DATA_PROCESSED/final_centroids.txt"
+rm -f "$DATA_RESULTS/clustered_results.txt"
 
 # 2. HDFS directories
 echo "Removing HDFS directories..."
@@ -20,4 +24,4 @@ hdfs dfs -rm -f /user/hadoop/hi_large/centroids.txt
 
 echo ""
 echo "✅ Cleanup complete!"
-echo "You can now run ./full_pipeline.sh again"
+echo "You can now run ./scripts/full_pipeline.sh again"

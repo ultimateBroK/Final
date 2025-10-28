@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 
-# Load centroids
+# Load centroids (shipped as working-dir file by streaming)
 centroids = np.loadtxt('centroids.txt', delimiter=',')
 
 for line in sys.stdin:

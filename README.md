@@ -2,42 +2,57 @@
 
 Pipeline phân tích dữ liệu HI-Large_Trans.csv sử dụng Polars và Hadoop MapReduce.
 
+## Cấu trúc thư mục (ADHD-friendly)
+
+```
+data/
+  raw/                # Input gốc (CSV lớn)
+  processed/          # Đầu vào/ra trung gian cho Hadoop
+  results/            # Kết quả cuối
+docs/                 # Tài liệu
+logs/                 # Log pipeline
+scripts/
+  hadoop/             # Mapper/Reducer + runner
+```
+
+## Chuẩn bị dữ liệu
+
+- Đặt file CSV vào: `data/raw/HI-Large_Trans.csv`
+
 ## Chạy Pipeline
 
 ```bash
-./full_pipeline.sh
+./scripts/full_pipeline.sh
 ```
+
+Log sẽ lưu tại `logs/pipeline_log_*.md`.
 
 ## Clean Outputs
 
-Để xóa tất cả outputs và chạy lại pipeline từ đầu:
-
 ```bash
-./clean_outputs.sh
-./full_pipeline.sh
+./scripts/clean_outputs.sh
+./scripts/full_pipeline.sh
 ```
 
-## Các File Output
+## Các File Output (local)
 
-Pipeline sẽ tạo các files sau:
+- `data/processed/hadoop_input.txt`
+- `data/processed/centroids.txt`
+- `data/processed/centroids_new.txt`
+- `data/processed/final_centroids.txt`
+- `data/results/clustered_results.txt`
 
-**Local files:**
-- `hadoop_input.txt` - Dữ liệu đã được chuẩn hóa cho Hadoop
-- `centroids.txt` - Centroids hiện tại (được update mỗi iteration)
-- `centroids_new.txt` - Centroids mới từ iteration hiện tại
-- `final_centroids.txt` - Centroids cuối cùng sau khi converged
-- `clustered_results.txt` - Kết quả phân cụm cho mỗi transaction
+## HDFS directories
 
-**HDFS directories:**
-- `/user/hadoop/hi_large/input/` - Input data trên HDFS
-- `/user/hadoop/hi_large/output_iter_*` - Output từ mỗi MapReduce iteration
-- `/user/hadoop/hi_large/centroids.txt` - Centroids trên HDFS
+- `/user/hadoop/hi_large/input/`
+- `/user/hadoop/hi_large/output_iter_*`
+- `/user/hadoop/hi_large/centroids.txt`
 
 ## Pipeline Steps
 
-1. **explore_fast.py** - Khám phá dữ liệu
-2. **prepare_polars.py** - Chuẩn bị features với Polars
-3. **init_centroids.py** - Khởi tạo centroids
-4. **run_hadoop_optimized.sh** - Chạy K-means với Hadoop MapReduce
-5. **assign_clusters_polars.py** - Gán clusters cho tất cả transactions
-6. **analyze_polars.py** - Phân tích kết quả
+1. `scripts/explore_fast.py`
+2. `scripts/prepare_polars.py`
+3. `scripts/init_centroids.py`
+4. `scripts/hadoop/run_hadoop_optimized.sh`
+5. `scripts/assign_clusters_polars.py`
+6. `scripts/analyze_polars.py`

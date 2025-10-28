@@ -1,8 +1,15 @@
 #!/bin/bash
 
+# Project root and paths
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPTS_DIR="$ROOT_DIR/scripts"
+LOGS_DIR="$ROOT_DIR/logs"
+DATA_DIR="$ROOT_DIR/data"
+
 # Tạo file log với timestamp
-LOG_FILE="pipeline_log_$(date +%Y%m%d_%H%M%S).md"
-CHECKPOINT_DIR=".pipeline_checkpoints"
+mkdir -p "$LOGS_DIR"
+LOG_FILE="$LOGS_DIR/pipeline_log_$(date +%Y%m%d_%H%M%S).md"
+CHECKPOINT_DIR="$ROOT_DIR/.pipeline_checkpoints"
 mkdir -p "$CHECKPOINT_DIR"
 
 # Function to log to both terminal and file
@@ -69,7 +76,7 @@ if is_step_completed 1; then
     log "⏭️  Step 1 already completed, skipping..."
 else
     STEP_START=$(date +%s)
-    python explore_fast.py 2>&1 | tee -a "$LOG_FILE"
+    (cd "$SCRIPTS_DIR" && python explore_fast.py) 2>&1 | tee -a "$LOG_FILE"
     if [ $? -eq 0 ]; then
         mark_step_completed 1
         STEP_END=$(date +%s)
@@ -89,7 +96,7 @@ if is_step_completed 2; then
     log "⏭️  Step 2 already completed, skipping..."
 else
     STEP_START=$(date +%s)
-    python prepare_polars.py 2>&1 | tee -a "$LOG_FILE"
+    (cd "$SCRIPTS_DIR" && python prepare_polars.py) 2>&1 | tee -a "$LOG_FILE"
     if [ $? -eq 0 ]; then
         mark_step_completed 2
         STEP_END=$(date +%s)
@@ -109,7 +116,7 @@ if is_step_completed 3; then
     log "⏭️  Step 3 already completed, skipping..."
 else
     STEP_START=$(date +%s)
-    python init_centroids.py 2>&1 | tee -a "$LOG_FILE"
+    (cd "$SCRIPTS_DIR" && python init_centroids.py) 2>&1 | tee -a "$LOG_FILE"
     if [ $? -eq 0 ]; then
         mark_step_completed 3
         STEP_END=$(date +%s)
@@ -129,7 +136,7 @@ if is_step_completed 4; then
     log "⏭️  Step 4 already completed, skipping..."
 else
     STEP_START=$(date +%s)
-    bash run_hadoop_optimized.sh 2>&1 | tee -a "$LOG_FILE"
+    (cd "$SCRIPTS_DIR/hadoop" && bash run_hadoop_optimized.sh) 2>&1 | tee -a "$LOG_FILE"
     if [ $? -eq 0 ]; then
         mark_step_completed 4
         STEP_END=$(date +%s)
@@ -149,7 +156,7 @@ if is_step_completed 5; then
     log "⏭️  Step 5 already completed, skipping..."
 else
     STEP_START=$(date +%s)
-    python assign_clusters_polars.py 2>&1 | tee -a "$LOG_FILE"
+    (cd "$SCRIPTS_DIR" && python assign_clusters_polars.py) 2>&1 | tee -a "$LOG_FILE"
     if [ $? -eq 0 ]; then
         mark_step_completed 5
         STEP_END=$(date +%s)
@@ -169,7 +176,7 @@ if is_step_completed 6; then
     log "⏭️  Step 6 already completed, skipping..."
 else
     STEP_START=$(date +%s)
-    python analyze_polars.py 2>&1 | tee -a "$LOG_FILE"
+    (cd "$SCRIPTS_DIR" && python analyze_polars.py) 2>&1 | tee -a "$LOG_FILE"
     if [ $? -eq 0 ]; then
         mark_step_completed 6
         STEP_END=$(date +%s)

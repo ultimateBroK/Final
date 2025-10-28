@@ -1,9 +1,15 @@
 # prepare_polars.py
 import polars as pl
 import numpy as np
+import os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DATA_RAW = os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
+DATA_PROCESSED = os.path.join(ROOT_DIR, 'data', 'processed')
+os.makedirs(DATA_PROCESSED, exist_ok=True)
 
 print("Loading with Polars...")
-df = pl.read_csv('HI-Large_Trans.csv')
+df = pl.read_csv(DATA_RAW)
 
 print("Feature engineering...")
 df_features = df.select([
@@ -58,8 +64,8 @@ df_normalized = df_numeric.select([
     for c in df_numeric.columns
 ])
 
-print("Writing to hadoop_input.txt...")
-df_normalized.write_csv('hadoop_input.txt', include_header=False)
+print("Writing to data/processed/hadoop_input.txt...")
+df_normalized.write_csv(os.path.join(DATA_PROCESSED, 'hadoop_input.txt'), include_header=False)
 
-print(f"✅ Created hadoop_input.txt with {len(df_normalized)} rows")
+print(f"✅ Created data/processed/hadoop_input.txt with {len(df_normalized)} rows")
 print(f"   Features: {df_normalized.columns}")

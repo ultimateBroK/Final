@@ -1,8 +1,12 @@
 # explore_fast.py
 import polars as pl
+import os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DATA_RAW = os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
 
 # Lazy scan - không load vào RAM
-df = pl.scan_csv('HI-Large_Trans.csv')
+df = pl.scan_csv(DATA_RAW)
 
 # Xem schema
 print(df.collect_schema)
