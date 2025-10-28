@@ -5,7 +5,7 @@ echo "=== Polars + Hadoop Pipeline for HI-Large_Trans.csv ==="
 
 # Resolve directories
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-DATA_PROCESSED="$ROOT_DIR/../data/processed"
+DATA_PROCESSED="$ROOT_DIR/data/processed"
 
 # Upload to HDFS
 echo "Uploading to HDFS..."

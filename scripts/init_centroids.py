@@ -9,7 +9,7 @@ DATA_PROCESSED = os.path.join(ROOT_DIR, 'data', 'processed')
 print("Sampling for centroid initialization...")
 # Polars sampling
 df = pl.read_csv(os.path.join(DATA_PROCESSED, 'hadoop_input.txt'), has_header=False,
-                 new_columns=[f'f{i}' for i in range(5)])
+                 new_columns=[f'f{i}' for i in range(9)])
 
 # Sample 100k rows
 sample = df.sample(n=min(100000, len(df)))
