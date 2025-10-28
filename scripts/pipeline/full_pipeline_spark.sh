@@ -66,7 +66,7 @@ log ""
 log "## Thực thi Pipeline"
 log ""
 log "=== POLARS + PYSPARK PIPELINE ==="
-log "Thời gian bắt đầu: $(date '+%Y-%m-%d %H:%M:%# Bước 1
+log "Thời gian bắt đầu: $(date '+%Y-%m-%d %H:%M:%S')"
 log "### Bước 1: Khám phá dữ liệu"
 log ""
 if is_step_completed 1; then
