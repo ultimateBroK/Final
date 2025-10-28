@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Project root and paths
+# Thư mục gốc dự án và các đường dẫn
 ROOT_DIR="$(cd "$(dirname "$0")/../.."; pwd)"
 SCRIPTS_DIR="$ROOT_DIR/scripts"
 LOGS_DIR="$ROOT_DIR/logs"
@@ -12,30 +12,30 @@ LOG_FILE="$LOGS_DIR/pipeline_log_$(date +%Y%m%d_%H%M%S).md"
 CHECKPOINT_DIR="$ROOT_DIR/.pipeline_checkpoints"
 mkdir -p "$CHECKPOINT_DIR"
 
-# Function to log to both terminal and file
+# Hàm ghi log ra cả terminal và file
 log() {
     echo "$1" | tee -a "$LOG_FILE"
 }
 
-# Function to check if step is completed
+# Hàm kiểm tra xem bước đã hoàn thành chưa
 is_step_completed() {
     [ -f "$CHECKPOINT_DIR/step_$1.done" ]
 }
 
-# Function to mark step as completed
+# Hàm đánh dấu bước đã hoàn thành
 mark_step_completed() {
     touch "$CHECKPOINT_DIR/step_$1.done"
     echo "$(date '+%Y-%m-%d %H:%M:%S')" > "$CHECKPOINT_DIR/step_$1.done"
 }
 
-# Function to reset all checkpoints
+# Hàm reset tất cả các checkpoint
 reset_checkpoints() {
     rm -rf "$CHECKPOINT_DIR"
     mkdir -p "$CHECKPOINT_DIR"
-    log "🔄 All checkpoints reset"
+    log "🔄 Đã reset tất cả checkpoints"
 }
 
-# Function to format time
+# Hàm định dạng thời gian
 format_time() {
     local seconds=$1
     local hours=$((seconds / 3600))
@@ -51,29 +51,26 @@ format_time() {
     fi
 }
 
-# Start total timer
+# Bắt đầu đếm thời gian tổng
 TOTAL_START=$(date +%s)
 
 # Khởi tạo file markdown
 log "# Polars + PySpark Pipeline Execution Log"
 log ""
-log "**Start Time:** $(date '+%Y-%m-%d %H:%M:%S')"
-log "**Log File:** $LOG_FILE"
+log "**Thời gian bắt đầu:** $(date '+%Y-%m-%d %H:%M:%S')"
+log "**File log:** $LOG_FILE"
 log ""
 log "---"
 log ""
 
-log "## Pipeline Execution"
+log "## Thực thi Pipeline"
 log ""
 log "=== POLARS + PYSPARK PIPELINE ==="
-log "Start time: $(date '+%Y-%m-%d %H:%M:%S')"
-log ""
-
-# Step 1
-log "### Step 1: Explore data"
+log "Thời gian bắt đầu: $(date '+%Y-%m-%d %H:%M:%# Bước 1
+log "### Bước 1: Khám phá dữ liệu"
 log ""
 if is_step_completed 1; then
-    log "⏭️  Step 1 already completed, skipping..."
+    log "⏭️  Bước 1 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/polars" && python explore_fast.py) 2>&1 | tee -a "$LOG_FILE"
@@ -81,19 +78,19 @@ else
         mark_step_completed 1
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 1 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 1 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 1 failed"
+        log "❌ Bước 1 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 2
-log "### Step 2: Prepare features with Polars"
+# Bước 2
+log "### Bước 2: Chuẩn bị đặc trưng với Polars"
 log ""
 if is_step_completed 2; then
-    log "⏭️  Step 2 already completed, skipping..."
+    log "⏭️  Bước 2 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/polars" && python prepare_polars.py) 2>&1 | tee -a "$LOG_FILE"
@@ -101,19 +98,19 @@ else
         mark_step_completed 2
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 2 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 2 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 2 failed"
+        log "❌ Bước 2 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 3
-log "### Step 3: Initialize centroids"
+# Bước 3
+log "### Bước 3: Khởi tạo tâm cụm"
 log ""
 if is_step_completed 3; then
-    log "⏭️  Step 3 already completed, skipping..."
+    log "⏭️  Bước 3 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/polars" && python init_centroids.py) 2>&1 | tee -a "$LOG_FILE"
@@ -121,19 +118,19 @@ else
         mark_step_completed 3
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 3 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 3 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 3 failed"
+        log "❌ Bước 3 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 4 - Upload to HDFS
-log "### Step 4: Upload data to HDFS"
+# Bước 4 - Upload lên HDFS
+log "### Bước 4: Upload dữ liệu lên HDFS"
 log ""
 if is_step_completed 4; then
-    log "⏭️  Step 4 already completed, skipping..."
+    log "⏭️  Bước 4 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/spark" && bash setup_hdfs.sh) 2>&1 | tee -a "$LOG_FILE"
@@ -141,19 +138,19 @@ else
         mark_step_completed 4
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 4 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 4 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 4 failed"
+        log "❌ Bước 4 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 5 - SPARK K-means on HDFS
-log "### Step 5: Run PySpark K-means on HDFS"
+# Bước 5 - SPARK K-means trên HDFS
+log "### Bước 5: Chạy PySpark K-means trên HDFS"
 log ""
 if is_step_completed 5; then
-    log "⏭️  Step 5 already completed, skipping..."
+    log "⏭️  Bước 5 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/spark" && bash run_spark.sh) 2>&1 | tee -a "$LOG_FILE"
@@ -161,19 +158,19 @@ else
         mark_step_completed 5
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 5 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 5 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 5 failed"
+        log "❌ Bước 5 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 6 - Download from HDFS
-log "### Step 6: Download results from HDFS"
+# Bước 6 - Tải về từ HDFS
+log "### Bước 6: Tải kết quả từ HDFS"
 log ""
 if is_step_completed 6; then
-    log "⏭️  Step 6 already completed, skipping..."
+    log "⏭️  Bước 6 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/spark" && bash download_from_hdfs.sh) 2>&1 | tee -a "$LOG_FILE"
@@ -181,19 +178,19 @@ else
         mark_step_completed 6
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 6 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 6 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 6 failed"
+        log "❌ Bước 6 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 7
-log "### Step 7: Assign clusters with Polars"
+# Bước 7
+log "### Bước 7: Gán cụm với Polars"
 log ""
 if is_step_completed 7; then
-    log "⏭️  Step 7 already completed, skipping..."
+    log "⏭️  Bước 7 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/polars" && python assign_clusters_polars.py) 2>&1 | tee -a "$LOG_FILE"
@@ -201,19 +198,19 @@ else
         mark_step_completed 7
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 7 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 7 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 7 failed"
+        log "❌ Bước 7 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Step 8
-log "### Step 8: Analyze results"
+# Bước 8
+log "### Bước 8: Phân tích kết quả"
 log ""
 if is_step_completed 8; then
-    log "⏭️  Step 8 already completed, skipping..."
+    log "⏭️  Bước 8 đã hoàn thành, đang bỏ qua..."
 else
     STEP_START=$(date +%s)
     (cd "$SCRIPTS_DIR/polars" && python analyze_polars.py) 2>&1 | tee -a "$LOG_FILE"
@@ -221,27 +218,27 @@ else
         mark_step_completed 8
         STEP_END=$(date +%s)
         STEP_TIME=$((STEP_END - STEP_START))
-        log "⏱️  **Step 8 completed in $(format_time $STEP_TIME)**"
+        log "⏱️  **Bước 8 hoàn thành trong $(format_time $STEP_TIME)**"
     else
-        log "❌ Step 8 failed"
+        log "❌ Bước 8 thất bại"
         exit 1
     fi
 fi
 log ""
 
-# Total time
+# Tổng thời gian
 TOTAL_END=$(date +%s)
 TOTAL_TIME=$((TOTAL_END - TOTAL_START))
 log ""
 log "---"
 log ""
-log "## Summary"
+log "## Tổng kết"
 log ""
-log "✅ **Pipeline completed successfully!**"
+log "✅ **Pipeline hoàn thành thành công!**"
 log ""
-log "**End Time:** $(date '+%Y-%m-%d %H:%M:%S')"
-log "**Total Runtime:** $(format_time $TOTAL_TIME)"
+log "**Thời gian kết thúc:** $(date '+%Y-%m-%d %H:%M:%S')"
+log "**Tổng thời gian chạy:** $(format_time $TOTAL_TIME)"
 log ""
 log "---"
 log ""
-log "*Log saved to: $LOG_FILE*"
+log "*Log đã lưu tại: $LOG_FILE*"

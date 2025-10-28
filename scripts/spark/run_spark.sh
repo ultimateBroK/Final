@@ -1,82 +1,82 @@
 #!/bin/bash
-# run_spark.sh - Run K-means clustering with PySpark on HDFS
+# run_spark.sh - Chạy thuật toán K-means với PySpark trên HDFS
 
-echo "=== PySpark K-means with HDFS ==="
+echo "=== PYSPARK K-MEANS VỚI HDFS ==="
 
-# Resolve directories
+# Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Set SPARK_HOME to pip-installed Spark
+# Thiết lập SPARK_HOME cho Spark được cài đặt qua pip
 export SPARK_HOME="$ROOT_DIR/.venv/lib/python3.12/site-packages/pyspark"
 export PATH="$SPARK_HOME/bin:$PATH"
 
-# HDFS Configuration
+# Cấu hình HDFS
 HDFS_URI="hdfs://localhost:9000"
 HDFS_BASE="/user/spark/hi_large"
 HDFS_INPUT="$HDFS_URI$HDFS_BASE/input/hadoop_input.txt"
 HDFS_CENTROIDS="$HDFS_URI$HDFS_BASE/centroids.txt"
 HDFS_OUTPUT="$HDFS_URI$HDFS_BASE/output_centroids"
 
-# Check if HDFS is running
+# Kiểm tra HDFS có đang chạy không
 if ! hdfs dfs -test -e / 2>/dev/null; then
-    echo "❌ HDFS is not accessible. Please start HDFS first."
-    echo "   Run: start-dfs.sh"
+    echo "❌ HDFS không thể truy cập. Vui lòng khởi động HDFS trước."
+    echo "   Chạy: start-dfs.sh"
     exit 1
 fi
 
-# Check if input files exist in HDFS
+# Kiểm tra file đầu vào có tồn tại trong HDFS không
 if ! hdfs dfs -test -e "$HDFS_BASE/input/hadoop_input.txt" 2>/dev/null; then
-    echo "❌ Input file not found in HDFS: $HDFS_BASE/input/hadoop_input.txt"
-    echo "   Please run: ./scripts/spark/setup_hdfs.sh"
+    echo "❌ Không tìm thấy file đầu vào trong HDFS: $HDFS_BASE/input/hadoop_input.txt"
+    echo "   Vui lòng chạy: ./scripts/spark/setup_hdfs.sh"
     exit 1
 fi
 
 if ! hdfs dfs -test -e "$HDFS_BASE/centroids.txt" 2>/dev/null; then
-    echo "❌ Centroids file not found in HDFS: $HDFS_BASE/centroids.txt"
-    echo "   Please run: ./scripts/spark/setup_hdfs.sh"
+    echo "❌ Không tìm thấy file tâm cụm trong HDFS: $HDFS_BASE/centroids.txt"
+    echo "   Vui lòng chạy: ./scripts/spark/setup_hdfs.sh"
     exit 1
 fi
 
-# Get CPU cores for tuning
+# Lấy số CPU cores để tối ưu hóa
 CPU_CORES=$(nproc)
 EXECUTOR_CORES=4
 EXECUTOR_INSTANCES=4
 DRIVER_MEMORY="4g"
 EXECUTOR_MEMORY="4g"
 
-echo "Configuration:"
+echo "Cấu hình:"
 echo "  CPU cores: $CPU_CORES"
-echo "  Executor instances: $EXECUTOR_INSTANCES"
+echo "  Số executor: $EXECUTOR_INSTANCES"
 echo "  Executor cores: $EXECUTOR_CORES"
 echo "  Executor memory: $EXECUTOR_MEMORY"
 echo "  Driver memory: $DRIVER_MEMORY"
 echo ""
-echo "HDFS paths:"
-echo "  Input: $HDFS_INPUT"
-echo "  Centroids: $HDFS_CENTROIDS"
-echo "  Output: $HDFS_OUTPUT"
+echo "Đường dẫn HDFS:"
+echo "  Đầu vào: $HDFS_INPUT"
+echo "  Tâm cụm: $HDFS_CENTROIDS"
+echo "  Đầu ra: $HDFS_OUTPUT"
 echo ""
 
-# Clean old output in HDFS
-echo "Cleaning old output..."
+# Dọn dẹp kết quả cũ trong HDFS
+echo "Đang dọn dẹp kết quả cũ..."
 hdfs dfs -rm -r -f "$HDFS_BASE/output_centroids" 2>/dev/null
 
-# Run PySpark K-means
+# Chạy PySpark K-means
 MAX_ITER=15
 
-echo "Running PySpark K-means clustering on HDFS..."
-echo "Max iterations: $MAX_ITER"
+echo "Đang chạy PySpark K-means clustering trên HDFS..."
+echo "Số lần lặp tối đa: $MAX_ITER"
 echo ""
 
-# Run with YARN (or standalone/local-cluster for testing)
-# Change --master to:
-#   - yarn: for YARN cluster
-#   - spark://master:7077: for Spark standalone
-#   - local[*]: for local mode with all cores
-#   - local-cluster[N,C,M]: N workers, C cores each, M MB memory (Spark 4.x requires MB as integer)
+# Chạy với YARN (hoặc standalone/local-cluster để test)
+# Thay đổi --master thành:
+#   - yarn: cho YARN cluster
+#   - spark://master:7077: cho Spark standalone
+#   - local[*]: cho chế độ local với tất cả cores
+#   - local-cluster[N,C,M]: N workers, C cores mỗi worker, M MB memory (Spark 4.x yêu cầu MB là số nguyên)
 
-# Convert memory to MB for local-cluster (e.g., 4g -> 4096)
+# Chuyển đổi memory sang MB cho local-cluster (ví dụ: 4g -> 4096)
 EXECUTOR_MEMORY_MB=$(echo "$EXECUTOR_MEMORY" | sed 's/g$//' | awk '{print $1*1024}')
 
 spark-submit \
@@ -100,13 +100,13 @@ spark-submit \
     "$MAX_ITER"
 
 if [ $? -ne 0 ]; then
-    echo "❌ PySpark job failed"
+    echo "❌ PySpark job thất bại"
     exit 1
 fi
 
 echo ""
-echo "✅ PySpark K-means completed!"
-echo "Final centroids saved to HDFS: $HDFS_OUTPUT"
+echo "✅ PySpark K-means hoàn thành!"
+echo "Tâm cụm cuối cùng đã lưu vào HDFS: $HDFS_OUTPUT"
 echo ""
-echo "To view results:"
+echo "Để xem kết quả:"
 echo "  hdfs dfs -cat $HDFS_BASE/output_centroids/part-*"

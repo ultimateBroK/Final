@@ -1,31 +1,31 @@
 #!/bin/bash
-# clean_spark.sh - Clean project for fresh start (HDFS workflow)
+# clean_spark.sh - Dọn dẹp dự án để bắt đầu lại từ đầu (HDFS workflow)
 
-echo "=== CLEANING PROJECT ==="
+echo "=== DỌN DẸP DỰ ÁN ==="
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 DATA_PROCESSED="$ROOT_DIR/data/processed"
 DATA_RESULTS="$ROOT_DIR/data/results"
 
-# 1. Remove any temp files
-echo "Removing temp files..."
+# 1. Xóa các file tạm
+echo "Đang xóa các file tạm..."
 rm -f "$DATA_PROCESSED"/*_temp.txt
 rm -f "$DATA_PROCESSED"/*.txt
 
-# 2. Remove downloaded results
-echo "Removing downloaded results..."
+# 2. Xóa kết quả đã tải về
+echo "Đang xóa kết quả đã tải về..."
 rm -f "$DATA_RESULTS"/*
 
-# 3. Remove logs
-echo "Removing logs..."
+# 3. Xóa log
+echo "Đang xóa logs..."
 rm -f "$ROOT_DIR/logs"/*.md
 
-# 4. Reset pipeline checkpoints
-echo "Resetting checkpoints..."
+# 4. Reset các checkpoint của pipeline
+echo "Đang reset checkpoints..."
 "$ROOT_DIR/scripts/pipeline/reset_pipeline.sh" all
 
-# 5. Clean HDFS (optional - uncomment if needed)
-# echo "Cleaning HDFS..."
+# 5. Dọn dẹp HDFS (tùy chọn - bỏ comment nếu cần)
+# echo "Đang dọn dẹp HDFS..."
 # hdfs dfs -rm -r -f /user/spark/hi_large/input 2>/dev/null
 # hdfs dfs -rm -r -f /user/spark/hi_large/output_centroids 2>/dev/null
 # hdfs dfs -rm -f /user/spark/hi_large/centroids.txt 2>/dev/null

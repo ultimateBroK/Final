@@ -1,115 +1,115 @@
 #!/bin/bash
-# setup_hdfs.sh - Setup HDFS directories and upload data for Spark pipeline
+# setup_hdfs.sh - Thiết lập thư mục HDFS và upload dữ liệu cho pipeline Spark
 
-echo "=== Setting up HDFS for PySpark K-means ==="
+echo "=== THIẾT LẬP HDFS CHO PYSPARK K-MEANS ==="
 
-# Resolve directories
+# Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DATA_PROCESSED="$ROOT_DIR/data/processed"
 
-# HDFS Configuration
+# Cấu hình HDFS
 HDFS_BASE="/user/spark/hi_large"
 
-# Check if HDFS is running
+# Kiểm tra HDFS có đang chạy không
 if ! hdfs dfs -test -e / 2>/dev/null; then
-    echo "❌ HDFS is not accessible. Please start HDFS first."
+    echo "❌ HDFS không thể truy cập. Vui lòng khởi động HDFS trước."
     echo ""
-    echo "To start HDFS:"
-    echo "  1. Format namenode (first time only): hdfs namenode -format"
-    echo "  2. Start HDFS: start-dfs.sh"
-    echo "  3. Check status: jps"
+    echo "Để khởi động HDFS:"
+    echo "  1. Format namenode (chỉ lần đầu): hdfs namenode -format"
+    echo "  2. Khởi động HDFS: start-dfs.sh"
+    echo "  3. Kiểm tra trạng thái: jps"
     exit 1
 fi
 
-echo "✅ HDFS is accessible"
+echo "✅ HDFS có thể truy cập"
 echo ""
 
-# Check if temp data files exist
+# Kiểm tra file dữ liệu tạm có tồn tại không
 INPUT_TEMP="$DATA_PROCESSED/hadoop_input_temp.txt"
 CENTROIDS_TEMP="$DATA_PROCESSED/centroids_temp.txt"
 
 if [ ! -f "$INPUT_TEMP" ]; then
-    echo "❌ Temp input file not found: $INPUT_TEMP"
-    echo "   Please run data preparation first:"
+    echo "❌ Không tìm thấy file đầu vào tạm: $INPUT_TEMP"
+    echo "   Vui lòng chạy chuẩn bị dữ liệu trước:"
     echo "   cd $ROOT_DIR/scripts/polars && python prepare_polars.py"
     exit 1
 fi
 
 if [ ! -f "$CENTROIDS_TEMP" ]; then
-    echo "❌ Temp centroids file not found: $CENTROIDS_TEMP"
-    echo "   Please run centroid initialization first:"
+    echo "❌ Không tìm thấy file tâm cụm tạm: $CENTROIDS_TEMP"
+    echo "   Vui lòng chạy khởi tạo tâm cụm trước:"
     echo "   cd $ROOT_DIR/scripts/polars && python init_centroids.py"
     exit 1
 fi
 
-echo "✅ Temp data files found"
+echo "✅ Đã tìm thấy file dữ liệu tạm"
 echo ""
 
-# Create HDFS directories
-echo "Creating HDFS directories..."
+# Tạo thư mục HDFS
+echo "Đang tạo thư mục HDFS..."
 hdfs dfs -mkdir -p "$HDFS_BASE/input"
 hdfs dfs -mkdir -p "$HDFS_BASE/output"
 
-# Clean old data
-echo "Cleaning old data in HDFS..."
+# Dọn dẹp dữ liệu cũ
+echo "Đang dọn dẹp dữ liệu cũ trong HDFS..."
 hdfs dfs -rm -f "$HDFS_BASE/input/*" 2>/dev/null
 hdfs dfs -rm -f "$HDFS_BASE/centroids.txt" 2>/dev/null
 hdfs dfs -rm -r -f "$HDFS_BASE/output_centroids" 2>/dev/null
 
-# Upload input data
+# Upload dữ liệu đầu vào
 echo ""
-echo "Uploading input data to HDFS..."
-echo "  Source: $INPUT_TEMP"
-echo "  Destination: $HDFS_BASE/input/hadoop_input.txt"
+echo "Đang upload dữ liệu đầu vào lên HDFS..."
+echo "  Nguồn: $INPUT_TEMP"
+echo "  Đích: $HDFS_BASE/input/hadoop_input.txt"
 hdfs dfs -put "$INPUT_TEMP" "$HDFS_BASE/input/hadoop_input.txt"
 
 if [ $? -ne 0 ]; then
-    echo "❌ Failed to upload input data"
+    echo "❌ Thất bại khi upload dữ liệu đầu vào"
     exit 1
 fi
 
-# Upload centroids
+# Upload tâm cụm
 echo ""
-echo "Uploading centroids to HDFS..."
-echo "  Source: $CENTROIDS_TEMP"
-echo "  Destination: $HDFS_BASE/centroids.txt"
+echo "Đang upload tâm cụm lên HDFS..."
+echo "  Nguồn: $CENTROIDS_TEMP"
+echo "  Đích: $HDFS_BASE/centroids.txt"
 hdfs dfs -put "$CENTROIDS_TEMP" "$HDFS_BASE/centroids.txt"
 
 if [ $? -ne 0 ]; then
-    echo "❌ Failed to upload centroids"
+    echo "❌ Thất bại khi upload tâm cụm"
     exit 1
 fi
 
-# Delete temp files after successful upload (DON'T store data locally)
+# Xóa file tạm sau khi upload thành công (KHÔNG lưu dữ liệu local)
 echo ""
-echo "Cleaning up temp files..."
+echo "Đang dọn dẹp file tạm..."
 rm -f "$INPUT_TEMP" "$CENTROIDS_TEMP"
-echo "✅ Temp files deleted (data now only on HDFS)"
+echo "✅ Đã xóa file tạm (dữ liệu chỉ còn trên HDFS)"
 
-# Verify uploads
+# Xác minh upload
 echo ""
-echo "Verifying uploads..."
+echo "Đang xác minh upload..."
 INPUT_SIZE=$(hdfs dfs -du -h "$HDFS_BASE/input/hadoop_input.txt" | awk '{print $1 " " $2}')
 CENTROIDS_SIZE=$(hdfs dfs -du -h "$HDFS_BASE/centroids.txt" | awk '{print $1 " " $2}')
 
-echo "  ✅ Input data: $INPUT_SIZE"
-echo "  ✅ Centroids: $CENTROIDS_SIZE"
+echo "  ✅ Dữ liệu đầu vào: $INPUT_SIZE"
+echo "  ✅ Tâm cụm: $CENTROIDS_SIZE"
 
-# Show HDFS structure
+# Hiển thị cấu trúc thư mục HDFS
 echo ""
-echo "HDFS directory structure:"
+echo "Cấu trúc thư mục HDFS:"
 hdfs dfs -ls -R "$HDFS_BASE"
 
 echo ""
 echo "==================================="
-echo "✅ HDFS setup completed successfully!"
+echo "✅ HOÀN TẤT THIẾT LẬP HDFS!"
 echo "==================================="
 echo ""
-echo "HDFS paths:"
-echo "  Input: hdfs://localhost:9000$HDFS_BASE/input/hadoop_input.txt"
-echo "  Centroids: hdfs://localhost:9000$HDFS_BASE/centroids.txt"
-echo "  Output: hdfs://localhost:9000$HDFS_BASE/output_centroids"
+echo "Đường dẫn HDFS:"
+echo "  Đầu vào: hdfs://localhost:9000$HDFS_BASE/input/hadoop_input.txt"
+echo "  Tâm cụm: hdfs://localhost:9000$HDFS_BASE/centroids.txt"
+echo "  Đầu ra: hdfs://localhost:9000$HDFS_BASE/output_centroids"
 echo ""
-echo "Next step: Run PySpark job"
+echo "Bước tiếp theo: Chạy PySpark job"
 echo "  ./scripts/spark/run_spark.sh"
