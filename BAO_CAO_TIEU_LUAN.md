@@ -136,8 +136,9 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 ### 2.2. Quy trình tiền xử lý dữ liệu
 
 #### Bước 1: Khám phá dữ liệu (Data Exploration)
-**Script**: `scripts/polars/explore_fast.py`
-**Thời gian**: ~30 giây
+
+**Script**: `scripts/polars/explore_fast.py`  
+**Thời gian**: ~30 giây  
 **Công việc**:
 - Đọc nhanh 100,000 dòng đầu để hiểu cấu trúc
 - Xem kiểu dữ liệu của từng cột (số, chuỗi)
@@ -151,8 +152,9 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 - **Statistical Summary**: Tính toán song song
 
 #### Bước 2: Trích xuất đặc trưng (Feature Engineering)
-**Script**: `scripts/polars/prepare_polars.py`
-**Thời gian**: ~10 phút
+
+**Script**: `scripts/polars/prepare_polars.py`  
+**Thời gian**: ~10 phút  
 **Công việc**:
 
 1. **Phân tích thời gian (Temporal Features)**
@@ -187,8 +189,9 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 - **Lưu ý**: File này sẽ BỊ XÓA tự động sau khi upload lên HDFS
 
 #### Bước 3: Khởi tạo tâm cụm ban đầu (Centroid Initialization)
-**Script**: `scripts/polars/init_centroids.py`
-**Thời gian**: ~30 giây
+
+**Script**: `scripts/polars/init_centroids.py`  
+**Thời gian**: ~30 giây  
 **Công việc**:
 - Lấy mẫu ngẫu nhiên 100,000 giao dịch
 - Chọn ngẫu nhiên K=5 điểm làm tâm cụm ban đầu
@@ -368,10 +371,11 @@ Top currencies: Euro (23%), Yuan (7.2%)
 ```
 
 #### BƯỚC 2: Xử lý và trích xuất đặc trưng 🔧
-**Mục đích**: Chuyển dữ liệu thô thành dạng số để thuật toán xử lý
-**File thực thi**: `scripts/polars/prepare_polars.py`
-**Thời gian**: ~10 phút
-**Input**: `data/raw/HI-Large_Trans.csv` (16GB)
+
+**Mục đích**: Chuyển dữ liệu thô thành dạng số để thuật toán xử lý  
+**File thực thi**: `scripts/polars/prepare_polars.py`  
+**Thời gian**: ~10 phút  
+**Input**: `data/raw/HI-Large_Trans.csv` (16GB)  
 **Output**: `data/processed/hadoop_input_temp.txt` (33GB, TẠM THỜI)
 
 **Các bước xử lý**:
@@ -388,10 +392,11 @@ Top currencies: Euro (23%), Yuan (7.2%)
 - 179M rows × 9 features × 8 bytes ≈ 12GB + overhead ≈ 33GB
 
 #### BƯỚC 3: Khởi tạo tâm cụm 🎯
-**Mục đích**: Chọn điểm bắt đầu cho thuật toán K-means
-**File thực thi**: `scripts/polars/init_centroids.py`
-**Thời gian**: ~30 giây
-**Input**: `data/processed/hadoop_input_temp.txt`
+
+**Mục đích**: Chọn điểm bắt đầu cho thuật toán K-means  
+**File thực thi**: `scripts/polars/init_centroids.py`  
+**Thời gian**: ~30 giây  
+**Input**: `data/processed/hadoop_input_temp.txt`  
 **Output**: `data/processed/centroids_temp.txt` (440 bytes)
 
 **Thuật toán**:
@@ -407,10 +412,11 @@ Cluster 1: [0.88, 0.22, 0.44, 0.66, 0.11, 0.99, 0.22, 0.44, 0.66]
 ```
 
 #### BƯỚC 4: Upload lên HDFS ☁️
-**Mục đích**: Chuyển dữ liệu lên hệ thống lưu trữ phân tán
-**File thực thi**: `scripts/spark/setup_hdfs.sh`
-**Thời gian**: ~5 phút
-**Input**: 2 file temp cục bộ
+
+**Mục đích**: Chuyển dữ liệu lên hệ thống lưu trữ phân tán  
+**File thực thi**: `scripts/spark/setup_hdfs.sh`  
+**Thời gian**: ~5 phút  
+**Input**: 2 file temp cục bộ  
 **Output**: Dữ liệu trên HDFS
 
 **Các bước thực hiện**:
@@ -427,10 +433,11 @@ Cluster 1: [0.88, 0.22, 0.44, 0.66, 0.11, 0.99, 0.22, 0.44, 0.66]
 - Nếu cần, có thể tải lại từ HDFS
 
 #### BƯỚC 5: Chạy K-means trên Spark 🚀
-**Mục đích**: Phân cụm 179 triệu giao dịch
-**File thực thi**: `scripts/spark/run_spark.sh` + `kmeans_spark.py`
-**Thời gian**: 15-30 phút (tùy phần cứng)
-**Input**: Dữ liệu từ HDFS
+
+**Mục đích**: Phân cụm 179 triệu giao dịch  
+**File thực thi**: `scripts/spark/run_spark.sh` + `kmeans_spark.py`  
+**Thời gian**: 15-30 phút (tùy phần cứng)  
+**Input**: Dữ liệu từ HDFS  
 **Output**: Tâm cụm cuối cùng trên HDFS
 
 **Thuật toán K-means**:
@@ -476,10 +483,11 @@ Cluster 4:  21,183,262 giao dịch (11.79%)
 ```
 
 #### BƯỚC 6: Tải kết quả về 📥
-**Mục đích**: Lấy tâm cụm cuối cùng từ HDFS
-**File thực thi**: `scripts/spark/download_from_hdfs.sh`
-**Thời gian**: ~30 giây
-**Input**: `/user/spark/hi_large/output_centroids/` trên HDFS
+
+**Mục đích**: Lấy tâm cụm cuối cùng từ HDFS  
+**File thực thi**: `scripts/spark/download_from_hdfs.sh`  
+**Thời gian**: ~30 giây  
+**Input**: `/user/spark/hi_large/output_centroids/` trên HDFS  
 **Output**: `data/results/final_centroids.txt` (~4KB)
 
 **Các bước**:
@@ -493,12 +501,13 @@ Cluster 4:  21,183,262 giao dịch (11.79%)
 - Cần thiết cho bước phân tích tiếp theo
 
 #### BƯỚC 7: Gán nhãn cụm cho từng giao dịch 🏷️
-**Mục đích**: Xác định mỗi giao dịch thuộc cụm nào
-**File thực thi**: `scripts/polars/assign_clusters_polars.py`
-**Thời gian**: ~10 phút
+
+**Mục đích**: Xác định mỗi giao dịch thuộc cụm nào  
+**File thực thi**: `scripts/polars/assign_clusters_polars.py`  
+**Thời gian**: ~10 phút  
 **Input**: 
   - CSV gốc từ HDFS (streaming)
-  - 5 tâm cụm từ bước 6
+  - 5 tâm cụm từ bước 6  
 **Output**: `data/results/clustered_results.txt`
 
 **Thuật toán**:
@@ -519,10 +528,11 @@ FOR mỗi giao dịch:
 - Sử dụng NumPy vectorization
 
 #### BƯỚC 8: Phân tích kết quả 📊
-**Mục đích**: Tìm cụm có tỷ lệ rửa tiền cao
-**File thực thi**: `scripts/polars/analyze_polars.py`
-**Thời gian**: ~2 phút
-**Input**: `data/results/clustered_results.txt`
+
+**Mục đích**: Tìm cụm có tỷ lệ rửa tiền cao  
+**File thực thi**: `scripts/polars/analyze_polars.py`  
+**Thời gian**: ~2 phút  
+**Input**: `data/results/clustered_results.txt`  
 **Output**: Báo cáo phân tích
 
 **Các phân tích thực hiện**:

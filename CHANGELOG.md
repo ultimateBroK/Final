@@ -4,7 +4,8 @@
 
 ### 📚 Cập nhật Documentation
 
-#### README.md:
+#### README.md
+
 - Cập nhật cấu trúc thư mục chi tiết hơn (tree format)
 - Thêm phần cài đặt Python dependencies
 - Mở rộng hướng dẫn HDFS-Only Workflow với diagrams
@@ -13,7 +14,7 @@
 - Thêm phần kiểm tra HDFS data structure
 - Thêm reference đến PROJECT_OVERVIEW.md
 
-#### docs/PROJECT_OVERVIEW.md (Mới):
+#### docs/PROJECT_OVERVIEW.md (Mới)
 - Document tổng quan đầy đủ về project
 - Kiến trúc hệ thống chi tiết
 - Workflow 8 bước với giải thích từng bước

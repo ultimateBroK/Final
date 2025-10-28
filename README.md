@@ -105,9 +105,9 @@ cp /path/to/HI-Large_Trans.csv data/raw/
 
 Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 
-### Workflow:
+### Workflow
 
-```
+```text
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
 │ Raw CSV     │ ───> │ Temp Files   │ ───> │ HDFS        │
 │ (data/raw/) │      │ (tạm thời)   │      │ (permanent) │
@@ -127,7 +127,7 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 4. Kết quả được lưu trên HDFS tại `/user/spark/hi_large/`
 5. *(Tùy chọn)* Tải kết quả nhỏ về `data/results/` để phân tích
 
-### Lưu ý:
+### Lưu ý
 
 - ✅ Temp files tự động bị xóa sau khi upload HDFS
 - ✅ Dữ liệu chính chỉ tồn tại trên HDFS
@@ -201,9 +201,9 @@ Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
 <a id="du-lieu-hdfs"></a>
 ## Dữ liệu trên HDFS
 
-### Cấu trúc HDFS:
+### Cấu trúc HDFS
 
-```
+```text
 /user/spark/hi_large/
 ├── input/
 │   └── hadoop_input.txt      # Dữ liệu đã normalize (~33GB)
@@ -212,9 +212,9 @@ Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
     └── part-00000
 ```
 
-### Kiểm tra dữ liệu:
+### Kiểm tra dữ liệu
 
-```bash
+```bash path=null start=null
 # Xem cấu trúc
 hdfs dfs -ls /user/spark/hi_large/
 
@@ -225,7 +225,7 @@ hdfs dfs -du -h /user/spark/hi_large/
 hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 ```
 
-### Download kết quả (tùy chọn):
+### Download kết quả (tùy chọn)
 
 Kết quả nhỏ được tải về `data/results/` để phân tích local.
 
@@ -248,7 +248,7 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
 <a id="kien-truc"></a>
 ## Kiến trúc hệ thống
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────┐
 │                     HDFS-Only Workflow                           │
 └──────────────────────────────────────────────────────────────────┘
@@ -272,7 +272,7 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
                                                       └────────────────┘
 ```
 
-### Đặc điểm:
+### Đặc điểm
 
 - ✅ **KHÔNG lưu dữ liệu lớn local** - Temp files tự động xóa sau upload
 - ✅ **Storage chỉ trên HDFS** - Tuân thủ quy định không lưu local  
