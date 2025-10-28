@@ -3,7 +3,7 @@ import polars as pl
 import numpy as np
 import os
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DATA_RAW = os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
 DATA_PROCESSED = os.path.join(ROOT_DIR, 'data', 'processed')
 os.makedirs(DATA_PROCESSED, exist_ok=True)
@@ -12,10 +12,9 @@ print("Loading with Polars...")
 df = pl.read_csv(DATA_RAW)
 
 print("Feature engineering...")
+
 df_features = df.select([
-    # Parse timestamp
     pl.col('Timestamp').str.strptime(pl.Datetime, format='%Y/%m/%d %H:%M').alias('datetime'),
-    
     # Basic features
     pl.col('Amount Received').alias('amount_received'),
     pl.col('Amount Paid').alias('amount_paid'),
@@ -64,8 +63,13 @@ df_normalized = df_numeric.select([
     for c in df_numeric.columns
 ])
 
-print("Writing to data/processed/hadoop_input.txt...")
-df_normalized.write_csv(os.path.join(DATA_PROCESSED, 'hadoop_input.txt'), include_header=False)
+# NOTE: This script prepares data but does NOT save large files locally
+# Data will be uploaded directly to HDFS by setup_hdfs.sh
+# Only create temp file for immediate HDFS upload
+temp_output = os.path.join(DATA_PROCESSED, 'hadoop_input_temp.txt')
+print(f"Writing temp file for HDFS upload: {temp_output}")
+df_normalized.write_csv(temp_output, include_header=False)
 
-print(f"✅ Created data/processed/hadoop_input.txt with {len(df_normalized)} rows")
+print(f"✅ Created temp file with {len(df_normalized)} rows (will be uploaded to HDFS)")
 print(f"   Features: {df_normalized.columns}")
+print("⚠️  Remember: This temp file will be deleted after HDFS upload")
