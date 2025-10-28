@@ -23,16 +23,16 @@ print(f"Number of clusters: {df_result['cluster'].n_unique()}")
 # Cluster distribution
 print("\n--- Cluster Sizes ---")
 cluster_counts = df_result.group_by('cluster').agg(
-    pl.count().alias('count')
+    pl.len().alias('count')
 ).sort('cluster')
 print(cluster_counts)
 
 # Laundering analysis
 print("\n--- Laundering Rate per Cluster ---")
 laundering_stats = df_result.group_by('cluster').agg([
-    pl.count().alias('total'),
+    pl.len().alias('total'),
     pl.col('Is Laundering').sum().alias('laundering_count'),
-    (pl.col('Is Laundering').sum() / pl.count() * 100).alias('laundering_rate')
+    (pl.col('Is Laundering').sum() / pl.len() * 100).alias('laundering_rate')
 ]).sort('cluster')
 
 print(laundering_stats)
