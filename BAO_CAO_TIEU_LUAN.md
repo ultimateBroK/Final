@@ -1,22 +1,34 @@
-# 📊 BÁO CÁO DỰ ÁN
-# PHÁT HIỆN RỬA TIỀN BẰNG HỌC MÁY
+# 📊 BÁO CÁO DỰ ÁN: PHÁT HIỆN RỬA TIỀN BẰNG HỌC MÁY
 
 ## Phân Tích 179 Triệu Giao Dịch với Apache Spark
 
+## Mục lục
+- [Tóm tắt điều hành](#tom-tat)
+- [Phần 1: Giới thiệu dự án](#p1)
+- [Phần 2: Dữ liệu và tiền xử lý](#p2)
+- [Phần 3: Kiến trúc hệ thống](#p3)
+- [Phần 4: Quy trình xử lý (Pipeline)](#p4)
+- [Phần 5: Kết quả và đánh giá](#p5)
+- [Phần 6: Tuân thủ quy định bảo mật](#p6)
+- [Phần 7: Hướng dẫn sử dụng](#p7)
+- [Phần 8: Xử lý sự cố](#p8)
+- [Phần 9: Kết luận và hướng phát triển](#p9)
+- [Phụ lục](#phu-luc)
+
 ---
 
-**Ngày lập báo cáo**: 28/10/2025 22:04:46
-**Vị trí dự án**: `/home/ultimatebrok/Downloads/Final`
-**Người thực hiện**: Sinh viên
-**Giảng viên hướng dẫn**: [Tên giảng viên]
+- Ngày lập báo cáo: 28/10/2025 22:04:46
+- Vị trí dự án: `/home/ultimatebrok/Downloads/Final`
+- Người thực hiện: Sinh viên
+- Giảng viên hướng dẫn: [Tên giảng viên]
 
 ---
 
+<a id="tom-tat"></a>
 ## TÓM TẮT ĐIỀU HÀNH
 
 ### Bài toán
-Phát hiện các giao dịch nghi ngờ rửa tiền trong tập dữ liệu lớn chứa **179 triệu giao dịch** 
-(kích thước 16GB), sử dụng kỹ thuật phân cụm K-means trên nền tảng xử lý phân tán Apache Spark.
+Phát hiện các giao dịch nghi ngờ rửa tiền trong tập dữ liệu lớn chứa **179 triệu giao dịch** (kích thước 16GB), sử dụng kỹ thuật phân cụm K-means trên nền tảng xử lý phân tán Apache Spark.
 
 ### Kết quả đạt được
 - ✅ Xử lý thành công 179,702,229 giao dịch
@@ -34,6 +46,7 @@ Phát hiện các giao dịch nghi ngờ rửa tiền trong tập dữ liệu l�
 
 ---
 
+<a id="p1"></a>
 ## PHẦN 1: GIỚI THIỆU DỰ ÁN
 
 ### 1.1. Bối cảnh và Động lực
@@ -87,6 +100,7 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 
 ---
 
+<a id="p2"></a>
 ## PHẦN 2: DỮ LIỆU VÀ TIỀN XỬ LÝ
 
 ### 2.1. Mô tả tập dữ liệu
@@ -187,6 +201,7 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 
 ---
 
+<a id="p3"></a>
 ## PHẦN 3: KIẾN TRÚC HỆ THỐNG
 
 ### 3.1. Sơ đồ tổng quan
@@ -312,6 +327,7 @@ Polars:  Đọc 16GB CSV → 4-5 phút ⚡
 
 ---
 
+<a id="p4"></a>
 ## PHẦN 4: QUY TRÌNH XỬ LÝ (PIPELINE)
 
 ### 4.1. Tổng quan quy trình 8 bước
@@ -535,6 +551,7 @@ FOR mỗi giao dịch:
 
 ---
 
+<a id="p5"></a>
 ## PHẦN 5: KẾT QUẢ VÀ ĐÁNH GIÁ
 
 ### 5.1. Kết quả phân cụm
@@ -651,6 +668,7 @@ Cluster 4: 0.01% ━━━━━━━━━━━━━━━━━━━━━
 
 ---
 
+<a id="p6"></a>
 ## PHẦN 6: TUÂN THỦ QUY ĐỊNH BẢO MẬT
 
 ### 6.1. Quy định: KHÔNG lưu dữ liệu lớn ở máy cục bộ
@@ -726,6 +744,7 @@ rm data/processed/hadoop_input.txt
 
 ---
 
+<a id="p7"></a>
 ## PHẦN 7: HƯỚNG DẪN SỬ DỤNG
 
 ### 7.1. Yêu cầu hệ thống
@@ -887,6 +906,7 @@ head data/results/clustered_results.txt
 
 ---
 
+<a id="p8"></a>
 ## PHẦN 8: XỬ LÝ SỰ CỐ
 
 ### 8.1. Lỗi thường gặp
@@ -983,6 +1003,7 @@ df -h  # Phải còn > 50GB trống
 
 ---
 
+<a id="p9"></a>
 ## PHẦN 9: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
 
 ### 9.1. Tổng kết dự án
@@ -1125,6 +1146,7 @@ CMD ["./scripts/pipeline/full_pipeline_spark.sh"]
 
 ---
 
+<a id="phu-luc"></a>
 ## PHỤ LỤC
 
 ### A. Thuật ngữ và Giải thích

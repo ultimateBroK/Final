@@ -2,8 +2,24 @@
 
 Pipeline phân tích dữ liệu HI-Large_Trans.csv sử dụng Polars và Apache Spark (PySpark).
 
-> 📚 **Xem chi tiết**: [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md) - Hướng dẫn đầy đủ và kiến trúc hệ thống
+> 📚 Xem thêm: [HƯỚNG DẪN CHẠY](HUONG_DAN_CHAY.md) · [BÁO CÁO](BAO_CAO_TIEU_LUAN.md) · [HADOOP_ALTERNATIVES](docs/HADOOP_ALTERNATIVES.md)
 
+## Mục lục
+- [Nâng cấp từ Hadoop sang Spark](#nang-cap)
+- [Cấu trúc thư mục](#cau-truc)
+- [Cài đặt](#cai-dat)
+- [Chuẩn bị dữ liệu](#chuan-bi-du-lieu)
+- [HDFS-Only Workflow](#hdfs-workflow)
+- [Chạy Pipeline](#chay-pipeline)
+- [Dọn dẹp Project](#don-dep)
+- [Dữ liệu trên HDFS](#du-lieu-hdfs)
+- [Chi tiết Pipeline Steps](#chi-tiet-steps)
+- [Kiến trúc hệ thống](#kien-truc)
+- [So sánh Hadoop vs Spark](#so-sanh)
+- [Lợi ích Apache Spark](#loi-ich)
+- [So sánh với các phương pháp khác](#phuong-phap-khac)
+
+<a id="nang-cap"></a>
 ## ⚡ Nâng cấp từ Hadoop sang Spark
 
 Project đã được cập nhật để sử dụng **Apache Spark** thay vì Hadoop MapReduce, giúp:
@@ -12,6 +28,7 @@ Project đã được cập nhật để sử dụng **Apache Spark** thay vì H
 - 📝 **Code đơn giản hơn** (PySpark API)
 - 🚀 **Scale tốt hơn** với big data
 
+<a id="cau-truc"></a>
 ## Cấu trúc thư mục
 
 ```
@@ -48,6 +65,7 @@ Final/
 └── README.md
 ```
 
+<a id="cai-dat"></a>
 ## Cài đặt
 
 ### Apache Spark
@@ -73,6 +91,7 @@ source .venv/bin/activate
 pip install polars numpy pyspark
 ```
 
+<a id="chuan-bi-du-lieu"></a>
 ## Chuẩn bị dữ liệu
 
 Đặt file CSV gốc vào thư mục raw:
@@ -81,6 +100,7 @@ pip install polars numpy pyspark
 cp /path/to/HI-Large_Trans.csv data/raw/
 ```
 
+<a id="hdfs-workflow"></a>
 ## ⚠️ QUAN TRỌNG: HDFS-Only Workflow
 
 Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
@@ -114,6 +134,7 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 - ✅ Chỉ lưu kết quả phân tích nhỏ ở local (centroid, logs)
 - ⚠️ Có thể sửa `HDFS_BASE` trong scripts nếu dùng cluster khác
 
+<a id="chay-pipeline"></a>
 ## Chạy Pipeline
 
 ### Quick Start
@@ -163,6 +184,7 @@ python scripts/polars/analyze_polars.py
 
 Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
 
+<a id="don-dep"></a>
 ## Dọn dẹp Project
 
 ```bash
@@ -176,6 +198,7 @@ Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
 ./scripts/pipeline/full_pipeline_spark.sh
 ```
 
+<a id="du-lieu-hdfs"></a>
 ## Dữ liệu trên HDFS
 
 ### Cấu trúc HDFS:
@@ -206,6 +229,7 @@ hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 
 Kết quả nhỏ được tải về `data/results/` để phân tích local.
 
+<a id="chi-tiet-steps"></a>
 ## Chi tiết Pipeline Steps
 
 | Bước | Script | Mô tả | Thời gian |
@@ -221,6 +245,7 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
 
 **Tổng thời gian**: ~40-60 phút (tùy cluster configuration)
 
+<a id="kien-truc"></a>
 ## Kiến trúc hệ thống
 
 ```
@@ -255,6 +280,7 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
 - ✅ **Scalable** - Thêm nodes để tăng performance
 - ✅ **Fault-tolerant** - HDFS replication đảm bảo an toàn dữ liệu
 
+<a id="so-sanh"></a>
 ## So sánh Hadoop vs Spark
 
 | Tiêu chí | Hadoop MapReduce | Apache Spark (HDFS) |
@@ -265,6 +291,7 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
 | **Code** | Dài (mapper/reducer) | Ngắn gọn (PySpark API) |
 | **Phù hợp** | Batch processing lớn | Iterative algorithms |
 
+<a id="loi-ich"></a>
 ## Lợi ích Apache Spark
 
 | Tiêu chí | Lợi ích |
@@ -276,6 +303,7 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
 | 📈 **Scale** | Horizontal scaling - thêm nodes dễ dàng |
 | 🛡️ **Production** | Fault-tolerant, mature ecosystem |
 
+<a id="phuong-phap-khac"></a>
 ### So sánh với các phương pháp khác:
 
 Xem chi tiết tại: [`docs/HADOOP_ALTERNATIVES.md`](docs/HADOOP_ALTERNATIVES.md)

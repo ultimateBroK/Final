@@ -1,5 +1,17 @@
 # 🚀 HƯỚNG DẪN CHẠY PIPELINE
 
+## Mục lục
+- [Giới thiệu](#gioi-thieu)
+- [Chuẩn bị](#chuan-bi)
+- [Pipeline 8 bước](#pipeline-8-buoc)
+- [Chạy tự động](#chay-tu-dong)
+- [Xử lý lỗi thường gặp](#loi-thuong-gap)
+- [Xem kết quả](#xem-ket-qua)
+- [Dọn dẹp sau khi xong](#don-dep)
+- [Checklist trước khi chạy](#checklist)
+- [Tài liệu tham khảo](#tai-lieu)
+
+<a id="gioi-thieu"></a>
 ## Giới thiệu
 
 Pipeline này xử lý 179 triệu giao dịch (16GB) để phát hiện rửa tiền bằng K-means clustering.
@@ -9,6 +21,7 @@ Pipeline này xử lý 179 triệu giao dịch (16GB) để phát hiện rửa t
 
 ---
 
+<a id="chuan-bi"></a>
 ## 📋 Chuẩn bị
 
 ### 1. Kiểm tra môi trường
@@ -39,6 +52,7 @@ hdfs dfsadmin -report
 
 ---
 
+<a id="pipeline-8-buoc"></a>
 ## 🔄 PIPELINE 8 BƯỚC
 
 ### BƯỚC 1: Khám phá dữ liệu 🔍
@@ -252,6 +266,7 @@ python scripts/polars/analyze_polars.py
 
 ---
 
+<a id="chay-tu-dong"></a>
 ## 🎯 CHẠY TỰ ĐỘNG (Khuyến nghị)
 
 Thay vì chạy từng bước, dùng script tự động:
@@ -269,6 +284,7 @@ Pipeline sẽ tự động:
 
 ---
 
+<a id="loi-thuong-gap"></a>
 ## 🔧 XỬ LÝ LỖI THƯỜNG GẶP
 
 ### Lỗi 1: HDFS không chạy
@@ -321,6 +337,7 @@ rm -rf data/processed/*
 
 ---
 
+<a id="xem-ket-qua"></a>
 ## 📊 XEM KẾT QUẢ
 
 ### Log pipeline
@@ -340,6 +357,7 @@ head data/results/clustered_results.txt
 
 ---
 
+<a id="don-dep"></a>
 ## 🧹 DỌN DẸP SAU KHI XONG
 
 ### Reset toàn bộ
@@ -395,6 +413,7 @@ tail -f logs/pipeline_log_*.md
 
 ---
 
+<a id="checklist"></a>
 ## ✅ CHECKLIST TRƯỚC KHI CHẠY
 
 - [ ] Java installed (version 11 hoặc 17)
@@ -407,6 +426,7 @@ tail -f logs/pipeline_log_*.md
 
 ---
 
+<a id="tai-lieu"></a>
 ## 📚 TÀI LIỆU THAM KHẢO
 
 - **BAO_CAO_TIEU_LUAN.md**: Báo cáo chi tiết bằng tiếng Việt
