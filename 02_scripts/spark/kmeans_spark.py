@@ -207,17 +207,63 @@ def run_kmeans(input_path, output_path, k=5, max_iterations=15, seed=42, tol=1e-
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Cách sử dụng: spark-submit kmeans_spark.py <đường_dẫn_hdfs_input> <đường_dẫn_hdfs_output> [k] [số_lần_lặp_tối_đa]")
-        print("Ví dụ: spark-submit kmeans_spark.py hdfs://localhost:9000/user/spark/input.txt hdfs://localhost:9000/user/spark/output 5 15")
+        print("Cách sử dụng: spark-submit kmeans_spark.py <đường_dẫn_hdfs_input> <đường_dẫn_hdfs_output> [k] [max_iter] [seed] [tol]")
+        print("Ví dụ: spark-submit kmeans_spark.py hdfs://localhost:9000/user/spark/input.txt hdfs://localhost:9000/user/spark/output 5 15 42 1e-4")
         sys.exit(1)
-    
+
     input_path = sys.argv[1]
     output_path = sys.argv[2]
-    k = int(sys.argv[3]) if len(sys.argv) > 3 else 5
-    max_iterations = int(sys.argv[4]) if len(sys.argv) > 4 else 15
-    seed = int(sys.argv[5]) if len(sys.argv) > 5 else 42
-    tol = float(sys.argv[6]) if len(sys.argv) > 6 else 1e-4
-    
+
+    # Defaults
+    k = 5
+    max_iterations = 15
+    seed = 42
+    tol = 0.0001
+
+    # Helper parsers that won't crash if order is flexible
+    def try_parse_int(value):
+        try:
+            return int(value)
+        except Exception:
+            return None
+
+    def try_parse_float(value):
+        try:
+            return float(value)
+        except Exception:
+            return None
+
+    # Parse optional args with resilience to misordered inputs
+    if len(sys.argv) > 3:
+        k_candidate = try_parse_int(sys.argv[3])
+        if k_candidate is not None and k_candidate > 0:
+            k = k_candidate
+
+    if len(sys.argv) > 4:
+        # Prefer interpreting as max_iter if it is an int, otherwise maybe tol
+        mi_candidate = try_parse_int(sys.argv[4])
+        if mi_candidate is not None and mi_candidate > 0:
+            max_iterations = mi_candidate
+        else:
+            tol_candidate = try_parse_float(sys.argv[4])
+            if tol_candidate is not None and tol_candidate > 0:
+                tol = tol_candidate
+
+    if len(sys.argv) > 5:
+        # Prefer seed (int); if not int, may be tol
+        seed_candidate = try_parse_int(sys.argv[5])
+        if seed_candidate is not None:
+            seed = seed_candidate
+        else:
+            tol_candidate = try_parse_float(sys.argv[5])
+            if tol_candidate is not None and tol_candidate > 0:
+                tol = tol_candidate
+
+    if len(sys.argv) > 6:
+        tol_candidate = try_parse_float(sys.argv[6])
+        if tol_candidate is not None and tol_candidate > 0:
+            tol = tol_candidate
+
     print(f"HDFS Đầu vào: {input_path}")
     print(f"HDFS Đầu ra: {output_path}")
     print(f"Số cụm K: {k}")
@@ -225,5 +271,5 @@ if __name__ == "__main__":
     print(f"Seed: {seed}")
     print(f"Tol: {tol}")
     print()
-    
+
     run_kmeans(input_path, output_path, k, max_iterations, seed, tol, use_hdfs=True)

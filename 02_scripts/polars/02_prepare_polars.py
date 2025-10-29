@@ -36,11 +36,11 @@ print(f"Đọc file: {DATA_RAW}")
 print("Vui lòng đợi (có thể mất 5-10 phút)...\n")
 
 # ==================== ĐỌC DỮ LIỆU ====================
-# Read_csv = Load toàn bộ vào RAM (cần ~20GB RAM)
-# Nếu không đủ RAM, dùng scan_csv và xử lý từng batch
-df = pl.read_csv(DATA_RAW)
+# Scan_csv = Lazy loading (không load hết vào RAM)
+# Polars sẽ xử lý từng batch và streaming ra disk
+df = pl.scan_csv(DATA_RAW)
 
-print(f"✅ Đã load {len(df):,} dòng vào RAM\n")
+print(f"✅ Đã setup lazy loading (không tốn RAM)\n")
 
 # ==================== TRÍCH XUẤT ĐẶC TRƯNG ====================
 print("🌟 TRÍCH XUẤT ĐẶC TRƯNG TỪ DỮ LIỆU THÔ...")
@@ -80,7 +80,7 @@ df_features = df.select([
     pl.col('Payment Format').alias('payment_format'),
 ])
 
-print(f"✅ Đã trích xuất {len(df_features.columns)} đặc trưng\n")
+print(f"✅ Đã trích xuất {len(df_features.collect_schema().names())} đặc trưng\n")
 
 # ==================== MÃ HÓA BIẾN PHÂN LOẠI ====================
 print("🔢 MÃ HÓA BIẾN PHÂN LOẠI (CATEGORICAL ENCODING)...")
@@ -109,7 +109,7 @@ df_numeric = df_features.select([
     'payment_format_encoded', # Hình thức thanh toán (số)
 ])
 
-print(f"📊 Có {len(df_numeric.columns)} đặc trưng số cho K-means\n")
+print(f"📊 Có {len(df_numeric.collect_schema().names())} đặc trưng số cho K-means\n")
 
 # ==================== CHUẨN HÓA (NORMALIZATION) ====================
 print("📊 CHUẨN HÓA DỮ LIỆU (Min-Max Scaling)...")
@@ -120,10 +120,10 @@ print("📊 CHUẨN HÓA DỮ LIỆU (Min-Max Scaling)...")
 # Nếu không chuẩn hóa, K-means sẽ bị ảnh hưởng bởi đặc trưng có giá trị lớn
 df_normalized = df_numeric.select([
     ((pl.col(c) - pl.col(c).mean()) / pl.col(c).std()).alias(c)
-    for c in df_numeric.columns
+    for c in df_numeric.collect_schema().names()
 ])
 
-print(f"✅ Đã chuẩn hóa {len(df_normalized.columns)} đặc trưng\n")
+print(f"✅ Đã chuẩn hóa {len(df_normalized.collect_schema().names())} đặc trưng\n")
 
 # ==================== LƯU FILE TẠM THỜI ====================
 print("💾 LƯU FILE TẠM THỜI CHO HDFS...")
@@ -134,7 +134,8 @@ print(f"   Đang ghi: {temp_output}")
 print("   Vui lòng đợi (có thể mất 3-5 phút)...\n")
 
 # Ghi file không có header (chỉ có số)
-df_normalized.write_csv(temp_output, include_header=False)
+# Sink = streaming write (không tốn RAM)
+df_normalized.sink_csv(temp_output, include_header=False)
 
 file_size_mb = os.path.getsize(temp_output) / (1024 * 1024 * 1024)
 print("="*70)
@@ -142,9 +143,9 @@ print("✅ HOÀN TẤT XỬ LÝ DỮ LIỆU!")
 print("="*70)
 print(f"📄 File tạm: {temp_output}")
 print(f"📊 Kích thước: {file_size_mb:.2f} GB")
-print(f"📊 Số dòng: {len(df_normalized):,}")
-print(f"📊 Số đặc trưng: {len(df_normalized.columns)}")
-print(f"📊 Các đặc trưng: {df_normalized.columns}")
+print(f"📊 Số dòng: [streaming - không đếm]")
+print(f"📊 Số đặc trưng: {len(df_normalized.collect_schema().names())}")
+print(f"📊 Các đặc trưng: {df_normalized.collect_schema().names()}")
 print()
 print("⚠️  QUAN TRỌNG:")
 print("   File này chỉ tồn tại TẠM THỜI!")

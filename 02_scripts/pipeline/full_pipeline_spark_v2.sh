@@ -38,7 +38,7 @@ VERBOSE=true
 SEED=""
 K_OVERRIDE=""
 MAX_ITER_OVERRIDE=""
-z_OVERRIDE=""
+TOL_OVERRIDE=""
 
 # ==================== PARSE ARGUMENTS ====================
 while [[ $# -gt 0 ]]; do
@@ -127,9 +127,9 @@ LOG_FILE="$LOGS_DIR/pipeline_log_$(date +%Y%m%d_%H%M%S).md"
 CHECKPOINT_DIR="$ROOT_DIR/.pipeline_checkpoints"
 mkdir -p "$CHECKPOINT_DIR"
 
-# Hàm ghi log ra cả terminal và file
+# Hàm ghi log CHỈ vào file (không in ra terminal để tránh trùng lặp)
 log() {
-    echo "$1" | tee -a "$LOG_FILE"
+    echo "$1" >> "$LOG_FILE"
 }
 
 # In ra terminal có màu (không ghi vào log)
@@ -391,7 +391,7 @@ run_step 3 "Upload Lên HDFS" \
 run_step 4 "K-means MLlib (Tối Ưu)" \
     "K-means với MLlib: k-means++, Catalyst optimizer, Tungsten" \
     "~10-15 phút (⚡ Nhanh hơn 30-50%)" \
-    "bash \"$SCRIPTS_DIR/spark/run_spark.sh\" ${SEED:+$SEED} ${K_OVERRIDE:+$K_OVERRIDE} ${MAX_ITER_OVERRIDE:+$MAX_ITER_OVERRIDE} ${TOL_OVERRIDE:+$TOL_OVERRIDE}"
+    "bash \"$SCRIPTS_DIR/spark/run_spark.sh\" ${K_OVERRIDE:+--k $K_OVERRIDE} ${MAX_ITER_OVERRIDE:+--max-iter $MAX_ITER_OVERRIDE} ${SEED:+--seed $SEED} ${TOL_OVERRIDE:+--tol $TOL_OVERRIDE}"
 
 run_step 5 "Tải Kết Quả Về" \
     "Download final centroids từ HDFS về local" \

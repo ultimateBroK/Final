@@ -4,9 +4,11 @@
 01_data/processed/
 01_data/results/
 
+# Checkpoints
+.pipeline_checkpoints/
+
 # Logs and snapshots
 04_logs/
-05_snapshots/
 
 # Visualization artifacts (keep README.md and notebooks)
 06_visualizations/latest_summary.txt

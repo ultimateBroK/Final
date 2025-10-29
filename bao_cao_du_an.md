@@ -17,10 +17,11 @@
 
 ---
 
-- Ngày lập báo cáo: 29/10/2025 15:44:30
+- Ngày lập báo cáo: 29/10/2025 18:45:48
 - Vị trí dự án: `/home/ultimatebrok/Downloads/Final`
 - Người thực hiện: Sinh viên
 - Giảng viên hướng dẫn: [Tên giảng viên]
+- Snapshot: `snapshot_20251029_184548`
 
 ---
 
@@ -32,8 +33,8 @@ Phát hiện các giao dịch nghi ngờ rửa tiền trong tập dữ liệu l�
 
 ### Kết quả đạt được
 - ✅ Xử lý thành công 179,702,229 giao dịch
-- ✅ Phân thành 5 cụm với tỷ lệ rửa tiền khác nhau (0.041% - 12.50%)
-- ✅ Thời gian xử lý: **12 phút 32 giây** (nhanh hơn Hadoop 4-8 lần, nhanh hơn RDD 30-50%)
+- ✅ Phân thành 5 cụm với tỷ lệ rửa tiền khác nhau (0.041% - 5.56%)
+- ✅ Thời gian xử lý: **11 phút 47 giây** (nhanh hơn Hadoop 4-8 lần, nhanh hơn RDD 30-50%)
 - ✅ Phát hiện 225,546 giao dịch nghi ngờ rửa tiền (0.126% tổng số)
 - ✅ Tuân thủ quy định: KHÔNG lưu dữ liệu lớn ở máy cục bộ
 
@@ -466,11 +467,11 @@ Iteration 15: Centroid shift = 0.010  (đã hội tụ ✓)
 
 **Phân phối kết quả**:
 ```
-Cluster 0:  40,034,828 giao dịch (22.28%)
-Cluster 1:  42,665,741 giao dịch (23.74%)
-Cluster 2:  24,884,738 giao dịch (13.85%)
-Cluster 3:  50,933,660 giao dịch (28.34%)  ← Lớn nhất
-Cluster 4:  21,183,262 giao dịch (11.79%)
+Cluster 0:  36,926,395 giao dịch (20.55%)
+Cluster 1:  69,939,082 giao dịch (38.92%)  ← Lớn nhất
+Cluster 2:  68,931,713 giao dịch (38.36%)  ← Lớn thứ 2
+Cluster 3:          18 giao dịch (0.00%)   ← Outlier!
+Cluster 4:   3,905,021 giao dịch (2.17%)
 ```
 
 #### BƯỚC 5: Tải kết quả về 📥
@@ -532,22 +533,23 @@ FOR mỗi giao dịch:
 3. **High-risk clusters**: Cụm nào > 10% rửa tiền?
 4. **Feature averages**: Đặc điểm trung bình mỗi cụm
 
-**Kết quả từ log thực tế (chạy lần cuối 29/10/2025)**:
+**Kết quả từ log thực tế (chạy lần cuối 29/10/2025 18:45)**:
 ```
 ╔══════════╦═════════════╦═══════════╦═════════════════╗
 ║ Cluster  ║ Giao dịch   ║ Rửa tiền  ║ Tỷ lệ (%)       ║
 ╠══════════╬═════════════╬═══════════╬═════════════════╣
-║    0     ║ 69,716,345  ║  90,355   ║ 0.130%          ║
-║    1     ║ 69,068,010  ║ 102,886   ║ 0.149%          ║
-║    2     ║ 37,012,845  ║  30,696   ║ 0.083%          ║
-║    3     ║         8   ║       1   ║ 12.500% ← CAO  ║
+║    0     ║ 36,926,395  ║  29,920   ║ 0.081%          ║
+║    1     ║ 69,939,082  ║  78,960   ║ 0.113%          ║
+║    2     ║ 68,931,713  ║ 115,057   ║ 0.167%          ║
+║    3     ║        18   ║       1   ║ 5.556% ← CAO   ║
 ║    4     ║  3,905,021  ║   1,608   ║ 0.041% ← THẤP ║
 ╚══════════╩═════════════╩═══════════╩═════════════════╝
 
 💡 NHẬN XÉT:
-- Cluster 3 rủi ro cao (12.50%) nhưng chỉ có 8 giao dịch → outlier
+- Cluster 3 nghi ngờ (5.56%) nhưng chỉ có 18 giao dịch → outlier cực lớn
 - Cluster 4 an toàn nhất (0.041%)
-- Đa số cụm (0, 1, 2) có tỷ lệ rửa tiền < 0.15% (tốt)
+- Đa số cụm (0, 1, 2) có tỷ lệ rửa tiền < 0.17% (rất tốt)
+- ✅ KHÔNG có cụm nào vượt ngưỡng 10%!
 ```
 
 ---
@@ -561,105 +563,118 @@ FOR mỗi giao dịch:
 - **Tổng giao dịch xử lý**: 179,702,229
 - **Số cụm**: 5
 - **Số vòng lặp**: 15
-- **Thời gian chạy**: 12 phút 32 giây
-- **Convergence**: Đạt được (shift < 0.01)
+- **Thời gian chạy**: 11 phút 47 giây
+- **Thời gian K-means (MLlib)**: 6 phút 47 giây
+- **Convergence**: Đạt được (WSSSE: 961,278,012.73)
 
 #### Phân tích chi tiết từng cụm
 
-**🔵 Cluster 0 - Cụm Lớn Nhất**
-- Số lượng: 69,716,345 (38.80%)
-- Rửa tiền: 90,355 giao dịch (0.130%)
+**🔵 Cluster 0 - Cụm Giao Dịch Vừa**
+- Số lượng: 36,926,395 (20.55%)
+- Rửa tiền: 29,920 giao dịch (0.081%)
 - Đặc điểm:
-  - Giá trị trung bình: 8.8M
-  - Tỷ lệ received/paid: 3.38
+  - Giá trị trung bình received: 8.62M
+  - Giá trị trung bình paid: 8.63M
+  - Tỷ lệ received/paid: 1.01
   - Đánh giá: **RỦI RO THẤP**
 
-**🜢 Cluster 1 - Cụm Đông Thứ Hai**
-- Số lượng: 69,068,010 (38.43%)
-- Rửa tiền: 102,886 giao dịch (0.149%)
+**🔷 Cluster 1 - Cụm Lớn Nhất**
+- Số lượng: 69,939,082 (38.92%)
+- Rửa tiền: 78,960 giao dịch (0.113%)
 - Đặc điểm:
-  - Giá trị trung bình: 3.32M
-  - Tỷ lệ received/paid: 1.00
+  - Giá trị trung bình received: 4.57M
+  - Giá trị trung bình paid: 2.50M
+  - Tỷ lệ received/paid: 3.26
   - Đánh giá: **RỦI RO THẤP**
 
-**🜡 Cluster 2 - Cụm Giao Dịch Vừa**
-- Số lượng: 37,012,845 (20.60%)
-- Rửa tiền: 30,696 giao dịch (0.083%) ✓
+**🔶 Cluster 2 - Cụm Đông Thứ Hai**
+- Số lượng: 68,931,713 (38.36%)
+- Rửa tiền: 115,057 giao dịch (0.167%)
 - Đặc điểm:
-  - Giá trị trung bình: 3.17M
-  - Tỷ lệ received/paid: 1.08
-  - Đánh giá: **RỦI RO RẤT THẤP**
+  - Giá trị trung bình received: 4.26M
+  - Giá trị trung bình paid: 2.46M
+  - Tỷ lệ received/paid: 1.15
+  - Đánh giá: **RỦI RO TRUNG BÌNH**
 
 **🔴 Cluster 3 - Outlier (Rủi Ro Cao)**
-- Số lượng: 8 (0.00%) ← RẤT ÍT
-- Rửa tiền: 1 giao dịch (12.50%)
+- Số lượng: 18 (0.00%) ← CỰC KỲ ÍT
+- Rửa tiền: 1 giao dịch (5.56%)
 - Đặc điểm:
-  - Giá trị trung bình: 5.9 nghìn tỷ (outlier rất lớn)
-  - Tỷ lệ received/paid: 23.42
-  - Đánh giá: **OUTLIER - Kiểm tra thủ công**
+  - Giá trị trung bình received: 4.24 nghìn tỷ (outlier cực lớn)
+  - Giá trị trung bình paid: 2.86 nghìn tỷ
+  - Tỷ lệ received/paid: 21.54
+  - Đánh giá: **OUTLIER - Kiểm tra thủ công ngay**
 
-**🟪 Cluster 4 - Cụm An Toàn Nhất**
+**🟣 Cluster 4 - Cụm An Toàn Nhất**
 - Số lượng: 3,905,021 (2.17%)
 - Rửa tiền: 1,608 giao dịch (0.041%) ✓✓✓
 - Đặc điểm:
   - Giá trị trung bình: 804
   - Tỷ lệ received/paid: 1.00
-  - Đánh giá: **RỦI RO RẤT THẤP**
+  - Đánh giá: **RỦI RO CỰC THẤP**
 
 ### 5.2. Nhận xét và Insights
 
 #### Phát hiện chính
 1. **Cluster 3 là outlier rủi ro cao**
-   - Tỷ lệ rửa tiền 12.50% (vượt ngưỡng 10%)
-   - NHƯNG chỉ có 8 giao dịch trong cụm này
-   - Đây là các giao dịch outlier với giá trị rất lớn (nghìn tỷ)
-   - Khuyến nghị: Kiểm tra thủ công 8 giao dịch này
+   - Tỷ lệ rửa tiền 5.56% (dưới ngưỡng 10% nhưng vẫn cao bất thường)
+   - NHƯNG chỉ có 18 giao dịch trong cụm này
+   - Đây là các giao dịch outlier với giá trị CỰC LỚN (nghìn tỷ)
+   - Khuyến nghị: Kiểm tra thủ công ngay lập tức 18 giao dịch này
 
-2. **Các cụm chính (0, 1, 2) rất an toàn**
-   - Cluster 0: 0.130% (38.80% tổng giao dịch)
-   - Cluster 1: 0.149% (38.43% tổng giao dịch)
-   - Cluster 2: 0.083% (20.60% tổng giao dịch)
-   - Tất cả đều dưới 0.15% - rất tốt!
+2. **Các cụm chính (0, 1, 2) an toàn**
+   - Cluster 0: 0.081% (20.55% tổng giao dịch) ✓
+   - Cluster 1: 0.113% (38.92% tổng giao dịch) ✓
+   - Cluster 2: 0.167% (38.36% tổng giao dịch) - cao nhất trong cụm chính
+   - Tất cả đều dưới 0.2% - trong mức chấp nhận được
 
 3. **Cluster 4 an toàn nhất**
-   - Chỉ 0.041% rửa tiền (thấp nhất)
+   - Chỉ 0.041% rửa tiền (thấp nhất trong tất cả)
    - Có thể ưu tiên thấp khi kiểm tra
 
-4. **Phân phối không đều**
-   - 2 cụm lớn chiếm ~77% (Cluster 0, 1)
-   - 1 cụm outlier nhỏ (Cluster 3: 8 giao dịch)
-   - Thuật toán phân biệt rõ các giao dịch bất thường
+4. **Phân phối không đều rõ rệt**
+   - 2 cụm lớn chiếm ~77% (Cluster 1, 2 với 38.92% và 38.36%)
+   - 1 cụm outlier cực nhỏ (Cluster 3: chỉ 18 giao dịch nhưng giá trị khổng lồ)
+   - Thuật toán MLlib K-means++ phân biệt rất tốt các outliers
+
+5. **KHÔNG có cụm nào vượt ngưỡng 10%**
+   - Điều này rất tốt, cho thấy hệ thống hoạt động hiệu quả
+   - Cluster 3 (5.56%) là nghi ngờ nhất nhưng vẫn dưới ngưỡng
 
 #### So sánh với ngưỡng
 ```
 Ngưỡng cảnh báo: > 10% rửa tiền
 
-Cluster 0: 0.130% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (38.8% giao dịch)
-Cluster 1: 0.149% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (38.4% giao dịch)
-Cluster 2: 0.083% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (20.6% giao dịch)
-Cluster 3: 12.50% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WARNING (chỉ 8 giao dịch)
+Cluster 0: 0.081% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (20.6% giao dịch)
+Cluster 1: 0.113% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (38.9% giao dịch)
+Cluster 2: 0.167% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (38.4% giao dịch)
+Cluster 3:  5.56% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CAUTION (chỉ 18 giao dịch)
 Cluster 4: 0.041% ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OK (2.2% giao dịch)
+
+✅ TẤT CẢ CÁC CỤM DƯỚI NGƯỠNG 10%!
 ```
 
 ### 5.3. Hiệu suất hệ thống
 
-#### Thời gian xử lý chi tiết (29/10/2025 15:26-15:39)
+#### Thời gian xử lý chi tiết (29/10/2025 18:33-18:45)
 | Bước | Công việc | Thời gian | % Tổng |
 |------|-----------|-----------|--------|
-| 1 | Khám phá | 8s | 1.1% |
-| 2 | Feature Engineering | 66s | 8.8% |
-| 3 | Upload HDFS | 39s | 5.2% |
-| 4 | Spark MLlib K-means | 363s | 48.3% |
+| 1 | Khám phá | 10s | 1.4% |
+| 2 | Feature Engineering | 26s | 3.7% |
+| 3 | Upload HDFS | 40s | 5.6% |
+| 4 | Spark MLlib K-means | 407s | 57.4% |
 | 5 | Download | 3s | 0.4% |
-| 6 | Gán nhãn | 195s | 25.9% |
-| 7 | Phân tích | 78s | 10.4% |
-| Tổng | | 752s (12 phút 32 giây) | 100% |
+| 6 | Gán nhãn | 194s | 27.4% |
+| 7 | Phân tích | 27s | 3.8% |
+| Tổng | | 707s (11 phút 47 giây) | 100% |
 
 ✅ **Cải thiện**: Nhanh hơn 30-50% so với RDD-based K-means
+✅ **Snapshot**: `snapshot_20251029_184548`
 
 **Nhận xét**:
-- K-means chiếm 80.5% thời gian (điều này là bình thường)
-- Các bước còn lại rất nhanh nhờ Polars
+- K-means chiếm 57.4% thời gian (tối ưu hơn nhờ MLlib)
+- Feature Engineering giảm từ 66s → 26s (tăng tốc 2.5x)
+- Các bước còn lại rất nhanh nhờ Polars và caching HDFS
 
 #### So sánh với Hadoop MapReduce
 | Tiêu chí | Hadoop (Legacy) | Spark (Hiện tại) | Cải thiện |
@@ -1651,11 +1666,11 @@ Iteration 15: Centroid shift = 0.010  (đã hội tụ ✓)
 
 **Phân phối kết quả**:
 ```
-Cluster 0:  40,034,828 giao dịch (22.28%)
-Cluster 1:  42,665,741 giao dịch (23.74%)
-Cluster 2:  24,884,738 giao dịch (13.85%)
-Cluster 3:  50,933,660 giao dịch (28.34%)  ← Lớn nhất
-Cluster 4:  21,183,262 giao dịch (11.79%)
+Cluster 0:  36,926,395 giao dịch (20.55%)
+Cluster 1:  69,939,082 giao dịch (38.92%)  ← Lớn nhất
+Cluster 2:  68,931,713 giao dịch (38.36%)  ← Lớn thứ 2
+Cluster 3:          18 giao dịch (0.00%)   ← Outlier!
+Cluster 4:   3,905,021 giao dịch (2.17%)
 ```
 
 ##### BƯỚC 5: Tải kết quả về 📥
@@ -1717,22 +1732,23 @@ FOR mỗi giao dịch:
 3. **High-risk clusters**: Cụm nào > 10% rửa tiền?
 4. **Feature averages**: Đặc điểm trung bình mỗi cụm
 
-**Kết quả từ log thực tế**:
+**Kết quả từ log thực tế (29/10/2025 18:45)**:
 ```
 ╔══════════╦═════════════╦═══════════╦═════════════════╗
 ║ Cluster  ║ Giao dịch   ║ Rửa tiền  ║ Tỷ lệ (%)       ║
 ╠══════════╬═════════════╬═══════════╬═════════════════╣
-║    0     ║ 40,034,832  ║  52,327   ║ 0.13%           ║
-║    1     ║ 42,665,746  ║  70,450   ║ 0.17% ← CAO     ║
-║    2     ║ 24,884,738  ║  16,686   ║ 0.07%           ║
-║    3     ║ 50,933,651  ║  82,943   ║ 0.16%           ║
-║    4     ║ 21,183,262  ║   3,140   ║ 0.01% ← THẤP    ║
+║    0     ║ 36,926,395  ║  29,920   ║ 0.081%          ║
+║    1     ║ 69,939,082  ║  78,960   ║ 0.113%          ║
+║    2     ║ 68,931,713  ║ 115,057   ║ 0.167% ← CAO    ║
+║    3     ║        18   ║       1   ║ 5.556% ← OUTLIER║
+║    4     ║  3,905,021  ║   1,608   ║ 0.041% ← THẤP   ║
 ╚══════════╩═════════════╩═══════════╩═════════════════╝
 
 💡 NHẬN XÉT:
-- Cluster 1 nghi ngờ nhất (0.17%, cao hơn trung bình)
-- Cluster 4 an toàn nhất (0.01%, thấp hơn nhiều)
-- KHÔNG có cụm nào > 10% (good sign)
+- Cluster 3 nghi ngờ nhất (5.56%, outlier cực lớn - chỉ 18 giao dịch)
+- Cluster 2 cao nhất trong cụm chính (0.167%)
+- Cluster 4 an toàn nhất (0.041%)
+- ✅ KHÔNG có cụm nào > 10% (excellent!)
 ```
 
 ---

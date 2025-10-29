@@ -65,13 +65,40 @@ hdfs dfs -rm -r -f "$HDFS_BASE/output_centroids" 2>/dev/null
 MAX_ITER=15
 K=5
 SEED=42
-TOL=1e-4
+TOL=0.0001
 
-# Tham số từ CLI: $1=seed (optional), $2=K (optional), $3=max_iter (optional), $4=tol (optional)
-if [ -n "${1:-}" ]; then SEED="$1"; fi
-if [ -n "${2:-}" ]; then K="$2"; fi
-if [ -n "${3:-}" ]; then MAX_ITER="$3"; fi
-if [ -n "${4:-}" ]; then TOL="$4"; fi
+# Parse named arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --k)
+            K="$2"
+            shift 2
+            ;;
+        --max-iter)
+            MAX_ITER="$2"
+            shift 2
+            ;;
+        --seed)
+            SEED="$2"
+            shift 2
+            ;;
+        --tol)
+            TOL="$2"
+            shift 2
+            ;;
+        *)
+            # Fallback: positional args for backward compatibility
+            # $1=K, $2=MAX_ITER, $3=SEED, $4=TOL
+            if [ -n "${1:-}" ] && [[ "$1" =~ ^[0-9]+$ ]]; then
+                K="$1"
+                [ -n "${2:-}" ] && MAX_ITER="$2"
+                [ -n "${3:-}" ] && SEED="$3"
+                [ -n "${4:-}" ] && TOL="$4"
+            fi
+            break
+            ;;
+    esac
+done
 
 echo "Đang chạy K-means với Spark MLlib..."
 echo "Số cụm: $K"
