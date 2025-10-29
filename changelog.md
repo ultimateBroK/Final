@@ -1,5 +1,23 @@
 # Changelog
 
+## [2025-10-29-03] - Snapshot cập nhật
+
+### 📦 Tạo snapshot mới nhất
+
+- Snapshot: `snapshot_20251029_213229`
+- Thời gian: `2025-10-29 21:32:30`
+- Kích thước: `342.75 MB`
+- Files:
+  - `final_centroids.txt` (436 bytes)
+  - `clustered_results.txt` (342.75 MB)
+  - `suspicious_transactions.csv` (558 bytes)
+  - `pipeline_log.md`
+
+### 📝 Docs cập nhật
+
+- Cập nhật `bao_cao_du_an.md` theo snapshot mới
+- Bổ sung mục "Latest snapshot" trong `README.md`
+
 ## [2025-10-29-02] - ⚡ Nâng Cấp Lên MLlib K-means++
 
 ### 🚀 Chuyển sang Spark MLlib 

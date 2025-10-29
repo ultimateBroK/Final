@@ -166,6 +166,7 @@ python 02_scripts/data/visualize_results.py
 
 1. **Không lưu dữ liệu lớn local**: Temp files tự động xóa sau upload HDFS
 2. **Snapshots**: Lưu lịch sử kết quả để so sánh qua các lần chạy
+   - Latest: `05_snapshots/snapshot_20251029_213229/` (342.75 MB, 2025-10-29 21:32:30)
 3. **Visualizations**: Tạo báo cáo dễ đọc với ASCII charts
 4. **Logs**: Mỗi lần chạy tạo log riêng với timestamp
 

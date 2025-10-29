@@ -222,6 +222,22 @@ V2 có overhead nhỏ (~1-2s) do:
 
 Nhưng không ảnh hưởng total time vì phần lớn thời gian là processing.
 
+## Snapshots
+
+Sau khi chạy xong, bạn có thể tạo snapshot kết quả và xem lại sau:
+
+```bash
+# Tạo snapshot kết quả hiện tại
+python 02_scripts/data/snapshot_results.py
+
+# Liệt kê các snapshot
+python 02_scripts/data/snapshot_results.py --list
+```
+
+Snapshot gần nhất trong project:
+- `05_snapshots/snapshot_20251029_213229/` (342.75 MB, 2025-10-29 21:32:30)
+- Gồm: `final_centroids.txt`, `clustered_results.txt`, `suspicious_transactions.csv`, `pipeline_log.md`
+
 ## Future Enhancements
 
 Có thể thêm trong tương lai:

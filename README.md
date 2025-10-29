@@ -2,7 +2,7 @@
 
 Pipeline phân tích 179 triệu giao dịch sử dụng Polars và Apache Spark (PySpark).
 
-> 📚 **Xem thêm:** [Báo cáo dự án](BAO_CAO_DU_AN.md) · [Hướng dẫn](03_docs/huong-dan.md) · [Cài đặt](03_docs/cai-dat.md) · [Jupyter](03_docs/jupyter.md)
+> 📚 **Xem thêm:** [Báo cáo dự án](bao_cao_du_an.md) · [Hướng dẫn](03_docs/huong-dan.md) · [Cài đặt](03_docs/cai-dat.md) · [Jupyter](03_docs/jupyter.md)
 
 ## Mục lục
 - [Nâng cấp từ Hadoop sang Spark](#nang-cap)
@@ -211,6 +211,20 @@ python 02_scripts/data/visualize_results.py
 Logs được lưu tại `04_logs/pipeline_log_*.md` với timestamp.
 Snapshots được lưu tại `05_snapshots/snapshot_*/` với timestamp.
 Visualization được lưu tại `06_visualizations/`.
+
+#### Latest snapshot
+
+- Tên: `snapshot_20251029_213229`
+- Thời gian: `2025-10-29 21:32:30`
+- Kích thước: `342.75 MB`
+- Đường dẫn: `05_snapshots/snapshot_20251029_213229/`
+- Files:
+  - `final_centroids.txt` (436 bytes)
+  - `clustered_results.txt` (342.75 MB)
+  - `suspicious_transactions.csv` (558 bytes)
+  - `pipeline_log.md`
+
+Tham chiếu: xem báo cáo cập nhật trong `bao_cao_du_an.md`.
 
 <a id="don-dep"></a>
 ## Dọn dẹp Project
