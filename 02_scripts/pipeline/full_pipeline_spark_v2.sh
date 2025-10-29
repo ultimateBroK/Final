@@ -391,12 +391,12 @@ run_step 1 "Khám Phá Dữ Liệu" \
     "python \"$SCRIPTS_DIR/polars/01_explore_fast.py\""
 
 run_step 2 "Xử Lý Đặc Trưng" \
-    "Feature engineering: timestamp → giờ/ngày, amount ratio, route hash, normalization" \
+    "Trích xuất đặc trưng: thời gian → giờ/ngày, tỷ lệ số tiền, mã tuyến, chuẩn hóa" \
     "~10 phút (6 bước nhỏ)" \
     "python \"$SCRIPTS_DIR/polars/02_prepare_polars.py\""
 
 run_step 3 "Upload Lên HDFS" \
-    "Upload dữ liệu lên HDFS, xóa temp files local" \
+    "Tải dữ liệu lên HDFS, xóa tệp tạm trên máy" \
     "~5 phút" \
     "bash \"$SCRIPTS_DIR/spark/setup_hdfs.sh\""
 
@@ -406,17 +406,17 @@ run_step 4 "K-means MLlib (Tối ưu)" \
     "bash \"$SCRIPTS_DIR/spark/run_spark.sh\" ${K_OVERRIDE:+--k $K_OVERRIDE} ${MAX_ITER_OVERRIDE:+--max-iter $MAX_ITER_OVERRIDE} ${SEED:+--seed $SEED} ${TOL_OVERRIDE:+--tol $TOL_OVERRIDE}"
 
 run_step 5 "Tải Kết Quả Về" \
-    "Download final centroids từ HDFS về local" \
+    "Tải tâm cụm cuối cùng từ HDFS về máy" \
     "~30 giây" \
     "bash \"$SCRIPTS_DIR/spark/download_from_hdfs.sh\""
 
 run_step 6 "Gán Nhãn Cụm" \
-    "Assign cluster labels cho từng giao dịch" \
+    "Gán nhãn cụm cho từng giao dịch" \
     "~10 phút" \
     "python \"$SCRIPTS_DIR/polars/04_assign_clusters.py\""
 
 run_step 7 "Phân Tích Kết Quả" \
-    "Statistical analysis và tìm high-risk clusters" \
+    "Phân tích thống kê và tìm cụm rủi ro cao" \
     "~2 phút" \
     "python \"$SCRIPTS_DIR/polars/05_analyze.py\""
 

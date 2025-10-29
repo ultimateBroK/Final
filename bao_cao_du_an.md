@@ -17,11 +17,12 @@
 
 ---
 
-- Ngày lập báo cáo: 29/10/2025 18:45:48
+- Ngày lập báo cáo: 29/10/2025 21:32:29
+- Ngày lập báo cáo: 29/10/2025 21:32:30
 - Vị trí dự án: `/home/ultimatebrok/Downloads/Final`
 - Người thực hiện: Sinh viên
 - Giảng viên hướng dẫn: [Tên giảng viên]
-- Snapshot: `snapshot_20251029_184548`
+- Snapshot: `snapshot_20251029_213229`
 
 ---
 
@@ -465,13 +466,15 @@ Iteration 10: Centroid shift = 0.046
 Iteration 15: Centroid shift = 0.010  (đã hội tụ ✓)
 ```
 
-**Phân phối kết quả**:
+**Phân phối kết quả (Snapshot 29/10/2025 21:32)**:
 ```
-Cluster 0:  36,926,395 giao dịch (20.55%)
+Cluster 0:  36,926,395 giao dịch (20.55%)  ← Cụm trung bình
 Cluster 1:  69,939,082 giao dịch (38.92%)  ← Lớn nhất
 Cluster 2:  68,931,713 giao dịch (38.36%)  ← Lớn thứ 2
-Cluster 3:          18 giao dịch (0.00%)   ← Outlier!
-Cluster 4:   3,905,021 giao dịch (2.17%)
+Cluster 3:          18 giao dịch ( 0.00%)  ← Outlier cực lớn!
+Cluster 4:   3,905,021 giao dịch ( 2.17%)  ← Cụm nhỏ nhất
+
+Tổng: 179,702,229 giao dịch (100%)
 ```
 
 #### BƯỚC 5: Tải kết quả về 📥
@@ -533,23 +536,26 @@ FOR mỗi giao dịch:
 3. **High-risk clusters**: Cụm nào > 10% rửa tiền?
 4. **Feature averages**: Đặc điểm trung bình mỗi cụm
 
-**Kết quả từ log thực tế (chạy lần cuối 29/10/2025 18:45)**:
+**Kết quả từ snapshot thực tế (29/10/2025 21:32:29)**:
 ```
-╔══════════╦═════════════╦═══════════╦═════════════════╗
-║ Cluster  ║ Giao dịch   ║ Rửa tiền  ║ Tỷ lệ (%)       ║
-╠══════════╬═════════════╬═══════════╬═════════════════╣
-║    0     ║ 36,926,395  ║  29,920   ║ 0.081%          ║
-║    1     ║ 69,939,082  ║  78,960   ║ 0.113%          ║
-║    2     ║ 68,931,713  ║ 115,057   ║ 0.167%          ║
-║    3     ║        18   ║       1   ║ 5.556% ← CAO   ║
-║    4     ║  3,905,021  ║   1,608   ║ 0.041% ← THẤP ║
-╚══════════╩═════════════╩═══════════╩═════════════════╝
+╔══════════╦═════════════╦═══════════════════╦═════════════════╗
+║ Cluster  ║ Giao dịch   ║ Tỷ lệ (%)         ║ Đánh giá        ║
+╠══════════╬═════════════╬═══════════════════╬═════════════════╣
+║    0     ║ 36,926,395  ║ 20.55%           ║ Cụm trung bình ║
+║    1     ║ 69,939,082  ║ 38.92% ← Lớn nhất║ Chủ đạo       ║
+║    2     ║ 68,931,713  ║ 38.36% ← Lớn 2  ║ Chủ đạo       ║
+║    3     ║         18  ║  0.00% ← Outlier║ KIỂM TRA NGAY ║
+║    4     ║  3,905,021  ║  2.17%           ║ Cụm nhỏ       ║
+╚══════════╩═════════════╩═══════════════════╩═════════════════╝
 
-💡 NHẬN XÉT:
-- Cluster 3 nghi ngờ (5.56%) nhưng chỉ có 18 giao dịch → outlier cực lớn
-- Cluster 4 an toàn nhất (0.041%)
-- Đa số cụm (0, 1, 2) có tỷ lệ rửa tiền < 0.17% (rất tốt)
-- ✅ KHÔNG có cụm nào vượt ngưỡng 10%!
+Tổng: 179,702,229 giao dịch (100.00%)
+
+💡 NHẬN XÉT CHI TIẾT:
+- Cluster 0, 1, 2: Chiếm 97.83% tổng giao dịch - đây là các cụm chính
+- Cluster 3: Chỉ 18 giao dịch (0.00001%) - các giao dịch outlier giá trị cực lớn
+- Cluster 4: 2.17% - cụm nhỏ, giao dịch giá trị thấp
+- 🎯 Phân cụm thành công: 2 cụm chính (~39% mỗi cụm) + 3 cụm đặc biệt
+- ✅ Thuật toán MLlib K-means++ đã phân biệt tốt outliers
 ```
 
 ---
@@ -561,11 +567,11 @@ FOR mỗi giao dịch:
 
 #### Thống kê tổng quan
 - **Tổng giao dịch xử lý**: 179,702,229
-- **Số cụm**: 5
-- **Số vòng lặp**: 15
-- **Thời gian chạy**: 11 phút 47 giây
-- **Thời gian K-means (MLlib)**: 6 phút 47 giây
-- **Convergence**: Đạt được (WSSSE: 961,278,012.73)
+- **Số cụm**: 5 cụm
+- **Số đặc trưng**: 9 đặc trưng/giao dịch
+- **Snapshot**: snapshot_20251029_213229
+- **Kích thước kết quả**: 342.75 MB (compressed)
+- **Thuật toán**: MLlib K-means với k-means++ initialization
 
 #### Phân tích chi tiết từng cụm
 
@@ -605,13 +611,12 @@ FOR mỗi giao dịch:
   - Tỷ lệ received/paid: 21.54
   - Đánh giá: **OUTLIER - Kiểm tra thủ công ngay**
 
-**🟣 Cluster 4 - Cụm An Toàn Nhất**
+**🟣 Cluster 4 - Cụm Nhỏ**
 - Số lượng: 3,905,021 (2.17%)
-- Rửa tiền: 1,608 giao dịch (0.041%) ✓✓✓
 - Đặc điểm:
-  - Giá trị trung bình: 804
-  - Tỷ lệ received/paid: 1.00
-  - Đánh giá: **RỦI RO CỰC THẤP**
+  - Cụm nhỏ nhất trong 5 cụm
+  - Chiếm 2.17% tổng giao dịch
+  - Đánh giá: **CỤM ĐẶC BIỆT**
 
 ### 5.2. Nhận xét và Insights
 
@@ -668,8 +673,8 @@ Cluster 4: 0.041% ━━━━━━━━━━━━━━━━━━━━�
 | 7 | Phân tích | 27s | 3.8% |
 | Tổng | | 707s (11 phút 47 giây) | 100% |
 
-✅ **Cải thiện**: Nhanh hơn 30-50% so với RDD-based K-means
-✅ **Snapshot**: `snapshot_20251029_184548`
+✅ **Đã cập nhật**: Nhanh hơn 30-50% nhờ MLlib K-means++
+✅ **Snapshot**: `snapshot_20251029_213229`
 
 **Nhận xét**:
 - K-means chiếm 57.4% thời gian (tối ưu hơn nhờ MLlib)
