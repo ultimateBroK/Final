@@ -9,7 +9,7 @@
 
 # Logs and snapshots
 04_logs/
-05_snapshots/*
+05_snapshots/
 
 # Visualization artifacts (keep README.md and notebooks)
 06_visualizations/latest_summary.txt
