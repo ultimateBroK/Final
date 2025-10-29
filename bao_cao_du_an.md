@@ -340,61 +340,126 @@ Polars:  Đọc 16GB CSV → 4-5 phút ⚡
 
 ⚠️ **Thay đổi quan trọng**: Pipeline đã tối ưu từ 8 bước xuống còn **7 bước**. Bước khởi tạo centroids đã loại bỏ vì MLlib K-means tự động dùng **k-means++**.
 
+**Thời gian thực tế từ Snapshot 29/10/2025 21:32:29**:
+
 ```
 BƯỚC 1        BƯỚC 2        BƯỚC 3
 Khám phá  →   Xử lý    →   Upload
- (30s)        (10 phút)      (5 phút)
+ 13 giây       36 giây      41 giây
 
 BƯỚC 4            BƯỚC 5        BƯỚC 6        BƯỚC 7
 K-means       →   Tải về   →   Gán nhãn  →   Phân tích
-(10-25p MLlib)     (30s)       (10 phút)     (2 phút)
+6 phút 5s      3 giây       3 phút 14s      30 giây
 
-TỔNG THỜI GIAN: 35-50 phút (nhanh hơn 30-50%!)
+TỔNG THỜI GIAN: 11 phút 22 giây (682 giây)
 ```
 
 ### 4.2. Chi tiết từng bước
 
 #### BƯỚC 1: Khám phá dữ liệu 🔍
-**Mục đích**: Hiểu cấu trúc và đặc điểm của dữ liệu
-**File thực thi**: `scripts/polars/explore_fast.py`
-**Thời gian**: ~30 giây
-**Input**: `data/raw/HI-Large_Trans.csv` (16GB)
+
+**Mục đích**: Hiểu cấu trúc và đặc điểm của dữ liệu  
+**File thực thi**: `scripts/polars/explore_fast.py`  
+**Thời gian thực tế**: **13 giây** (Snapshot 29/10/2025 21:20:57 - 21:21:10)  
+**Input**: `data/raw/HI-Large_Trans.csv` (16GB)  
 **Output**: Thống kê in ra màn hình
 
 **Các phân tích thực hiện**:
-1. Đọc 100,000 dòng đầu (đại diện)
-2. Xem schema: Tên cột, kiểu dữ liệu
-3. Thống kê mô tả: min, max, mean, median, std
-4. Phân tích nhãn: Bao nhiêu % rửa tiền?
-5. Top loại tiền tệ phổ biến
+1. **Lazy Loading**: Đọc metadata và 100,000 dòng đầu (đại diện) - không tải toàn bộ vào RAM
+2. **Schema Analysis**: Xem tên cột, kiểu dữ liệu (11 cột: Timestamp, From Bank, Account, To Bank, Account.1, Amount Received, Receiving Currency, Amount Paid, Payment Currency, Payment Format, Is Laundering)
+3. **Thống kê mô tả**: min, max, mean, median, std cho các cột số
+4. **Phân tích nhãn rửa tiền**: Đếm số giao dịch bình thường vs nghi ngờ
+5. **Top loại tiền tệ**: Phân tích phân phối các loại tiền phổ biến
 
-**Kết quả ví dụ**:
+**Kết quả thực tế từ Snapshot**:
 ```
-Total rows: 179,702,229
-Laundering rate: 0.126%
-Top currencies: Euro (23%), Yuan (7.2%)
+Tổng số giao dịch: 179,702,229
+Tỷ lệ rửa tiền: 0.126% (225,546 / 179,702,229)
+Phân phối nhãn:
+  - 0 (Bình thường): 179,476,683 giao dịch
+  - 1 (Rửa tiền): 225,546 giao dịch
+
+Top 10 loại tiền tệ nhận phổ biến:
+  - US Dollar: 65,292,945 giao dịch (36.4%)
+  - Euro: 41,290,069 giao dịch (23.0%)
+  - Yuan: 12,920,668 giao dịch (7.2%)
+  - Ruble: 5,571,567 giao dịch (3.1%)
+  - Australian Dollar: 5,256,710 giao dịch (2.9%)
+  - Yen: 4,841,570 giao dịch (2.7%)
+  - Swiss Franc: 4,829,099 giao dịch (2.7%)
+  - Rupee: 4,178,243 giao dịch (2.3%)
+  - Bitcoin: 3,958,153 giao dịch (2.2%)
+  - Brazil Real: 3,596,378 giao dịch (2.0%)
+
+Giá trị giao dịch:
+  - Min: 0.01
+  - Max: 5,115,400,000 (trên 5 tỷ!)
+  - Mean: 1,142,200
+  - Median: 2,513.06
 ```
 
 #### BƯỚC 2: Xử lý và trích xuất đặc trưng 🔧
 
 **Mục đích**: Chuyển dữ liệu thô thành dạng số để thuật toán xử lý  
 **File thực thi**: `scripts/polars/prepare_polars.py`  
-**Thời gian**: ~10 phút  
+**Thời gian thực tế**: **36 giây** (21:21:11 - 21:21:45, Snapshot 29/10/2025)  
 **Input**: `data/raw/HI-Large_Trans.csv` (16GB)  
-**Output**: `data/processed/hadoop_input_temp.txt` (33GB, TẠM THỜI)
+**Output**: `data/processed/hadoop_input_temp.txt` (**31GB**, TẠM THỜI)
 
-**Các bước xử lý**:
-1. **Parse timestamp**: "2022/08/01 00:17" → giờ=0, ngày=0 (Thứ 2)
-2. **Tính ratio**: amount_ratio = 6794.63 / 7739.29 = 0.878
-3. **Hash route**: hash(20, 20) = 400 (ví dụ)
-4. **Encode currency**: "US Dollar" → 0, "Yuan" → 1
-5. **Normalize**: Đưa tất cả về [0, 1]
+**Chi tiết 6 bước xử lý (từ log thực tế)**:
 
-**Tại sao lại tăng từ 16GB lên 33GB?**
-- Dữ liệu gốc: Chỉ có 11 cột
-- Sau xử lý: Thêm nhiều cột đặc trưng
+**Bước 2.1/6: Thiết lập đọc trì hoãn (Lazy Loading)**
+- Thời gian: 0.0s
+- Mục đích: Không tải toàn bộ vào RAM, chỉ đọc khi cần thiết
+- Sử dụng: `pl.scan_csv()` - Polars lazy evaluation
+
+**Bước 2.2/6: Trích xuất đặc trưng từ dữ liệu thô**
+- Thời gian: 0.0s (tính toán lazy, chưa thực thi)
+- Các đặc trưng được tạo:
+  1. **Temporal Features**: Parse `Timestamp` → `hour` (0-23), `day_of_week` (0-6)
+  2. **Amount Features**: `Amount Received`, `Amount Paid`, `amount_ratio = Received / Paid`
+  3. **Route Feature**: `route_hash = hash(From Bank + To Bank)` - mã hóa tuyến chuyển tiền
+
+**Bước 2.3/6: Mã hóa biến phân loại (Categorical Encoding)**
+- Thời gian: 0.0s
+- Mã hóa Label Encoding cho:
+  - `Receiving Currency` → `recv_curr_encoded` (số nguyên)
+  - `Payment Currency` → `payment_curr_encoded` (số nguyên)
+  - `Payment Format` → `payment_format_encoded` (số nguyên)
+
+**Bước 2.4/6: Chọn các đặc trưng số**
+- Thời gian: 0.0s
+- Kết quả: Chọn **9 đặc trưng số** cho K-means:
+  1. `amount_received`
+  2. `amount_paid`
+  3. `amount_ratio`
+  4. `hour`
+  5. `day_of_week`
+  6. `route_hash`
+  7. `recv_curr_encoded`
+  8. `payment_curr_encoded`
+  9. `payment_format_encoded`
+
+**Bước 2.5/6: Chuẩn hóa dữ liệu (Z-score Normalization)**
+- Thời gian: 0.0s (tính toán lazy)
+- Công thức: `(x - mean) / std` (Z-score, không phải Min-Max)
+- Mục đích: Đưa tất cả features về cùng scale (mean=0, std=1)
+
+**Bước 2.6/6: Lưu tệp tạm thời cho HDFS**
+- Thời gian: **34.7 giây** (chiếm phần lớn thời gian của bước 2)
+- Đường dẫn: `/home/ultimatebrok/Downloads/Final/01_data/processed/hadoop_input_temp.txt`
+- Kích thước: **31.00 GB** (sau khi normalize)
+- Ghi chú: Polars streaming write - không tốn RAM
+- **Cảnh báo**: File này sẽ tự động xóa sau khi upload lên HDFS!
+
+**Tổng thời gian bước 2: 0.6 phút (34.7s)**
+
+**Tại sao lại từ 16GB thành 31GB?**
+- Dữ liệu gốc: 11 cột (có cả chuỗi, số)
+- Sau xử lý: 9 cột số float64
 - Mỗi số float64 = 8 bytes
-- 179M rows × 9 features × 8 bytes ≈ 12GB + overhead ≈ 33GB
+- 179,702,229 rows × 9 features × 8 bytes ≈ 12.9GB lý thuyết
+- Overhead (delimiters, newlines, formatting): ~18GB → **31GB thực tế**
 
 #### ~~BƯỚC 3: Khởi tạo tâm cụm~~ ❌ **ĐÃ LOẠI BỎ**
 
@@ -404,78 +469,150 @@ Top currencies: Euro (23%), Yuan (7.2%)
 
 #### BƯỚC 3: Upload lên HDFS ☁️
 
-**Mục đích**: Chuyển dữ liệu lên hệ thống phân tán  
+**Mục đích**: Chuyển dữ liệu lên hệ thống phân tán và xóa file tạm cục bộ  
 **File thực thi**: `scripts/spark/setup_hdfs.sh`  
-**Thời gian**: ~5 phút  
-**Input**: 1 file temp cục bộ (hadoop_input_temp.txt)  
-**Output**: Dữ liệu trên HDFS
+**Thời gian thực tế**: **41 giây** (Snapshot 29/10/2025 21:22 - 21:22:41)  
+**Input**: File temp cục bộ `hadoop_input_temp.txt` (31GB)  
+**Output**: Dữ liệu trên HDFS tại `/user/spark/hi_large/input/hadoop_input.txt`
 
-**Các bước thực hiện**:
-1. Kiểm tra HDFS đang chạy: `hdfs dfsadmin -report`
-2. Tạo thư mục: `hdfs dfs -mkdir -p /user/spark/hi_large/input`
-3. Upload input: `hdfs dfs -put hadoop_input_temp.txt /user/.../input/`
-4. **XÓA file temp cục bộ**: `rm -rf data/processed/*`
-5. Verify: Kiểm tra kích thước file trên HDFS
+**Chi tiết các bước thực hiện**:
 
-**🔒 Tuân thủ quy định**:
-- Sau bước này, KHÔNG còn dữ liệu lớn ở máy cục bộ
-- Chỉ tồn tại trên HDFS (phân tán, an toàn)
-- Nếu cần, có thể tải lại từ HDFS
+1. **Kiểm tra HDFS đang chạy**
+   - Chạy: `hdfs dfsadmin -report`
+   - Kết quả: HDFS có thể truy cập
+
+2. **Tìm file dữ liệu tạm**
+   - Kiểm tra: `/home/ultimatebrok/Downloads/Final/01_data/processed/hadoop_input_temp.txt`
+   - Xác nhận: File tồn tại (31GB)
+
+3. **Tạo thư mục HDFS**
+   - Lệnh: `hdfs dfs -mkdir -p /user/spark/hi_large/input`
+   - Mục đích: Chuẩn bị thư mục đích
+
+4. **Dọn dẹp dữ liệu cũ trong HDFS** (nếu có)
+   - Xóa: `/user/spark/hi_large/input/hadoop_input.txt` (nếu tồn tại)
+   - Xóa: `/user/spark/hi_large/output_centroids` (nếu tồn tại)
+
+5. **Upload dữ liệu lên HDFS**
+   - Nguồn: `/home/ultimatebrok/Downloads/Final/01_data/processed/hadoop_input_temp.txt`
+   - Đích: `/user/spark/hi_large/input/hadoop_input.txt`
+   - Thời gian upload: ~35-40 giây (31GB qua mạng nội bộ)
+
+6. **XÓA file tạm cục bộ** ⚠️ **QUAN TRỌNG**
+   - Lệnh: `rm -rf data/processed/*`
+   - Kết quả: File 31GB đã được xóa khỏi máy cục bộ
+   - **Lý do**: Tuân thủ quy định bảo mật - không lưu dữ liệu lớn local
+
+7. **Xác minh upload**
+   - Kiểm tra kích thước trên HDFS: `hdfs dfs -du -h /user/spark/hi_large/input/`
+   - Kết quả: **31.0 GB** (33,282,391,568 bytes)
+   - Đường dẫn HDFS: `hdfs://localhost:9000/user/spark/hi_large/input/hadoop_input.txt`
+
+**🔒 Tuân thủ quy định bảo mật**:
+- ✅ Sau bước này, **KHÔNG còn** dữ liệu lớn (31GB) ở máy cục bộ
+- ✅ Chỉ tồn tại trên HDFS (phân tán, an toàn, có replication)
+- ✅ File temp đã được xóa tự động
+- 📝 Lưu ý: MLlib sẽ tự động khởi tạo centroids với k-means++ (không cần file centroids.txt nữa)
+
+**Cấu trúc HDFS sau bước 3**:
+```
+/user/spark/hi_large/
+├── input/
+│   └── hadoop_input.txt    (31.0 GB - dữ liệu đã xử lý)
+├── centroids.txt            (437 bytes - tâm cụm cũ, không dùng nữa)
+└── output_centroids/        (sẽ được tạo ở bước 4)
+```
 
 #### BƯỚC 4: Chạy K-means trên Spark 🚀
 
-**Mục đích**: Phân cụm 179 triệu giao dịch bằng **MLlib K-means**  
+**Mục đích**: Phân cụm 179 triệu giao dịch bằng **MLlib K-means với k-means++**  
 **File thực thi**: `scripts/spark/run_spark.sh` + `kmeans_spark.py`  
-**Thời gian**: 10-25 phút (nhanh hơn 30-50% nhờ MLlib!)  
-**Input**: Dữ liệu từ HDFS  
-**Output**: Tâm cụm cuối cùng trên HDFS
+**Thời gian thực tế**: **6 phút 5 giây** (365.8s, Snapshot 29/10/2025 21:22:30 - 21:28:27)  
+**Input**: `hdfs://localhost:9000/user/spark/hi_large/input/hadoop_input.txt` (31GB)  
+**Output**: `hdfs://localhost:9000/user/spark/hi_large/output_centroids/` (5 tâm cụm)
 
-**MLlib K-means với k-means++ initialization**:
-```
-KHỞ TẠO (TỰ ĐỘNG bởi MLlib):
-  - K=5 tâm cụm
-  - Sử dụng k-means++ (thông minh, không random)
-  - Max iterations = 15
-  - Tối ưu Catalyst + Tungsten engine
+**Cấu hình Spark cluster**:
+- **Spark version**: 4.0.1
+- **Java version**: 17.0.16
+- **Chế độ**: Standalone cluster (local)
+- **Số executor**: 4 workers
+- **Executor cores**: 4 cores/worker (tổng 16 cores)
+- **Executor memory**: 8GB/worker (tổng 32GB RAM)
+- **Driver memory**: 8GB
+- **Spark UI**: `http://192.168.1.10:4040` (có thể theo dõi tiến trình)
 
-LẶP LẠI 15 LẦN:
-  1. Gán mỗi giao dịch vào cụm gần nhất
-     - Tính khoảng cách Euclidean đến 5 tâm cụm
-     - Chọn cụm có khoảng cách nhỏ nhất
+**Chi tiết 5 bước xử lý**:
+
+**Bước 4.1/5: Đọc dữ liệu từ HDFS** 📂
+- Thời gian: **58.2 giây** (21:22:35 - 21:23:33)
+- Dữ liệu đọc: 179,702,229 bản ghi từ file 31GB trên HDFS
+- Định dạng: CSV không header, 9 cột số (features đã normalized)
+
+**Bước 4.2/5: Tạo vector đặc trưng** 🔧
+- Thời gian: **63.1 giây** (21:23:33 - 21:24:36)
+- Công việc:
+  - Sử dụng `VectorAssembler` để ghép 9 cột thành 1 vector
+  - Cache vào bộ nhớ/đĩa để tăng tốc các iteration tiếp theo
+  - Kết quả: 179,702,229 vector đặc trưng
+
+**Bước 4.3/5: Cấu hình K-means** 🎯
+- Thời gian: **0.1 giây**
+- Tham số:
+  - `K = 5` (số cụm)
+  - `MaxIter = 15` (số vòng lặp tối đa)
+  - `Seed = 42` (tái tạo kết quả)
+  - `Tol = 0.0001` (ngưỡng hội tụ)
+  - `InitMode = "k-means||"` (**k-means++ tự động** - không cần khởi tạo thủ công)
+
+**Bước 4.4/5: Huấn luyện K-means** 🚀
+- Thời gian: **230.8 giây (3 phút 50.8 giây)** - chiếm 63% tổng thời gian bước 4
+- Quá trình:
+  ```
+  MLlib K-means tự động khởi tạo với k-means++:
+    1. Chọn ngẫu nhiên 1 điểm làm tâm đầu tiên
+    2. Chọn các tâm tiếp theo với xác suất tỉ lệ với bình phương 
+       khoảng cách đến tâm gần nhất (thông minh hơn random)
   
-  2. Cập nhật tâm cụm
-     - Tính trung bình tất cả điểm trong mỗi cụm
-     - Tâm cụm mới = trung bình các điểm
-  
-  3. Kiểm tra hội tụ
-     - Tính độ dịch chuyển tâm cụm
-     - Nếu < threshold → Dừng lại
+  Lặp lại 15 lần:
+    Iteration 1-15:
+      a) Assign: Gán mỗi điểm vào cụm gần nhất (Euclidean distance)
+      b) Update: Cập nhật tâm cụm = trung bình các điểm trong cụm
+      c) Check convergence: Nếu shift < Tol (0.0001) → dừng sớm
+  ```
+- Tối ưu hóa:
+  - **Catalyst Optimizer**: Tối ưu query plan
+  - **Tungsten Execution Engine**: Thực thi nhanh trong bộ nhớ
+  - **Adaptive Query Execution (AQE)**: Tự động điều chỉnh số partitions
 
-KẾT QUẢ:
-  - 5 tâm cụm cuối cùng (tốt hơn random init)
-  - Mỗi cụm chứa bao nhiêu điểm
-  - Hội tụ nhanh hơn (~10-12 iterations thay vì 15)
-```
+**Kết quả huấn luyện**:
+- **Số vòng lặp thực tế**: 15 (đạt max iterations, chưa hội tụ sớm)
+- **WSSSE (Within-Set Sum of Squared Errors)**: 961,278,012.73
+- **Trung bình SSE/điểm**: 5.349283
+- **Chất lượng**: Tốt - các cụm phân tách rõ ràng
 
-**Quá trình hội tụ (từ log thực tế)**:
-```
-Iteration  1: Centroid shift = 2.232  (chưa ổn định)
-Iteration  2: Centroid shift = 1.409
-Iteration  5: Centroid shift = 0.383
-Iteration 10: Centroid shift = 0.046
-Iteration 15: Centroid shift = 0.010  (đã hội tụ ✓)
-```
+**Bước 4.5/5: Lưu tâm cụm vào HDFS** 💾
+- Thời gian: **0.8 giây**
+- Đường dẫn: `hdfs://localhost:9000/user/spark/hi_large/output_centroids/`
+- Kích thước: ~4KB (5 dòng, mỗi dòng 9 giá trị float)
 
-**Phân phối kết quả (Snapshot 29/10/2025 21:32)**:
-```
-Cluster 0:  36,926,395 giao dịch (20.55%)  ← Cụm trung bình
-Cluster 1:  69,939,082 giao dịch (38.92%)  ← Lớn nhất
-Cluster 2:  68,931,713 giao dịch (38.36%)  ← Lớn thứ 2
-Cluster 3:          18 giao dịch ( 0.00%)  ← Outlier cực lớn!
-Cluster 4:   3,905,021 giao dịch ( 2.17%)  ← Cụm nhỏ nhất
+**Phân tích kết quả** (từ log):
+- Thời gian: **3.7 giây** (21:28:28 - 21:28:31)
+- Phân phối cụm:
+  ```
+  Cluster 0: 36,926,397 điểm (20.55%) ██████████
+  Cluster 1: 69,939,093 điểm (38.92%) ███████████████████ ← Lớn nhất
+  Cluster 2: 68,931,700 điểm (38.36%) ███████████████████ ← Lớn thứ 2
+  Cluster 3: 18 điểm (0.00%)          █ ← Outlier cực lớn!
+  Cluster 4: 3,905,021 điểm (2.17%)   █ ← Cụm nhỏ
+  ```
 
-Tổng: 179,702,229 giao dịch (100%)
-```
+**Tổng thời gian bước 4: 5.9 phút (365.8s)**
+
+**Nhận xét về hiệu suất**:
+- ✅ Nhanh hơn 30-50% so với RDD-based K-means (ước tính 10-25 phút)
+- ✅ MLlib tối ưu tốt với Catalyst + Tungsten
+- ✅ K-means++ khởi tạo thông minh giúp chất lượng tốt hơn
+- ⚠️ Chưa hội tụ sớm (phải chạy đủ 15 iterations) - có thể cần tune tolerance
 
 #### BƯỚC 5: Tải kết quả về 📥
 
@@ -497,66 +634,202 @@ Tổng: 179,702,229 giao dịch (100%)
 
 #### BƯỚC 6: Gán nhãn cụm cho từng giao dịch 🏷️
 
-**Mục đích**: Xác định mỗi giao dịch thuộc cụm nào  
+**Mục đích**: Xác định mỗi giao dịch thuộc cụm nào bằng cách tính khoảng cách Euclidean  
 **File thực thi**: `scripts/polars/assign_clusters_polars.py`  
-**Thời gian**: ~10 phút  
+**Thời gian thực tế**: **3 phút 14 giây** (194s, Snapshot 29/10/2025 21:28:31 - 21:31:45)  
 **Input**: 
-  - CSV gốc từ HDFS (streaming)
-  - 5 tâm cụm từ bước 6  
-**Output**: `data/results/clustered_results.txt`
+  - File normalized từ HDFS: `/user/spark/hi_large/input/hadoop_input.txt` (31GB, 179M dòng)
+  - 5 tâm cụm từ bước 5: `data/results/final_centroids.txt`  
+**Output**: `data/results/clustered_results.txt` (342.75 MB, chứa cluster_id cho mỗi giao dịch)
 
-**Thuật toán**:
+**Chi tiết quy trình xử lý**:
+
+**Bước 6.1: Đọc tâm cụm cuối cùng**
+- File: `data/results/final_centroids.txt`
+- Kết quả: Load 5 tâm cụm, mỗi tâm có 9 đặc trưng
+- Thời gian: < 1 giây
+
+**Bước 6.2: Đọc dữ liệu từ HDFS (Streaming)**
+- Đường dẫn: `/user/spark/hi_large/input/hadoop_input.txt`
+- Cách đọc: **Streaming từ HDFS** - không load toàn bộ vào RAM
+- Kết quả: 179,702,229 bản ghi (đã normalized, 9 features)
+- Thời gian: ~30-40 giây
+
+**Bước 6.3: Chuyển sang NumPy và tính khoảng cách** 🔢
+- Dữ liệu: 179,702,229 dòng × 9 cột
+- Tâm cụm: 5 cụm × 9 đặc trưng
+- Phương pháp: **Batch Processing** với NumPy vectorization
+
+**Thuật toán tính khoảng cách (Batch Processing)**:
 ```python
-FOR mỗi giao dịch:
-    distances = []
-    FOR mỗi tâm cụm (5 cụm):
-        d = euclidean_distance(giao_dịch, tâm_cụm)
-        distances.append(d)
+# Xử lý từng batch 1 triệu giao dịch
+BATCH_SIZE = 1_000_000
+FOR batch trong [0, 179]:
+    # Lấy batch (1M rows × 9 features)
+    batch_data = get_batch(batch)
     
-    cluster_id = argmin(distances)  # Chọn cụm gần nhất
-    ghi_kết_quả(giao_dịch, cluster_id)
+    # Tính khoảng cách Euclidean đến 5 tâm cụm
+    # Sử dụng vectorization của NumPy
+    distances = sqrt(sum((batch_data[:, None, :] - centroids[None, :, :])**2, axis=2))
+    # Shape: (1M, 5) - mỗi hàng là khoảng cách đến 5 cụm
+    
+    # Chọn cụm gần nhất
+    cluster_labels = argmin(distances, axis=1)
+    # Shape: (1M,) - mỗi giao dịch có 1 cluster_id
+    
+    # Lưu kết quả batch
+    write_results(cluster_labels)
 ```
 
-**Xử lý batch để tăng tốc**:
-- Không xử lý từng giao dịch
-- Xử lý 1 triệu giao dịch cùng lúc
-- Sử dụng NumPy vectorization
+**Tiến trình xử lý** (từ log):
+```
+Đã xử lý 1,000,000/179,702,229 giao dịch (0.6%)
+Đã xử lý 11,000,000/179,702,229 giao dịch (6.1%)
+Đã xử lý 21,000,000/179,702,229 giao dịch (11.7%)
+Đã xử lý 31,000,000/179,702,229 giao dịch (17.3%)
+Đã xử lý 41,000,000/179,702,229 giao dịch (22.8%)
+Đã xử lý 51,000,000/179,702,229 giao dịch (28.4%)
+Đã xử lý 61,000,000/179,702,229 giao dịch (33.9%)
+Đã xử lý 71,000,000/179,702,229 giao dịch (39.5%)
+Đã xử lý 81,000,000/179,702,229 giao dịch (45.1%)
+Đã xử lý 91,000,000/179,702,229 giao dịch (50.6%)
+Đã xử lý 101,000,000/179,702,229 giao dịch (56.2%)
+Đã xử lý 111,000,000/179,702,229 giao dịch (61.8%)
+Đã xử lý 121,000,000/179,702,229 giao dịch (67.3%)
+Đã xử lý 131,000,000/179,702,229 giao dịch (72.9%)
+Đã xử lý 141,000,000/179,702,229 giao dịch (78.5%)
+Đã xử lý 151,000,000/179,702,229 giao dịch (84.0%)
+Đã xử lý 161,000,000/179,702,229 giao dịch (89.6%)
+Đã xử lý 171,000,000/179,702,229 giao dịch (95.2%)
+Đã xử lý 179,702,229/179,702,229 giao dịch (100.0%)
+```
+
+**Bước 6.4: Lưu kết quả**
+- File: `data/results/clustered_results.txt`
+- Kích thước: **342.75 MB**
+- Định dạng: 1 dòng = 1 cluster_id (số nguyên 0-4)
+- Tổng dòng: 179,702,229 (bằng số giao dịch)
+
+**Phân phối cụm** (xác nhận từ kết quả):
+```
+Cluster 0: 36,926,395 giao dịch (20.55%)
+Cluster 1: 69,939,082 giao dịch (38.92%) ← Lớn nhất
+Cluster 2: 68,931,713 giao dịch (38.36%) ← Lớn thứ 2
+Cluster 3: 18 giao dịch (0.00%)          ← Outlier!
+Cluster 4: 3,905,021 giao dịch (2.17%)
+```
+
+**Tối ưu hóa**:
+- ✅ **NumPy vectorization**: Nhanh hơn Python loop 100-1000x
+- ✅ **Batch processing**: Xử lý 1M rows/batch để tiết kiệm RAM
+- ✅ **Streaming từ HDFS**: Không load toàn bộ vào RAM
+- ✅ **Tổng thời gian**: 3 phút 14 giây cho 179M giao dịch (~58M rows/phút)
 
 #### BƯỚC 7: Phân tích kết quả 📊
 
-**Mục đích**: Tìm cụm có tỷ lệ rửa tiền cao  
+**Mục đích**: Phân tích thống kê chi tiết và xác định cụm có tỷ lệ rửa tiền cao  
 **File thực thi**: `scripts/polars/analyze_polars.py`  
-**Thời gian**: ~2 phút  
-**Input**: `data/results/clustered_results.txt`  
-**Output**: Báo cáo phân tích
+**Thời gian thực tế**: **30 giây** (Snapshot 29/10/2025 21:31:45 - 21:32:15)  
+**Input**: 
+  - `data/results/clustered_results.txt` (342.75 MB, cluster_id cho mỗi giao dịch)
+  - `data/raw/HI-Large_Trans.csv` (16GB, dữ liệu gốc với nhãn rửa tiền)  
+**Output**: Báo cáo phân tích chi tiết
 
-**Các phân tích thực hiện**:
-1. **Kích thước cụm**: Mỗi cụm có bao nhiêu giao dịch?
-2. **Tỷ lệ rửa tiền**: % rửa tiền trong từng cụm
-3. **High-risk clusters**: Cụm nào > 10% rửa tiền?
-4. **Feature averages**: Đặc điểm trung bình mỗi cụm
+**Chi tiết các phân tích thực hiện**:
 
-**Kết quả từ snapshot thực tế (29/10/2025 21:32:29)**:
+**Bước 7.1: Đọc kết quả phân cụm**
+- File: `data/results/clustered_results.txt`
+- Kết quả: Load 179,702,229 nhãn cụm (cluster_id từ 0-4)
+- Thời gian: ~5 giây
+
+**Bước 7.2: Đọc dữ liệu gốc (Lazy Mode)**
+- File: `data/raw/HI-Large_Trans.csv`
+- Cách đọc: **Lazy loading** với Polars - chỉ load metadata, không load toàn bộ vào RAM
+- Mục đích: Gắn cluster_id vào dữ liệu gốc để phân tích
+- Thời gian: ~10 giây
+
+**Bước 7.3: Gắn nhãn cụm vào dữ liệu**
+- Kết quả: Mỗi giao dịch có thêm cột `cluster` (0-4)
+- Thời gian: ~2 giây
+
+**Bước 7.4: Phân tích thống kê**
+
+**1. Kích thước mỗi cụm**:
 ```
-╔══════════╦═════════════╦═══════════════════╦═════════════════╗
-║ Cluster  ║ Giao dịch   ║ Tỷ lệ (%)         ║ Đánh giá        ║
-╠══════════╬═════════════╬═══════════════════╬═════════════════╣
-║    0     ║ 36,926,395  ║ 20.55%           ║ Cụm trung bình ║
-║    1     ║ 69,939,082  ║ 38.92% ← Lớn nhất║ Chủ đạo       ║
-║    2     ║ 68,931,713  ║ 38.36% ← Lớn 2  ║ Chủ đạo       ║
-║    3     ║         18  ║  0.00% ← Outlier║ KIỂM TRA NGAY ║
-║    4     ║  3,905,021  ║  2.17%           ║ Cụm nhỏ       ║
-╚══════════╩═════════════╩═══════════════════╩═════════════════╝
-
-Tổng: 179,702,229 giao dịch (100.00%)
-
-💡 NHẬN XÉT CHI TIẾT:
-- Cluster 0, 1, 2: Chiếm 97.83% tổng giao dịch - đây là các cụm chính
-- Cluster 3: Chỉ 18 giao dịch (0.00001%) - các giao dịch outlier giá trị cực lớn
-- Cluster 4: 2.17% - cụm nhỏ, giao dịch giá trị thấp
-- 🎯 Phân cụm thành công: 2 cụm chính (~39% mỗi cụm) + 3 cụm đặc biệt
-- ✅ Thuật toán MLlib K-means++ đã phân biệt tốt outliers
+Cluster 0: 36,926,395 giao dịch (20.55%)
+Cluster 1: 69,939,082 giao dịch (38.92%) ← Lớn nhất
+Cluster 2: 68,931,713 giao dịch (38.36%) ← Lớn thứ 2
+Cluster 3: 18 giao dịch (0.00%)          ← Outlier cực lớn!
+Cluster 4: 3,905,021 giao dịch (2.17%)   ← Cụm nhỏ
 ```
+
+**2. Tỷ lệ rửa tiền trong từng cụm** (từ snapshot):
+```
+╔══════════╦═════════════╦══════════════╦═════════════════╗
+║ Cluster  ║ Tổng giao dịch ║ Rửa tiền  ║ Tỷ lệ (%)       ║
+╠══════════╬═════════════╬══════════════╬═════════════════╣
+║    0     ║ 36,926,395  ║ 29,920      ║ 0.081%          ║
+║    1     ║ 69,939,082  ║ 78,960      ║ 0.113%          ║
+║    2     ║ 68,931,713  ║ 115,057     ║ 0.167% ← CAO    ║
+║    3     ║ 18           ║ 1           ║ 5.556% ← OUTLIER║
+║    4     ║ 3,905,021   ║ 1,608       ║ 0.041% ← THẤP   ║
+╚══════════╩═════════════╩══════════════╩═════════════════╝
+
+Tổng: 225,546 giao dịch rửa tiền (0.126% tổng số)
+```
+
+**3. Cụm có rủi ro cao (>10% rửa tiền)**:
+```
+⚠️  KIỂM TRA:
+✅ KHÔNG có cụm nào vượt ngưỡng 10%
+   Tất cả các cụm đều trong mức chấp nhận được.
+   
+⚠️  Lưu ý: Cluster 3 có tỷ lệ 5.56% (cao nhất) nhưng chỉ có 18 giao dịch
+   → Đây là các giao dịch outlier với giá trị cực lớn cần kiểm tra thủ công
+```
+
+**4. Đặc trưng trung bình mỗi cụm**:
+```
+╔══════════╦═════════════════════╦═════════════════╦═══════════╗
+║ Cluster  ║ avg_amount_received ║ avg_amount_paid ║ avg_ratio ║
+╠══════════╬═════════════════════╬═════════════════╬═══════════╣
+║    0     ║ 8.62 triệu          ║ 8.63 triệu      ║ 1.01      ║
+║    1     ║ 4.57 triệu          ║ 2.50 triệu      ║ 3.26      ║
+║    2     ║ 4.26 triệu          ║ 2.46 triệu      ║ 1.15      ║
+║    3     ║ 4.24 NGHÌN TỶ      ║ 2.86 NGHÌN TỶ  ║ 21.54     ║ ← OUTLIER!
+║    4     ║ 804                 ║ 804             ║ 1.0       ║
+╚══════════╩═════════════════════╩═════════════════╩═══════════╝
+```
+
+**Nhận xét chi tiết**:
+1. **Cụm nghi ngờ NHẤT: Cluster 3 (5.56% rửa tiền)**
+   - Chỉ có 18 giao dịch nhưng giá trị cực lớn (nghìn tỷ)
+   - Tỷ lệ rửa tiền cao nhất (5.56%)
+   - **Khuyến nghị**: Kiểm tra thủ công ngay lập tức 18 giao dịch này
+
+2. **Cụm an toàn NHẤT: Cluster 4 (0.041% rửa tiền)**
+   - Tỷ lệ thấp nhất trong tất cả các cụm
+   - Giá trị giao dịch nhỏ (~804 đơn vị)
+   - Có thể ưu tiên thấp khi kiểm tra
+
+3. **Các cụm chính (0, 1, 2) an toàn**
+   - Chiếm 97.83% tổng giao dịch
+   - Tỷ lệ rửa tiền: 0.081% - 0.167% (dưới 0.2%)
+   - Tất cả đều trong mức chấp nhận được
+
+4. **Đánh giá tổng thể**: ⚠️ **RỦI RO TRUNG BÌNH**
+   - Tỷ lệ rửa tiền trong mức chấp nhận nhưng cần theo dõi
+   - Không có cụm nào vượt ngưỡng cảnh báo 10%
+   - Cluster 3 cần được kiểm tra kỹ do đặc điểm outlier
+
+**Tổng thời gian bước 7: 30 giây**
+
+**Kết quả cuối cùng**:
+- ✅ Đã phân tích 179,702,229 giao dịch
+- ✅ Phân thành 5 cụm với phân phối rõ ràng
+- ✅ Tỷ lệ rửa tiền: 0.04% - 5.56%
+- ✅ Số cụm rủi ro cao (>10%): 0 (Tốt!)
+- ✅ Xác định được cụm outlier (Cluster 3) cần kiểm tra
 
 ---
 
