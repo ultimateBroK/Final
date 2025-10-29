@@ -1,8 +1,8 @@
-# Polars + PySpark Pipeline
+# 📊 Dự Án Phân Tích Rửa Tiền - K-means Clustering
 
-Pipeline phân tích dữ liệu HI-Large_Trans.csv sử dụng Polars và Apache Spark (PySpark).
+Pipeline phân tích 179 triệu giao dịch sử dụng Polars và Apache Spark (PySpark).
 
-> 📚 Xem thêm: [HƯỚNG DẪN CHẠY](HUONG_DAN_CHAY.md) · [BÁO CÁO](BAO_CAO_TIEU_LUAN.md) · [HADOOP_ALTERNATIVES](docs/HADOOP_ALTERNATIVES.md)
+> 📚 **Xem thêm:** [Báo cáo dự án](BAO_CAO_DU_AN.md) · [Hướng dẫn](03_docs/huong-dan.md) · [Cài đặt](03_docs/cai-dat.md) · [Jupyter](03_docs/jupyter.md)
 
 ## Mục lục
 - [Nâng cấp từ Hadoop sang Spark](#nang-cap)
@@ -33,36 +33,48 @@ Project đã được cập nhật để sử dụng **Apache Spark** thay vì H
 
 ```
 Final/
-├── data/
-│   ├── raw/                    # CSV gốc (HI-Large_Trans.csv)
-│   ├── processed/              # Temp files (tự động xóa sau upload HDFS)
-│   └── results/                # Kết quả từ HDFS (tùy chọn tải về)
-├── docs/
-│   ├── HADOOP_ALTERNATIVES.md  # So sánh các phương pháp clustering
-│   └── Polars_Hadoop_HI_Large.md  # Legacy Hadoop workflow
-├── logs/                       # Pipeline execution logs
-├── scripts/
-│   ├── polars/                 # Data processing với Polars
-│   │   ├── explore_fast.py
-│   │   ├── prepare_polars.py
-│   │   ├── init_centroids.py
-│   │   ├── assign_clusters_polars.py
-│   │   └── analyze_polars.py
-│   ├── spark/                  # PySpark implementation
+├── 01_data/                      # Dữ liệu
+│   ├── raw/                      # CSV gốc (HI-Large_Trans.csv)
+│   ├── processed/                # Temp (tự động xóa sau upload HDFS)
+│   └── results/                  # Kết quả (tải về từ HDFS)
+├── 02_scripts/                   # Scripts
+│   ├── polars/                   # Data processing
+│   │   ├── 01_explore_fast.py
+│   │   ├── 02_prepare_polars.py
+│   │   ├── 04_assign_clusters.py
+│   │   └── 05_analyze.py
+│   ├── spark/                    # PySpark MLlib K-means
 │   │   ├── setup_hdfs.sh
 │   │   ├── run_spark.sh
 │   │   ├── kmeans_spark.py
 │   │   └── download_from_hdfs.sh
-│   ├── pipeline/               # Pipeline orchestration
+│   ├── pipeline/                 # Orchestration
 │   │   ├── full_pipeline_spark.sh
 │   │   ├── clean_spark.sh
 │   │   └── reset_pipeline.sh
-│   └── setup/                  # Installation
-│       └── install_spark.sh
-├── archive/
-│   └── hadoop/                 # Legacy MapReduce code
-├── CHANGELOG.md
-└── README.md
+│   ├── setup/                    # Installation
+│   │   ├── install_spark.sh
+│   │   └── setup_jupyter_kernel.sh
+│   └── data/                     # Utilities
+│       ├── snapshot_results.py
+│       └── visualize_results.py
+├── 03_docs/                      # Tài liệu
+│   ├── cai-dat.md                # Hướng dẫn cài đặt
+│   ├── cau-truc.md               # Cấu trúc dự án
+│   ├── hadoop-alternatives.md    # So sánh phương pháp
+│   ├── huong-dan.md              # Hướng dẫn chạy
+│   ├── jupyter.md                # Setup Jupyter
+│   ├── migration.md              # Migration guide
+│   └── tong-quan.md              # Tổng quan dự án
+├── 04_logs/                      # Logs
+├── 05_snapshots/                 # Snapshots
+├── 06_visualizations/            # Visualization
+│   ├── phan-tich.ipynb           # Notebook phân tích
+│   └── README.md
+├── BAO_CAO_DU_AN.md              # Báo cáo chính (gộp)
+├── changelog.md                  # Lịch sử thay đổi
+├── README.md                     # File này
+└── requirements.txt              # Dependencies
 ```
 
 <a id="cai-dat"></a>
@@ -97,7 +109,7 @@ pip install polars numpy pyspark
 Đặt file CSV gốc vào thư mục raw:
 
 ```bash
-cp /path/to/HI-Large_Trans.csv data/raw/
+cp /path/to/HI-Large_Trans.csv 01_data/raw/
 ```
 
 <a id="hdfs-workflow"></a>
@@ -110,7 +122,8 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 ```text
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
 │ Raw CSV     │ ───> │ Temp Files   │ ───> │ HDFS        │
-│ (data/raw/) │      │ (tạm thời)   │      │ (permanent) │
+│ (01_data/   │      │ (tạm thời)   │      │ (permanent) │
+│  raw/)      │      │              │      │             │
 └─────────────┘      └──────────────┘      └─────────────┘
                             │                      │
                             │ (auto delete)        │
@@ -121,11 +134,11 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 
 ### Cách thức hoạt động:
 
-1. **Polars** đọc CSV gốc và tạo temp files trong `data/processed/`
+1. **Polars** đọc CSV gốc và tạo temp files trong `01_data/processed/`
 2. **setup_hdfs.sh** upload files lên HDFS và **tự động xóa** temp files
 3. **Spark** xử lý dữ liệu trực tiếp trên HDFS (distributed)
 4. Kết quả được lưu trên HDFS tại `/user/spark/hi_large/`
-5. *(Tùy chọn)* Tải kết quả nhỏ về `data/results/` để phân tích
+5. *(Tùy chọn)* Tải kết quả nhỏ về `01_data/results/` để phân tích
 
 ### Lưu ý
 
@@ -141,61 +154,65 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 
 ```bash
 # Chạy toàn bộ pipeline tự động
-./scripts/pipeline/full_pipeline_spark.sh
+./02_scripts/pipeline/full_pipeline_spark.sh
 ```
 
 Pipeline sẽ tự động:
 1. Khám phá dữ liệu với Polars
 2. Chuẩn bị features và normalize
-3. Khởi tạo centroids
-4. Upload lên HDFS (và xóa temp files)
-5. Chạy K-means trên Spark
-6. Tải kết quả và phân tích
+3. Upload lên HDFS (và xóa temp files)
+4. Chạy K-means MLlib trên Spark (⚡ k-means++)
+5. Tải kết quả và phân tích
 
 ### Manual Steps (nếu cần debug)
 
 ```bash
 # 1. Khám phá dữ liệu
-python scripts/polars/explore_fast.py
+python 02_scripts/polars/01_explore_fast.py
 
 # 2. Chuẩn bị features (tạo temp files)
-python scripts/polars/prepare_polars.py
+python 02_scripts/polars/02_prepare_polars.py
 
-# 3. Khởi tạo centroids (tạo temp files)
-python scripts/polars/init_centroids.py
+# 3. Upload lên HDFS và XÓA temp files
+02_scripts/spark/setup_hdfs.sh
 
-# 4. Upload lên HDFS và XÓA temp files
-scripts/spark/setup_hdfs.sh
+# 4. Chạy Spark MLlib K-means trên HDFS (⚡ k-means++ auto)
+02_scripts/spark/run_spark.sh
 
-# 5. Chạy Spark K-means trên HDFS
-scripts/spark/run_spark.sh
+# 5. (Tùy chọn) Tải kết quả về
+02_scripts/spark/download_from_hdfs.sh
 
-# 6. (Tùy chọn) Tải kết quả về
-scripts/spark/download_from_hdfs.sh
+# 6. Gán clusters
+python 02_scripts/polars/04_assign_clusters.py
 
-# 7. Gán clusters
-python scripts/polars/assign_clusters_polars.py
+# 7. Phân tích kết quả
+python 02_scripts/polars/05_analyze.py
 
-# 8. Phân tích kết quả
-python scripts/polars/analyze_polars.py
+# 8. (Tùy chọn) Tạo snapshot kết quả
+python 02_scripts/data/snapshot_results.py
+
+# 9. (Tùy chọn) Trực quan hóa
+python 02_scripts/data/visualize_results.py
 ```
 
-### Logs
+### Logs & Snapshots
 
-Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
+Logs được lưu tại `04_logs/pipeline_log_*.md` với timestamp.
+Snapshots được lưu tại `05_snapshots/snapshot_*/` với timestamp.
+Visualization được lưu tại `06_visualizations/`.
 
 <a id="don-dep"></a>
 ## Dọn dẹp Project
 
 ```bash
 # Xóa tất cả temp files, logs, và checkpoints
-./scripts/pipeline/clean_spark.sh
+./02_scripts/pipeline/clean_spark.sh
 
 # Reset chỉ pipeline checkpoints (giữ lại data)
-./scripts/pipeline/reset_pipeline.sh
+./02_scripts/pipeline/reset_pipeline.sh
 
 # Sau khi clean, chạy lại pipeline
-./scripts/pipeline/full_pipeline_spark.sh
+./02_scripts/pipeline/full_pipeline_spark.sh
 ```
 
 <a id="du-lieu-hdfs"></a>
@@ -207,8 +224,7 @@ Logs được lưu tại `logs/pipeline_log_*.md` với timestamp.
 /user/spark/hi_large/
 ├── input/
 │   └── hadoop_input.txt      # Dữ liệu đã normalize (~33GB)
-├── centroids.txt             # K centroids ban đầu
-└── output_centroids/         # Final centroids từ Spark
+└── output_centroids/         # Final centroids từ MLlib (k-means++)
     └── part-00000
 ```
 
@@ -227,23 +243,37 @@ hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 
 ### Download kết quả (tùy chọn)
 
-Kết quả nhỏ được tải về `data/results/` để phân tích local.
+Kết quả nhỏ được tải về `01_data/results/` để phân tích local.
+
+### Snapshots & Visualizations
+
+```bash
+# Tạo snapshot kết quả hiện tại
+python 02_scripts/data/snapshot_results.py
+
+# Xem danh sách snapshots
+python 02_scripts/data/snapshot_results.py --list
+
+# Tạo biểu đồ trực quan
+python 02_scripts/data/visualize_results.py
+```
 
 <a id="chi-tiet-steps"></a>
 ## Chi tiết Pipeline Steps
 
 | Bước | Script | Mô tả | Thời gian |
 |------|--------|-------|----------|
-| 1 | `scripts/polars/explore_fast.py` | Khám phá dữ liệu nhanh | ~30s |
-| 2 | `scripts/polars/prepare_polars.py` | Feature engineering & normalize | ~10 phút |
-| 3 | `scripts/polars/init_centroids.py` | Khởi tạo K centroids | ~30s |
-| 4 | `scripts/spark/setup_hdfs.sh` | Upload HDFS & xóa temp files | ~5 phút |
-| 5 | `scripts/spark/run_spark.sh` | K-means trên Spark (HDFS) | ~15-30 phút |
-| 6 | `scripts/spark/download_from_hdfs.sh` | Tải centroids từ HDFS | ~30s |
-| 7 | `scripts/polars/assign_clusters_polars.py` | Gán clusters cho data | ~10 phút |
-| 8 | `scripts/polars/analyze_polars.py` | Phân tích & báo cáo | ~2 phút |
+| 1 | `02_scripts/polars/01_explore_fast.py` | Khám phá dữ liệu nhanh | ~30s |
+| 2 | `02_scripts/polars/02_prepare_polars.py` | Feature engineering & normalize | ~10 phút |
+| 3 | `02_scripts/spark/setup_hdfs.sh` | Upload HDFS & xóa temp files | ~5 phút |
+| 4 | `02_scripts/spark/run_spark.sh` | K-means MLlib (⚡ k-means++) | ~10-15 phút |
+| 5 | `02_scripts/spark/download_from_hdfs.sh` | Tải centroids từ HDFS | ~30s |
+| 6 | `02_scripts/polars/04_assign_clusters.py` | Gán clusters cho data | ~10 phút |
+| 7 | `02_scripts/polars/05_analyze.py` | Phân tích & báo cáo | ~2 phút |
+| 8 | `02_scripts/data/snapshot_results.py` | Snapshot kết quả | ~10s |
+| 9 | `02_scripts/data/visualize_results.py` | Tạo biểu đồ trực quan | ~2 phút |
 
-**Tổng thời gian**: ~40-60 phút (tùy cluster configuration)
+**Tổng thời gian**: ~30-40 phút (⚡ Nhanh hơn 30-50% nhờ MLlib!)
 
 <a id="kien-truc"></a>
 ## Kiến trúc hệ thống
@@ -257,19 +287,21 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
        │                   │                  │                │
    ┌───▼────┐         ┌───▼────┐        ┌───▼────┐       ┌───▼────┐
    │16GB CSV│────────>│ Temp   │───────>│ 33GB   │──────>│K-means │
-   │data/raw│         │ Files  │ upload │Storage │ read  │Cluster │
+   │01_data/│         │ Files  │ upload │Storage │ read  │Cluster │
+   │  raw/  │         │        │        │        │       │        │
    └────────┘         └────────┘        └────────┘       └────────┘
                            │                                   │
                            │ (auto delete)                     │
                            ▼                                   ▼
                       [Xóa ngay]                       [Results HDFS]
                                                               │
-                                                              │
-                                                              ▼
-                                                      ┌────────────────┐
-                                                      │  data/results/ │
-                                                      │  (small files) │
-                                                      └────────────────┘
+                        ┌─────────────────────────────────────┤
+                        │                                     │
+                        ▼                                     ▼
+               ┌─────────────────┐                  ┌─────────────────┐
+               │ 01_data/results/│                  │  05_snapshots/  │
+               │  (small files)  │                  │  06_visualizations/│
+               └─────────────────┘                  └─────────────────┘
 ```
 
 ### Đặc điểm
@@ -306,4 +338,4 @@ Kết quả nhỏ được tải về `data/results/` để phân tích local.
 <a id="phuong-phap-khac"></a>
 ### So sánh với các phương pháp khác:
 
-Xem chi tiết tại: [`docs/HADOOP_ALTERNATIVES.md`](docs/HADOOP_ALTERNATIVES.md)
+Xem chi tiết tại: [`03_docs/HADOOP_ALTERNATIVES.md`](03_docs/HADOOP_ALTERNATIVES.md)

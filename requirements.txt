@@ -1,0 +1,48 @@
+# Requirements for Money Laundering Detection Project
+# Install: pip install -r requirements.txt
+
+# ========================================
+# CORE DATA PROCESSING
+# ========================================
+polars>=0.19.0              # Fast DataFrame library
+numpy>=1.24.0               # Numerical computing
+pandas>=2.1.0               # Data manipulation (for compatibility)
+pyarrow>=14.0.0            # Columnar data format
+
+# ========================================
+# BIG DATA & SPARK
+# ========================================
+pyspark>=3.5.0             # Apache Spark for distributed computing
+
+# ========================================
+# JUPYTER & NOTEBOOKS
+# ========================================
+jupyter>=1.0.0             # Jupyter metapackage
+jupyterlab>=4.0.0          # JupyterLab interface
+notebook>=7.0.0            # Classic Notebook
+ipywidgets>=8.0.0          # Interactive widgets
+ipykernel>=6.25.0          # IPython kernel
+
+# ========================================
+# VISUALIZATION - INTERACTIVE
+# ========================================
+plotly>=5.17.0             # Interactive plots
+kaleido>=0.2.1             # Static image export for Plotly
+
+# ========================================
+# VISUALIZATION - STATIC
+# ========================================
+matplotlib>=3.8.0          # Plotting library
+seaborn>=0.13.0            # Statistical visualization
+
+# ========================================
+# UTILITIES
+# ========================================
+tqdm>=4.66.0               # Progress bars (optional but useful)
+
+# ========================================
+# DEVELOPMENT (Optional)
+# ========================================
+# black>=23.0.0            # Code formatter
+# flake8>=6.0.0            # Linter
+# pytest>=7.4.0            # Testing framework

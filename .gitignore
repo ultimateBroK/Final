@@ -1,14 +1,42 @@
-data/raw/HI-Large_Trans.csv
+### Project data and outputs
+# Raw and processed data
+01_data/raw/
+01_data/processed/
+01_data/results/
 
-.venv
+# Logs and snapshots
+04_logs/
+05_snapshots/
 
-.vscode
-.pipeline_checkpoints
-# logs/
-data/processed/
-data/results/
-# keep docs tracked
+# Visualization artifacts (keep README.md and notebooks)
+06_visualizations/latest_summary.txt
+06_visualizations/visual_report_*.md
+06_visualizations/thong_ke_cum.csv
+
+### Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+
+### Notebooks
+.ipynb_checkpoints/
+
+### Environments
+.venv/
+venv/
+env/
+
+### IDE / OS
+.vscode/
+.idea/
 .DS_Store
+
+### Env files
 .env
 .env.local
 .env.development.local
