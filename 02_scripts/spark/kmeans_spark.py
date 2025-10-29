@@ -29,13 +29,12 @@ Kỹ thuật: Spark MLlib KMeans, k-means++ init, adaptive execution
 import sys
 import time
 from datetime import datetime
-import numpy as np
 from pyspark.sql import SparkSession
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.feature import VectorAssembler
 from pyspark import StorageLevel
 
-def run_kmeans(input_path, output_path, k=5, max_iterations=15, use_hdfs=True):
+def run_kmeans(input_path, output_path, k=5, max_iterations=15, seed=42, tol=1e-4, use_hdfs=True):
     """
     Chạy thuật toán K-means clustering với Spark MLlib
     
@@ -83,8 +82,8 @@ def run_kmeans(input_path, output_path, k=5, max_iterations=15, use_hdfs=True):
     log_with_time(f"📅 Đầu vào: {input_path}")
     log_with_time(f"📊 Số cụm: {k}")
     log_with_time(f"🔄 Số lần lặp tối đa: {max_iterations}")
-    log_with_time(f"✅ K-means++ initialization")
-    log_with_time(f"✅ Catalyst optimizer + Tungsten")
+    log_with_time("✅ K-means++ initialization")
+    log_with_time("✅ Catalyst optimizer + Tungsten")
     print()
     
     # Đọc dữ liệu từ HDFS
@@ -130,10 +129,10 @@ def run_kmeans(input_path, output_path, k=5, max_iterations=15, use_hdfs=True):
         .setInitMode("k-means||") \
         .setFeaturesCol("features") \
         .setPredictionCol("cluster") \
-        .setSeed(42) \
-        .setTol(1e-4)
+        .setSeed(seed) \
+        .setTol(tol)
     
-    log_with_time(f"   ✅ Model configured: K={k}, MaxIter={max_iterations}, Seed=42", step_start)
+    log_with_time(f"   ✅ Model configured: K={k}, MaxIter={max_iterations}, Seed={seed}, Tol={tol}", step_start)
     print()
     
     # Train model
@@ -216,11 +215,15 @@ if __name__ == "__main__":
     output_path = sys.argv[2]
     k = int(sys.argv[3]) if len(sys.argv) > 3 else 5
     max_iterations = int(sys.argv[4]) if len(sys.argv) > 4 else 15
+    seed = int(sys.argv[5]) if len(sys.argv) > 5 else 42
+    tol = float(sys.argv[6]) if len(sys.argv) > 6 else 1e-4
     
     print(f"HDFS Đầu vào: {input_path}")
     print(f"HDFS Đầu ra: {output_path}")
     print(f"Số cụm K: {k}")
     print(f"Max iterations: {max_iterations}")
+    print(f"Seed: {seed}")
+    print(f"Tol: {tol}")
     print()
     
-    run_kmeans(input_path, output_path, k, max_iterations, use_hdfs=True)
+    run_kmeans(input_path, output_path, k, max_iterations, seed, tol, use_hdfs=True)

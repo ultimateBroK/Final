@@ -9,6 +9,8 @@ Khi chạy bước 4 (K-means training), bạn sẽ thấy output chi tiết the
 [14:32:15] 📅 Đầu vào: hdfs://localhost:9000/user/spark/hi_large/input/hadoop_input.txt
 [14:32:15] 📊 Số cụm: 5
 [14:32:15] 🔄 Số lần lặp tối đa: 15
+[14:32:15] 🌱 Seed: 42
+[14:32:15] 🎚️ Tol: 1e-4
 [14:32:15] ✅ K-means++ initialization
 [14:32:15] ✅ Catalyst optimizer + Tungsten
 
@@ -20,7 +22,7 @@ Khi chạy bước 4 (K-means training), bạn sẽ thấy output chi tiết the
 [14:37:18] ✅ Đã tạo 179,702,229 feature vectors (⏱️  155.2s)
 
 [14:37:19] 🎯 BƯỚC 3/5: Khởi tạo K-means với k-means++ initialization...
-[14:37:19]    ✅ Model configured: K=5, MaxIter=15, Seed=42 (⏱️  0.2s)
+[14:37:19]    ✅ Model configured: K=5, MaxIter=15, Seed=42, Tol=1e-4 (⏱️  0.2s)
 
 [14:37:19] 🚀 BƯỚC 4/5: Đang train K-means (tối đa 15 iterations)...
 [14:37:19]    💻 Sử dụng Catalyst optimizer + Tungsten execution engine

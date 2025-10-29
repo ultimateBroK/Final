@@ -27,6 +27,7 @@ LOGS_DIR="$ROOT_DIR/04_logs"
 DATA_DIR="$ROOT_DIR/01_data"
 SNAPSHOTS_DIR="$ROOT_DIR/05_snapshots"
 VIZ_DIR="$ROOT_DIR/06_visualizations"
+TOTAL_STEPS=7
 
 # Flags
 RESET_MODE=false
@@ -34,6 +35,10 @@ DRY_RUN=false
 FROM_STEP=1
 SKIP_STEPS=()
 VERBOSE=true
+SEED=""
+K_OVERRIDE=""
+MAX_ITER_OVERRIDE=""
+z_OVERRIDE=""
 
 # ==================== PARSE ARGUMENTS ====================
 while [[ $# -gt 0 ]]; do
@@ -54,6 +59,22 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             shift
             ;;
+        --seed)
+            SEED="$2"
+            shift 2
+            ;;
+        --k)
+            K_OVERRIDE="$2"
+            shift 2
+            ;;
+        --max-iter)
+            MAX_ITER_OVERRIDE="$2"
+            shift 2
+            ;;
+        --tol)
+            TOL_OVERRIDE="$2"
+            shift 2
+            ;;
         --help|-h)
             cat << EOF
 🚀 POLARS + PYSPARK K-MEANS PIPELINE - SIÊU VIỆT EDITION
@@ -65,6 +86,10 @@ OPTIONS:
   --from-step N     Bắt đầu từ bước N (1-7)
   --skip-step N     Bỏ qua bước N
   --dry-run         Chỉ hiển thị kế hoạch
+  --seed N          Thiết lập seed cho KMeans (ví dụ 42)
+  --k N             Số cụm K cho KMeans (ví dụ 5)
+  --max-iter N      Số vòng lặp tối đa KMeans (ví dụ 15)
+  --tol FLOAT       Ngưỡng hội tụ (ví dụ 1e-4)
   --help, -h        Hiển thị hướng dẫn này
 
 VÍ DỤ:
@@ -106,6 +131,21 @@ mkdir -p "$CHECKPOINT_DIR"
 log() {
     echo "$1" | tee -a "$LOG_FILE"
 }
+
+# In ra terminal có màu (không ghi vào log)
+term() {
+    # Điều khiển màu: chỉ in ra terminal để tránh escape vào log
+    # Sử dụng >&2 để tách khỏi tee của log()
+    echo -e "$1" >&2
+}
+
+# Màu cơ bản cho terminal
+COLOR_RESET='\033[0m'
+COLOR_BOLD='\033[1m'
+COLOR_BLUE='\033[34m'
+COLOR_GREEN='\033[32m'
+COLOR_YELLOW='\033[33m'
+COLOR_RED='\033[31m'
 
 # Hàm kiểm tra xem bước đã hoàn thành chưa
 is_step_completed() {
@@ -196,15 +236,15 @@ show_progress() {
         fi
     done
     
-    local percent=$((completed * 100 / 7))
+    local percent=$((completed * 100 / TOTAL_STEPS))
     local bar_length=20
-    local filled=$((completed * bar_length / 7))
+    local filled=$((completed * bar_length / TOTAL_STEPS))
     local empty=$((bar_length - filled))
     
-    printf "   Tiến độ: [" >&2
+    printf "${COLOR_BOLD}${COLOR_BLUE}   Tiến độ:${COLOR_RESET} [" >&2
     printf "%${filled}s" | tr ' ' '█' >&2
     printf "%${empty}s" | tr ' ' '░' >&2
-    printf "] %d/8 (%d%%)\n" $completed $percent >&2
+    printf "] %d/%d (%d%%)\n" $completed $TOTAL_STEPS $percent >&2
 }
 
 # Hàm định dạng thời gian
@@ -231,7 +271,9 @@ run_step() {
     local step_time="$4"
     local command="$5"
     
-    log "### 🔢 Bước $step_num/8: $step_name"
+    term "${COLOR_BOLD}${COLOR_BLUE}\n═══════════════════════════════════════════════════════════════${COLOR_RESET}"
+    term "${COLOR_BOLD}${COLOR_BLUE}🔢 Bước $step_num/${TOTAL_STEPS}:${COLOR_RESET} ${COLOR_BOLD}$step_name${COLOR_RESET}"
+    log "### 🔢 Bước $step_num/${TOTAL_STEPS}: $step_name"
     log ""
     log "**Mục đích:** $step_desc"
     log "**Thời gian ước tính:** $step_time"
@@ -245,6 +287,7 @@ run_step() {
         log "📖 [Dry Run] Sẽ chạy: $command"
     else
         STEP_START=$(date +%s)
+        term "${COLOR_YELLOW}🛠️  Đang chạy...${COLOR_RESET}"
         log "🛠️  Đang chạy..."
         
         if eval "$command" 2>&1 | tee -a "$LOG_FILE"; then
@@ -252,9 +295,11 @@ run_step() {
             STEP_END=$(date +%s)
             STEP_TIME_ACTUAL=$((STEP_END - STEP_START))
             log ""
+            term "${COLOR_GREEN}✅ Hoàn thành: ${COLOR_BOLD}Bước $step_num${COLOR_RESET}${COLOR_GREEN} trong $(format_time $STEP_TIME_ACTUAL)${COLOR_RESET}"
             log "✅ **Bước $step_num hoàn thành trong $(format_time $STEP_TIME_ACTUAL)**"
         else
             log ""
+            term "${COLOR_RED}❌ Thất bại: ${COLOR_BOLD}Bước $step_num${COLOR_RESET}${COLOR_RED}. Kiểm tra log ở trên.${COLOR_RESET}"
             log "❌ **Bước $step_num thất bại! Kiểm tra log ở trên.**"
             exit 1
         fi
@@ -278,7 +323,10 @@ fi
 # ==================== BẮT ĐẦU PIPELINE ====================
 TOTAL_START=$(date +%s)
 
-# Khởi tạo file markdown
+# Khởi tạo file markdown + banner terminal
+term "${COLOR_BOLD}${COLOR_BLUE}===============================================================${COLOR_RESET}"
+term "${COLOR_BOLD}${COLOR_BLUE}🚀 Polars + PySpark Pipeline - Siêu Việt Edition${COLOR_RESET}"
+term "${COLOR_BOLD}${COLOR_BLUE}===============================================================${COLOR_RESET}"
 log "# 🚀 Polars + PySpark Pipeline - Siêu Việt Edition"
 log ""
 log "**Thời gian bắt đầu:** $(date '+%Y-%m-%d %H:%M:%S')"
@@ -289,6 +337,22 @@ if [[ $FROM_STEP -gt 1 ]]; then
 fi
 if [[ ${#SKIP_STEPS[@]} -gt 0 ]]; then
     log "**Bỏ qua:** Bước ${SKIP_STEPS[*]}"
+fi
+if [[ -n "$SEED" ]]; then
+    log "**Seed:** $SEED"
+    term "${COLOR_BOLD}${COLOR_BLUE}Seed:${COLOR_RESET} $SEED"
+fi
+if [[ -n "$K_OVERRIDE" ]]; then
+    log "**K (override):** $K_OVERRIDE"
+    term "${COLOR_BOLD}${COLOR_BLUE}K:${COLOR_RESET} $K_OVERRIDE"
+fi
+if [[ -n "$MAX_ITER_OVERRIDE" ]]; then
+    log "**Max Iter (override):** $MAX_ITER_OVERRIDE"
+    term "${COLOR_BOLD}${COLOR_BLUE}Max Iter:${COLOR_RESET} $MAX_ITER_OVERRIDE"
+fi
+if [[ -n "$TOL_OVERRIDE" ]]; then
+    log "**Tol (override):** $TOL_OVERRIDE"
+    term "${COLOR_BOLD}${COLOR_BLUE}Tol:${COLOR_RESET} $TOL_OVERRIDE"
 fi
 log ""
 log "---"
@@ -327,7 +391,7 @@ run_step 3 "Upload Lên HDFS" \
 run_step 4 "K-means MLlib (Tối Ưu)" \
     "K-means với MLlib: k-means++, Catalyst optimizer, Tungsten" \
     "~10-15 phút (⚡ Nhanh hơn 30-50%)" \
-    "bash \"$SCRIPTS_DIR/spark/run_spark.sh\""
+    "bash \"$SCRIPTS_DIR/spark/run_spark.sh\" ${SEED:+$SEED} ${K_OVERRIDE:+$K_OVERRIDE} ${MAX_ITER_OVERRIDE:+$MAX_ITER_OVERRIDE} ${TOL_OVERRIDE:+$TOL_OVERRIDE}"
 
 run_step 5 "Tải Kết Quả Về" \
     "Download final centroids từ HDFS về local" \

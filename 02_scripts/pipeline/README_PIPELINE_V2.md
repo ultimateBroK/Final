@@ -8,7 +8,7 @@ Pipeline V2.0 là phiên bản nâng cấp siêu việt của `full_pipeline_spa
 
 | Tính năng | V1 (full_pipeline_spark.sh) | V2 (full_pipeline_spark_v2.sh) |
 |-----------|------------------------------|--------------------------------|
-| Command line arguments | ❌ Không | ✅ Có (--reset, --from-step, --skip-step, --dry-run) |
+| Command line arguments | ❌ Không | ✅ Có (--reset, --from-step, --skip-step, --dry-run, --seed, --k, --max-iter, --tol) |
 | Prerequisites checking | ❌ Không | ✅ Kiểm tra Python, HDFS, CSV, RAM, Disk |
 | Progress bar | ❌ Không | ✅ Visual progress [████████░░] 6/8 (75%) |
 | Step descriptions | ⚠️ Cơ bản | ✅ Chi tiết với mục đích và thời gian |
@@ -41,6 +41,22 @@ Pipeline V2.0 là phiên bản nâng cấp siêu việt của `full_pipeline_spa
 
 # Xem hướng dẫn đầy đủ
 ./02_scripts/pipeline/full_pipeline_spark_v2.sh --help
+
+# Chạy với tham số KMeans
+#   --seed N       : đặt seed (vd 42)
+#   --k N          : số cụm K (vd 5)
+#   --max-iter N   : số vòng lặp tối đa (vd 15)
+#   --tol FLOAT    : ngưỡng hội tụ (vd 1e-4)
+
+# Ví dụ: K=6, maxIter=25, seed=33, tol=1e-5
+./02_scripts/pipeline/full_pipeline_spark_v2.sh --k 6 --max-iter 25 --seed 33 --tol 1e-5
+
+# Batch nhiều seed cho báo cáo
+for s in 11 22 33 44 55; do \
+  ./02_scripts/pipeline/clean_all.sh; \
+  ./02_scripts/pipeline/full_pipeline_spark_v2.sh --seed $s --k 5 --max-iter 15 --tol 1e-4; \
+  python 02_scripts/data/snapshot_results.py; \
+done
 ```
 
 ### 2️⃣ Prerequisites Checking

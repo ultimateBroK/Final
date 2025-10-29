@@ -153,8 +153,19 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 ### Quick Start
 
 ```bash
-# Chạy toàn bộ pipeline tự động
-./02_scripts/pipeline/full_pipeline_spark.sh
+# Chạy toàn bộ pipeline (V2 khuyến nghị)
+./02_scripts/pipeline/full_pipeline_spark_v2.sh
+
+# Tùy chọn flags (KMeans):
+#   --seed N       : đặt seed (vd 42)
+#   --k N          : số cụm K (vd 5)
+#   --max-iter N   : số vòng lặp tối đa (vd 15)
+#   --tol FLOAT    : ngưỡng hội tụ (vd 1e-4)
+# Điều khiển luồng:
+#   --reset, --from-step N, --skip-step N, --dry-run
+
+# Ví dụ: K=6, maxIter=20, seed=33, tol=1e-5
+./02_scripts/pipeline/full_pipeline_spark_v2.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
 ```
 
 Pipeline sẽ tự động:

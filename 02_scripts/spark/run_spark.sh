@@ -61,12 +61,23 @@ echo "Đang dọn dẹp kết quả cũ..."
 hdfs dfs -rm -r -f "$HDFS_BASE/output_centroids" 2>/dev/null
 
 # Chạy K-means với MLlib
+# Mặc định
 MAX_ITER=15
 K=5
+SEED=42
+TOL=1e-4
+
+# Tham số từ CLI: $1=seed (optional), $2=K (optional), $3=max_iter (optional), $4=tol (optional)
+if [ -n "${1:-}" ]; then SEED="$1"; fi
+if [ -n "${2:-}" ]; then K="$2"; fi
+if [ -n "${3:-}" ]; then MAX_ITER="$3"; fi
+if [ -n "${4:-}" ]; then TOL="$4"; fi
 
 echo "Đang chạy K-means với Spark MLlib..."
 echo "Số cụm: $K"
 echo "Số lần lặp tối đa: $MAX_ITER"
+echo "Seed: $SEED"
+echo "Tol: $TOL"
 echo ""
 
 # Chạy với YARN (hoặc standalone/local-cluster để test)
@@ -100,7 +111,9 @@ spark-submit \
     "$HDFS_INPUT" \
     "$HDFS_OUTPUT" \
     "$K" \
-    "$MAX_ITER"
+    "$MAX_ITER" \
+    "$SEED" \
+    "$TOL"
 
 if [ $? -ne 0 ]; then
     echo "❌ PySpark job thất bại"
