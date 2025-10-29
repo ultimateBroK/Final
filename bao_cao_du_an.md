@@ -2,6 +2,30 @@
 
 ## Phân Tích 179 Triệu Giao Dịch với Apache Spark
 
+---
+
+## 📖 CHO NGƯỜI MỚI BẮT ĐẦU
+
+**Bạn chưa biết gì về Big Data? Đừng lo!** Báo cáo này được viết để mọi người đều hiểu được.
+
+### Những gì bạn cần biết trước:
+- ✅ **Không cần biết lập trình** để hiểu ý tưởng chính
+- ✅ **Không cần biết toán cao cấp** - chúng tôi sẽ giải thích bằng ví dụ đơn giản
+- ⚠️ Một số phần kỹ thuật có thể hơi khó, nhưng đã có giải thích chi tiết
+
+### Cách đọc báo cáo này:
+1. **Bắt đầu với "Tóm tắt điều hành"** - Hiểu tổng quan dự án
+2. **Đọc "Phần 1: Giới thiệu"** - Hiểu vấn đề và giải pháp
+3. **Bỏ qua các phần kỹ thuật nếu khó hiểu** - Quay lại sau khi đã hiểu tổng quan
+4. **Xem "Phụ lục - Thuật ngữ"** khi gặp từ khó
+
+### Ví dụ về cách chúng tôi giải thích:
+> ❌ **Cách cũ (khó hiểu)**: "K-means là thuật toán phân cụm unsupervised learning sử dụng khoảng cách Euclidean để minimize within-cluster sum of squares."
+> 
+> ✅ **Cách mới (dễ hiểu)**: "K-means tự động chia 179 triệu học sinh thành 5 lớp dựa trên điểm số. Học sinh giống nhau sẽ ở cùng lớp."
+
+---
+
 ## Mục lục
 - [Tóm tắt điều hành](#tom-tat)
 - [Phần 1: Giới thiệu dự án](#p1)
@@ -29,21 +53,28 @@
 ## TÓM TẮT ĐIỀU HÀNH
 
 ### Bài toán
-Phát hiện các giao dịch nghi ngờ rửa tiền trong tập dữ liệu lớn chứa **179 triệu giao dịch** (kích thước 16GB), sử dụng kỹ thuật phân cụm K-means trên nền tảng xử lý phân tán Apache Spark.
+**Vấn đề thực tế**: Ngân hàng có hàng trăm triệu giao dịch mỗi tháng. Làm sao tìm được những giao dịch nghi ngờ rửa tiền trong số đó?
+
+**Giải pháp**: Chúng ta có một file CSV **rất lớn** (16GB, tương đương ~35,000 bài nhạc MP3 hoặc 8,000 video YouTube 2 phút) chứa **179 triệu giao dịch**. Sử dụng máy tính phân tích và nhóm các giao dịch tương tự nhau lại, sau đó tìm những nhóm có dấu hiệu bất thường.
+
+> **Big Data là gì?** Dữ liệu quá lớn đến mức một máy tính thông thường không thể xử lý hết trong thời gian hợp lý. Phải dùng nhiều máy tính làm việc cùng lúc (phân tán).
 
 ### Kết quả đạt được
-- ✅ Xử lý thành công 179,702,229 giao dịch
-- ✅ Phân thành 5 cụm với tỷ lệ rửa tiền khác nhau (0.041% - 5.56%)
-- ✅ Thời gian xử lý: **11 phút 47 giây** (nhanh hơn Hadoop 4-8 lần, nhanh hơn RDD 30-50%)
-- ✅ Phát hiện 225,546 giao dịch nghi ngờ rửa tiền (0.126% tổng số)
-- ✅ Tuân thủ quy định: KHÔNG lưu dữ liệu lớn ở máy cục bộ
+- ✅ Xử lý thành công **179,702,229 giao dịch** (gần như toàn bộ dân số nước Mỹ!)
+- ✅ Phân thành **5 nhóm** (cụm) giao dịch với tỷ lệ rửa tiền khác nhau (0.041% - 5.56%)
+- ✅ Thời gian xử lý: **11 phút 47 giây** - rất nhanh cho khối lượng dữ liệu khổng lồ này
+- ✅ Phát hiện **225,546 giao dịch nghi ngờ** rửa tiền cần kiểm tra thủ công
+- ✅ Tuân thủ quy định: KHÔNG lưu dữ liệu lớn ở máy cục bộ (chỉ lưu trên hệ thống an toàn)
 
-### Công nghệ sử dụng
-- **Polars**: Thư viện xử lý dữ liệu siêu nhanh (nhanh hơn Pandas 10-100 lần)
-- **Apache Spark**: Hệ thống xử lý phân tán trong bộ nhớ
-- **HDFS**: Hệ thống lưu trữ phân tán của Hadoop
-- **Python**: Ngôn ngữ lập trình chính
-- **K-means**: Thuật toán phân cụm học máy
+### Công nghệ sử dụng (Giải thích đơn giản)
+
+| Công nghệ | Vai trò đơn giản | Ví dụ so sánh |
+|----------|-----------------|---------------|
+| **Polars** | Đọc và xử lý file CSV cực nhanh ở máy tính cá nhân | Như Excel nhưng nhanh gấp 10-100 lần, xử lý được file 16GB |
+| **Apache Spark** | Phân tán công việc cho nhiều máy tính làm cùng lúc | Như có 4 công nhân cùng làm việc song song, nhanh gấp 4 lần |
+| **HDFS** | Lưu trữ file lớn an toàn trên nhiều máy | Như Google Drive nhưng dành cho dữ liệu cực lớn, tự động sao lưu |
+| **Python** | Ngôn ngữ lập trình | Tiếng Việt để viết code |
+| **K-means** | Thuật toán tự động nhóm dữ liệu tương tự | Như tự động sắp xếp học sinh vào 5 lớp dựa trên điểm số |
 
 ---
 
@@ -53,9 +84,12 @@ Phát hiện các giao dịch nghi ngờ rửa tiền trong tập dữ liệu l�
 ### 1.1. Bối cảnh và Động lực
 
 #### Vấn đề rửa tiền trong thực tế
-Rửa tiền là hành vi che giấu nguồn gốc bất hợp pháp của tiền bằng cách chuyển qua nhiều 
-giao dịch phức tạp. Các tổ chức tài chính phải phát hiện và báo cáo các giao dịch nghi ngờ 
-theo quy định pháp luật.
+**Rửa tiền là gì?** Đơn giản là hành vi "giặt" tiền bẩn thành tiền sạch. Ví dụ: Một người có tiền từ buôn bán ma túy bất hợp pháp, họ không thể dùng trực tiếp vì sẽ bị phát hiện. Thay vào đó, họ sẽ:
+1. Chuyển tiền qua nhiều tài khoản khác nhau
+2. Tạo nhiều giao dịch nhỏ để che giấu
+3. Dùng nhiều ngân hàng khác nhau
+
+**Nhiệm vụ của ngân hàng**: Phải phát hiện những giao dịch có dấu hiệu rửa tiền và báo cáo cho cơ quan chức năng. Nhưng với hàng trăm triệu giao dịch mỗi tháng, con người không thể kiểm tra thủ công được!
 
 #### Thách thức với dữ liệu lớn
 - **Khối lượng khổng lồ**: Hàng trăm triệu giao dịch mỗi tháng
@@ -64,34 +98,46 @@ theo quy định pháp luật.
 - **Tuân thủ quy định**: Bảo mật dữ liệu khách hàng
 
 #### Giải pháp của dự án
-Sử dụng **học máy không giám sát (Unsupervised Learning)** với thuật toán K-means để:
-- Tự động phân nhóm giao dịch có đặc điểm tương tự
-- Phát hiện các cụm có tỷ lệ rửa tiền cao bất thường
-- Xử lý song song trên nhiều máy tính (distributed computing)
-- Đảm bảo tuân thủ quy định về bảo mật dữ liệu
+**Ý tưởng**: Dùng máy tính tự động phân tích!
+
+**Cách hoạt động đơn giản**:
+1. **Học máy không giám sát** = Máy tự học, không cần dạy trước (giống như để máy tự tìm pattern)
+2. **K-means** = Thuật toán tự động nhóm giao dịch tương tự nhau (ví dụ: nhóm theo giá trị, thời gian, địa điểm)
+3. **Phân tán** = Dùng nhiều máy tính cùng làm (như có nhiều công nhân)
+4. **Bảo mật** = Dữ liệu khách hàng được bảo vệ, không lưu ở máy cá nhân
+
+**Ví dụ minh họa**: 
+> Giống như giáo viên tự động sắp xếp 179 triệu học sinh vào 5 lớp dựa trên điểm số, chiều cao, tuổi tác. Sau đó xem lớp nào có nhiều học sinh quay cóp (tỷ lệ rửa tiền cao).
 
 ### 1.2. Mục tiêu dự án
 
 #### Mục tiêu chính
-1. **Phân tích dữ liệu giao dịch quy mô lớn**
-   - Xử lý file CSV 16GB chứa 179 triệu bản ghi
-   - Trích xuất đặc trưng (feature extraction) từ dữ liệu thô
-   - Chuẩn hóa dữ liệu để thuật toán hoạt động hiệu quả
 
-2. **Phân cụm giao dịch bằng K-means**
-   - Chia 179 triệu giao dịch thành 5 cụm
-   - Mỗi cụm đại diện cho một pattern giao dịch
-   - Sử dụng Apache Spark để xử lý phân tán
+**1. Phân tích dữ liệu giao dịch quy mô lớn**
+   - **Input**: File CSV 16GB (rất lớn!)
+   - **Công việc**: 
+     - Đọc 179 triệu dòng dữ liệu
+     - **Trích xuất đặc trưng** = Chuyển dữ liệu thô thành số để máy tính hiểu (ví dụ: "US Dollar" → số 0, "Euro" → số 1)
+     - **Chuẩn hóa** = Đưa tất cả số về cùng thang đo (giống như quy đổi về cùng đơn vị: km, m, cm → chỉ dùng 1 đơn vị)
 
-3. **Phát hiện giao dịch nghi ngờ**
-   - Phân tích tỷ lệ rửa tiền trong từng cụm
-   - Xác định cụm có tỷ lệ bất thường cao
-   - Xuất danh sách giao dịch cần kiểm tra thủ công
+**2. Phân cụm giao dịch bằng K-means**
+   - **Ý tưởng**: Tự động chia 179 triệu giao dịch thành **5 nhóm** (cụm)
+   - **Ví dụ**: 
+     - Cụm 1: Giao dịch nhỏ, ban ngày
+     - Cụm 2: Giao dịch lớn, ban đêm
+     - Cụm 3: Giao dịch quốc tế
+     - v.v.
+   - **Công cụ**: Apache Spark (phân tán cho nhiều máy cùng làm)
 
-4. **Tuân thủ quy định bảo mật**
-   - KHÔNG lưu dữ liệu lớn ở máy cục bộ
-   - Chỉ lưu trên HDFS (Hadoop Distributed File System)
-   - Tự động xóa file tạm sau khi xử lý
+**3. Phát hiện giao dịch nghi ngờ**
+   - Xem trong mỗi nhóm có bao nhiêu % là rửa tiền
+   - Nếu nhóm nào có tỷ lệ cao bất thường → đánh dấu là nghi ngờ
+   - Xuất danh sách để con người kiểm tra thủ công
+
+**4. Tuân thủ quy định bảo mật**
+   - Dữ liệu khách hàng **KHÔNG được** lưu ở máy tính cá nhân
+   - Chỉ lưu trên hệ thống an toàn (HDFS)
+   - File tạm tự động xóa sau khi xử lý xong
 
 #### Mục tiêu phụ
 - Học và áp dụng công nghệ Big Data (Spark, HDFS)
@@ -107,10 +153,12 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 ### 2.1. Mô tả tập dữ liệu
 
 #### Thông tin cơ bản
-- **Tên file**: `HI-Large_Trans.csv`
-- **Kích thước**: 16 GB (gigabyte)
-- **Số bản ghi**: 179,702,229 giao dịch
-- **Nguồn**: Tập dữ liệu mô phỏng giao dịch ngân hàng quốc tế
+- **Tên file**: `HI-Large_Trans.csv` (file Excel/CSV format)
+- **Kích thước**: **16 GB** = Khoảng 35,000 bài nhạc MP3 hoặc 8,000 video YouTube ngắn
+- **Số bản ghi**: **179,702,229 giao dịch** = Gần bằng dân số nước Mỹ (330 triệu người)
+- **Nguồn**: Dữ liệu mô phỏng (không phải dữ liệu thật, chỉ để học tập) về giao dịch ngân hàng quốc tế
+
+> **Tại sao dữ liệu lớn đến vậy?** Mỗi ngân hàng lớn có thể có hàng triệu giao dịch mỗi ngày. File này mô phỏng dữ liệu trong vài tháng của nhiều ngân hàng.
 
 #### Cấu trúc dữ liệu (11 cột)
 
@@ -147,41 +195,49 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 - Thống kê mô tả: min, max, mean, median
 - Phân tích phân phối của nhãn rửa tiền
 
-**Kỹ thuật sử dụng**:
-- **Lazy Loading**: Chỉ đọc metadata, không load toàn bộ vào RAM
-- **Polars DataFrame**: Thư viện nhanh viết bằng Rust
-- **Statistical Summary**: Tính toán song song
+**Kỹ thuật sử dụng** (Giải thích đơn giản):
+- **Lazy Loading** = Chỉ đọc một phần nhỏ để xem cấu trúc, không tải hết 16GB vào RAM (giống như chỉ đọc mục lục sách thay vì đọc toàn bộ 1000 trang)
+- **Polars DataFrame** = Công cụ xử lý dữ liệu cực nhanh (viết bằng Rust - ngôn ngữ nhanh như C++)
+- **Statistical Summary** = Tính toán nhiều phép toán cùng lúc (song song)
 
 #### Bước 2: Trích xuất đặc trưng (Feature Engineering)
 
 **Script**: `scripts/polars/prepare_polars.py`  
-**Thời gian**: ~10 phút  
-**Công việc**:
+**Thời gian**: ~36 giây (rất nhanh!)  
+**Công việc**: Chuyển đổi dữ liệu thô thành dạng số để máy tính phân tích
 
-1. **Phân tích thời gian (Temporal Features)**
-   - Parse chuỗi timestamp thành datetime
-   - Trích xuất giờ trong ngày (0-23)
-   - Trích xuất ngày trong tuần (0-6)
-   - **Lý do**: Rửa tiền thường xảy ra vào giờ không bình thường
+**1. Phân tích thời gian (Temporal Features)**
+   - **Input**: "2022/08/01 00:17" (chuỗi văn bản)
+   - **Output**: 
+     - Giờ trong ngày: 0 (nửa đêm)
+     - Ngày trong tuần: 1 (Thứ 2)
+   - **Lý do**: Giao dịch rửa tiền thường xảy ra vào giờ lạ (2-3h sáng) hoặc cuối tuần
 
-2. **Tính toán tỷ lệ (Ratio Features)**
-   - `amount_ratio = Amount Received / Amount Paid`
-   - **Lý do**: Tỷ lệ bất thường có thể là dấu hiệu rửa tiền
-   - Xử lý chia cho 0 (division by zero)
+**2. Tính toán tỷ lệ (Ratio Features)**
+   - **Công thức**: `amount_ratio = Số tiền nhận / Số tiền trả`
+   - **Ví dụ**: Nhận 1000$, trả 500$ → ratio = 2.0
+   - **Lý do**: Nếu ratio quá cao hoặc quá thấp → có thể nghi ngờ (ví dụ: nhận 1 triệu nhưng chỉ trả 100$)
 
-3. **Mã hóa tuyến đường (Route Hash)**
-   - Hash(From Bank, To Bank) → một số duy nhất
-   - **Lý do**: Phát hiện tuyến chuyển tiền lặp lại nghi ngờ
+**3. Mã hóa tuyến đường (Route Hash)**
+   - **Ví dụ**: Giao dịch từ Ngân hàng A → Ngân hàng B → chuyển thành một số duy nhất (như mã số)
+   - **Lý do**: Nếu tuyến A→B xuất hiện quá nhiều lần → có thể đang rửa tiền qua tuyến này
 
-4. **Mã hóa biến phân loại (Categorical Encoding)**
-   - Chuyển chuỗi thành số (One-Hot hoặc Label Encoding)
-   - Ví dụ: "US Dollar" → 0, "Yuan" → 1, "Bitcoin" → 2
-   - **Lý do**: Thuật toán K-means chỉ làm việc với số
+**4. Mã hóa biến phân loại (Categorical Encoding)**
+   - **Vấn đề**: Máy tính không hiểu chữ, chỉ hiểu số
+   - **Giải pháp**: Chuyển tất cả chữ thành số
+   - **Ví dụ**: 
+     - "US Dollar" → 0
+     - "Euro" → 1  
+     - "Bitcoin" → 2
+   - Giống như đánh số cho từng loại tiền tệ
 
-5. **Chuẩn hóa (Normalization)**
-   - Min-Max Scaling: Đưa tất cả về khoảng [0, 1]
-   - Công thức: `(x - min) / (max - min)`
-   - **Lý do**: Các đặc trưng có scale khác nhau sẽ ảnh hưởng kết quả
+**5. Chuẩn hóa (Normalization)**
+   - **Vấn đề**: Số tiền có thể từ 0.01$ đến 5 tỷ$, còn giờ chỉ từ 0-23. Nếu không chuẩn hóa, số tiền sẽ "lấn át" giờ
+   - **Giải pháp**: Đưa tất cả về thang đo 0-1
+   - **Ví dụ**: 
+     - Số tiền: 1,000,000$ (min=0.01, max=5 tỷ) → chuẩn hóa thành 0.2
+     - Giờ: 23h (min=0, max=23) → chuẩn hóa thành 1.0
+   - Giống như quy đổi tất cả về cùng đơn vị để so sánh công bằng
 
 **Đầu ra**:
 - File: `data/processed/hadoop_input_temp.txt` (TẠM THỜI)
@@ -261,74 +317,93 @@ Sử dụng **học máy không giám sát (Unsupervised Learning)** với thu�
 ### 3.2. Giải thích các thành phần
 
 #### Polars - Xử lý dữ liệu nhanh
-**Vai trò**: Đọc và xử lý CSV ở máy cục bộ
-**Tại sao dùng Polars**:
-- Nhanh hơn Pandas 10-100 lần
-- Viết bằng Rust (ngôn ngữ hiệu suất cao)
-- Hỗ trợ lazy evaluation (tính toán khi cần)
-- Xử lý được file lớn hơn RAM
+**Vai trò**: Như Excel/Pandas nhưng nhanh hơn rất nhiều
 
-**So sánh với Pandas**:
-```
-Pandas:  Đọc 16GB CSV → 45 phút
-Polars:  Đọc 16GB CSV → 4-5 phút ⚡
-```
+**Tại sao dùng Polars thay vì Pandas?**:
+- Pandas: Đọc 16GB mất 45 phút (quá lâu!)
+- Polars: Đọc 16GB mất 4-5 phút (nhanh gấp 9 lần!)
+- **Lý do**: Polars viết bằng Rust (ngôn ngữ nhanh như C++) trong khi Pandas viết bằng Python (chậm hơn)
+- **Lazy evaluation**: Không tính toán ngay, chỉ tính khi cần (như đọc mục lục trước, đọc nội dung sau)
+- **Xử lý file lớn**: Có thể xử lý file lớn hơn cả RAM của máy tính (như streaming video YouTube)
 
-#### HDFS - Lưu trữ phân tán
-**Vai trò**: Lưu trữ file lớn trên nhiều máy
-**Cách hoạt động**:
-1. File 33GB được chia thành các block 128MB
-2. Mỗi block được sao lưu 3 bản trên 3 máy khác nhau
-3. Nếu 1 máy hỏng, vẫn còn 2 bản sao khác
+**Ví dụ so sánh**: 
+> Nếu Pandas là xe đạp thì Polars là xe máy. Cùng quãng đường nhưng nhanh hơn nhiều!
 
-**Cấu trúc thư mục HDFS trong dự án**:
+#### HDFS - Lưu trữ phân tán (Như Google Drive cho Big Data)
+**Vai trò**: Lưu trữ file cực lớn (33GB) trên nhiều máy tính, tự động sao lưu
+
+**Cách hoạt động đơn giản**:
+1. **Chia nhỏ**: File 33GB được chia thành nhiều mảnh 128MB (như chia bánh thành nhiều miếng)
+2. **Sao lưu**: Mỗi mảnh được lưu ở 3 máy khác nhau (như photo 3 bản quan trọng)
+3. **An toàn**: Nếu 1 máy hỏng → vẫn còn 2 bản sao ở máy khác (không mất dữ liệu!)
+
+**Ví dụ minh họa**:
+> HDFS giống như một kho lưu trữ có nhiều người canh giữ. Mỗi tài liệu quan trọng được photo 3 bản, lưu ở 3 kho khác nhau. Nếu 1 kho cháy, vẫn còn 2 kho khác!
+
+**Cấu trúc thư mục HDFS** (giống như thư mục trên máy tính):
 ```
-/user/spark/hi_large/
+/user/spark/hi_large/          ← Thư mục chính
 ├── input/
-│   └── hadoop_input.txt          (33GB - Dữ liệu đã xử lý)
-├── centroids.txt                 (440 bytes - Tâm cụm ban đầu)
-└── output_centroids/             (Thư mục kết quả)
-    └── part-00000                (Tâm cụm cuối cùng)
+│   └── hadoop_input.txt       ← File dữ liệu đã xử lý (33GB)
+└── output_centroids/          ← Thư mục kết quả
+    └── part-00000             ← File kết quả nhỏ (~4KB)
 ```
 
 **Lợi ích**:
-- ✅ Không giới hạn dung lượng (thêm máy = thêm không gian)
-- ✅ An toàn (replication)
-- ✅ Tuân thủ quy định (không lưu local)
+- ✅ **Không giới hạn**: Thêm máy = thêm không gian (như Google Drive)
+- ✅ **An toàn**: Tự động sao lưu 3 bản (replication)
+- ✅ **Tuân thủ quy định**: Không lưu ở máy cá nhân, chỉ trên hệ thống an toàn
 
-#### Apache Spark - Xử lý phân tán
-**Vai trò**: Chạy K-means trên nhiều máy song song
+#### Apache Spark - Xử lý phân tán (Nhiều máy cùng làm việc)
+**Vai trò**: Chạy thuật toán K-means trên nhiều máy tính cùng lúc (song song)
+
+**Ví dụ đơn giản**: 
+> Giống như có 1 ông chủ (Master) và 4 công nhân (Workers). Ông chủ giao việc:
+> - Công nhân 1: Xử lý 44 triệu giao dịch đầu
+> - Công nhân 2: Xử lý 44 triệu giao dịch tiếp
+> - Công nhân 3: Xử lý 44 triệu giao dịch tiếp
+> - Công nhân 4: Xử lý phần còn lại
+> 
+> Tất cả làm cùng lúc → nhanh gấp 4 lần!
+
 **Kiến trúc Spark**:
-
 ```
         ┌─────────────┐
-        │   MASTER    │  ← Điều phối công việc
+        │   MASTER    │  ← Ông chủ điều phối
         └──────┬──────┘
                │
       ┌────────┼────────┐
       │        │        │
    ┌──▼──┐  ┌──▼──┐  ┌──▼──┐
-   │ W1  │  │ W2  │  │ W3  │  ← Workers (Công nhân)
+   │ W1  │  │ W2  │  │ W3  │  ← Công nhân làm việc
    └─────┘  └─────┘  └─────┘
-   44M rows 44M rows 44M rows   (Chia đều dữ liệu)
+   44M     44M     44M      (Mỗi người 1 phần)
 ```
 
-**Cách Spark xử lý K-means**:
-1. **Phân chia dữ liệu**: 179M rows → 4 phần (4 workers)
-2. **Xử lý song song**: Mỗi worker tính khoảng cách của phần của mình
-3. **Tổng hợp**: Master thu thập kết quả và cập nhật tâm cụm
-4. **Lặp lại**: 15 lần cho đến khi hội tụ
+**Cách Spark xử lý K-means** (chia công việc):
+1. **Phân chia**: Chia 179 triệu giao dịch thành 4 phần cho 4 workers
+2. **Làm việc song song**: Mỗi worker xử lý phần của mình (như 4 người cùng đọc 4 quyển sách khác nhau)
+3. **Tổng hợp**: Master thu thập kết quả từ tất cả workers (như thu bài làm)
+4. **Lặp lại**: Làm 15 lần cho đến khi đạt kết quả tốt
 
-**Tại sao Spark nhanh**:
-- **In-memory computing**: Giữ dữ liệu trong RAM, không ghi disk
-- **Lazy evaluation**: Chỉ tính toán khi cần thiết
-- **Pipeline optimization**: Tự động tối ưu chuỗi các phép toán
+**Tại sao Spark nhanh hơn Hadoop?**
+- **In-memory computing**: Lưu dữ liệu trong RAM (nhanh) thay vì ổ cứng (chậm) - giống như đọc sách trên máy tính (RAM) nhanh hơn đọc từ ổ cứng
+- **Lazy evaluation**: Chỉ tính khi cần (như xem mục lục trước)
+- **Tự động tối ưu**: Spark tự động sắp xếp lại công việc để làm nhanh nhất có thể
 
-**Cấu hình Spark trong dự án**:
-- **Driver memory**: 4GB (bộ nhớ chương trình chính)
-- **Executor memory**: 4GB × 4 = 16GB (bộ nhớ workers)
-- **Cores**: 4 cores/worker × 4 workers = 16 cores
-- **Parallelism**: Xử lý 16 partition cùng lúc
+**Cấu hình Spark trong dự án** (Cấu hình máy tính):
+
+| Thành phần | Giải thích đơn giản | Số lượng |
+|------------|---------------------|----------|
+| **Driver memory** | Bộ nhớ cho ông chủ (Master) | 4GB (như RAM laptop) |
+| **Executor memory** | Bộ nhớ cho mỗi công nhân (Worker) | 4GB × 4 = 16GB tổng |
+| **Cores** | CPU cores (như số "tay" của máy tính) | 4 cores/worker × 4 = 16 cores |
+| **Parallelism** | Số việc làm cùng lúc | 16 (16 việc song song) |
+
+> **Giải thích thêm**: 
+> - 1 core = như 1 tay làm việc. 4 cores = có 4 tay, làm được 4 việc cùng lúc
+> - 16GB RAM = như có 16 tủ sách để chứa dữ liệu
+> - Xử lý song song = như 16 người cùng đọc 16 quyển sách khác nhau, nhanh gấp 16 lần!
 
 ---
 
@@ -524,11 +599,20 @@ Giá trị giao dịch:
 
 #### BƯỚC 4: Chạy K-means trên Spark 🚀
 
-**Mục đích**: Phân cụm 179 triệu giao dịch bằng **MLlib K-means với k-means++**  
+**Mục đích**: Tự động chia 179 triệu giao dịch thành **5 nhóm** (cụm) bằng thuật toán **K-means**  
 **File thực thi**: `scripts/spark/run_spark.sh` + `kmeans_spark.py`  
-**Thời gian thực tế**: **6 phút 5 giây** (365.8s, Snapshot 29/10/2025 21:22:30 - 21:28:27)  
-**Input**: `hdfs://localhost:9000/user/spark/hi_large/input/hadoop_input.txt` (31GB)  
-**Output**: `hdfs://localhost:9000/user/spark/hi_large/output_centroids/` (5 tâm cụm)
+**Thời gian thực tế**: **6 phút 5 giây** (rất nhanh cho 179 triệu giao dịch!)  
+**Input**: File dữ liệu đã xử lý trên HDFS (31GB)  
+**Output**: 5 tâm cụm (centroids) - mỗi tâm là đại diện cho 1 nhóm
+
+> **K-means là gì?** 
+> Ví dụ: Bạn có 179 triệu học sinh, cần chia thành 5 lớp. K-means sẽ:
+> 1. Chọn ngẫu nhiên 5 học sinh làm "tâm lớp" (centroids)
+> 2. Gán mỗi học sinh vào lớp gần nhất (dựa trên điểm số, chiều cao, v.v.)
+> 3. Tính lại tâm lớp mới (lấy điểm trung bình)
+> 4. Lặp lại cho đến khi ổn định
+> 
+> Kết quả: 5 lớp học sinh tương tự nhau về đặc điểm!
 
 **Cấu hình Spark cluster**:
 - **Spark version**: 4.0.1
@@ -555,33 +639,58 @@ Giá trị giao dịch:
   - Kết quả: 179,702,229 vector đặc trưng
 
 **Bước 4.3/5: Cấu hình K-means** 🎯
-- Thời gian: **0.1 giây**
-- Tham số:
-  - `K = 5` (số cụm)
-  - `MaxIter = 15` (số vòng lặp tối đa)
-  - `Seed = 42` (tái tạo kết quả)
-  - `Tol = 0.0001` (ngưỡng hội tụ)
-  - `InitMode = "k-means||"` (**k-means++ tự động** - không cần khởi tạo thủ công)
+- Thời gian: **0.1 giây** (rất nhanh!)
+- **Các tham số** (giống như cài đặt):
+  - `K = 5`: Chia thành 5 nhóm (cụm) - như chia thành 5 lớp
+  - `MaxIter = 15`: Lặp tối đa 15 lần (như làm lại 15 lần cho đến khi đạt)
+  - `Seed = 42`: Số ngẫu nhiên cố định (để tái tạo kết quả giống nhau mỗi lần chạy)
+  - `Tol = 0.0001`: Ngưỡng hội tụ (nếu thay đổi < 0.0001 thì dừng - đã đủ tốt)
+  - `InitMode = "k-means||"`: **Tự động chọn tâm cụm thông minh** (không cần chọn thủ công)
 
-**Bước 4.4/5: Huấn luyện K-means** 🚀
-- Thời gian: **230.8 giây (3 phút 50.8 giây)** - chiếm 63% tổng thời gian bước 4
-- Quá trình:
-  ```
-  MLlib K-means tự động khởi tạo với k-means++:
-    1. Chọn ngẫu nhiên 1 điểm làm tâm đầu tiên
-    2. Chọn các tâm tiếp theo với xác suất tỉ lệ với bình phương 
-       khoảng cách đến tâm gần nhất (thông minh hơn random)
-  
-  Lặp lại 15 lần:
-    Iteration 1-15:
-      a) Assign: Gán mỗi điểm vào cụm gần nhất (Euclidean distance)
-      b) Update: Cập nhật tâm cụm = trung bình các điểm trong cụm
-      c) Check convergence: Nếu shift < Tol (0.0001) → dừng sớm
-  ```
-- Tối ưu hóa:
-  - **Catalyst Optimizer**: Tối ưu query plan
-  - **Tungsten Execution Engine**: Thực thi nhanh trong bộ nhớ
-  - **Adaptive Query Execution (AQE)**: Tự động điều chỉnh số partitions
+> **k-means++ là gì?** Thay vì chọn 5 tâm cụm ngẫu nhiên, nó chọn thông minh hơn:
+> - Tâm 1: Chọn ngẫu nhiên
+> - Tâm 2: Chọn điểm xa tâm 1 nhất
+> - Tâm 3: Chọn điểm xa 2 tâm trước đó nhất
+> - ... 
+> → Kết quả tốt hơn và nhanh hơn!
+
+**Bước 4.4/5: Huấn luyện K-means** 🚀 (Phần quan trọng nhất!)
+- Thời gian: **3 phút 50.8 giây** - chiếm 63% tổng thời gian (nhưng xử lý được 179 triệu giao dịch!)
+
+**Quá trình K-means hoạt động** (giải thích đơn giản):
+
+**1. Khởi tạo thông minh (k-means++)**:
+   - Chọn 5 "học sinh tiêu biểu" làm tâm lớp (thông minh, không phải random)
+   - Làm sao để các tâm cách xa nhau → các nhóm khác biệt rõ ràng
+
+**2. Lặp lại 15 lần** (như sắp xếp lại 15 lần):
+   
+   **Mỗi lần lặp có 3 bước**:
+   
+   **a) Assign (Gán)**: 
+   - Mỗi giao dịch được gán vào cụm gần nhất
+   - Tính khoảng cách Euclidean = như đo khoảng cách giữa 2 điểm trên bản đồ
+   - Ví dụ: Giao dịch A gần tâm cụm 2 nhất → gán vào cụm 2
+   
+   **b) Update (Cập nhật)**:
+   - Tính lại tâm cụm mới = lấy điểm trung bình của tất cả giao dịch trong cụm
+   - Ví dụ: Cụm 2 có 1000 giao dịch → tâm mới = trung bình 1000 giao dịch đó
+   
+   **c) Check (Kiểm tra)**:
+   - Nếu tâm cụm thay đổi rất ít (< 0.0001) → dừng sớm (đã đạt kết quả tốt)
+   - Nếu không → tiếp tục lặp
+
+**Ví dụ minh họa**:
+> Giống như giáo viên sắp xếp học sinh vào 5 lớp:
+> - Lần 1: Chia ngẫu nhiên
+> - Lần 2: Xem lại, có học sinh nào nên chuyển lớp không?
+> - Lần 3: Điều chỉnh lại
+> - ...
+> - Lần 15: Hoàn thiện!
+**Tối ưu hóa của Spark** (Tự động làm nhanh hơn):
+- **Catalyst Optimizer**: Tự động sắp xếp lại các bước làm việc để nhanh nhất (như Google Maps tìm đường ngắn nhất)
+- **Tungsten Execution Engine**: Thực thi nhanh trong RAM (như làm việc trên máy tính nhanh thay vì giấy)
+- **Adaptive Query Execution (AQE)**: Tự động điều chỉnh số phần chia (nếu 1 phần quá lớn → chia nhỏ hơn để cân bằng)
 
 **Kết quả huấn luyện**:
 - **Số vòng lặp thực tế**: 15 (đạt max iterations, chưa hội tụ sớm)
@@ -633,13 +742,21 @@ Giá trị giao dịch:
 
 #### BƯỚC 6: Gán nhãn cụm cho từng giao dịch 🏷️
 
-**Mục đích**: Xác định mỗi giao dịch thuộc cụm nào bằng cách tính khoảng cách Euclidean  
+**Mục đích**: Xác định **mỗi giao dịch thuộc nhóm nào** bằng cách tính khoảng cách  
 **File thực thi**: `scripts/polars/assign_clusters_polars.py`  
-**Thời gian thực tế**: **3 phút 14 giây** (194s, Snapshot 29/10/2025 21:28:31 - 21:31:45)  
+**Thời gian thực tế**: **3 phút 14 giây** (194s - rất nhanh!)  
 **Input**: 
-  - File normalized từ HDFS: `/user/spark/hi_large/input/hadoop_input.txt` (31GB, 179M dòng)
-  - 5 tâm cụm từ bước 5: `data/results/final_centroids.txt`  
-**Output**: `data/results/clustered_results.txt` (342.75 MB, chứa cluster_id cho mỗi giao dịch)
+  - File dữ liệu đã xử lý từ HDFS (31GB, 179 triệu dòng)
+  - 5 tâm cụm từ bước 5 (đại diện cho 5 nhóm)  
+**Output**: File kết quả (342.75 MB) - mỗi dòng là số nhóm (0-4) của mỗi giao dịch
+
+> **Ví dụ**: 
+> - Giao dịch 1 → tính khoảng cách đến 5 tâm cụm → tâm cụm 2 gần nhất → gán vào nhóm 2
+> - Giao dịch 2 → tính khoảng cách → tâm cụm 0 gần nhất → gán vào nhóm 0
+> - ... (làm 179 triệu lần!)
+
+**Khoảng cách Euclidean là gì?** 
+Giống như đo khoảng cách thẳng giữa 2 điểm trên bản đồ. Khoảng cách nhỏ nhất = thuộc nhóm đó!
 
 **Chi tiết quy trình xử lý**:
 
@@ -659,26 +776,23 @@ Giá trị giao dịch:
 - Tâm cụm: 5 cụm × 9 đặc trưng
 - Phương pháp: **Batch Processing** với NumPy vectorization
 
-**Thuật toán tính khoảng cách (Batch Processing)**:
-```python
-# Xử lý từng batch 1 triệu giao dịch
-BATCH_SIZE = 1_000_000
-FOR batch trong [0, 179]:
-    # Lấy batch (1M rows × 9 features)
-    batch_data = get_batch(batch)
-    
-    # Tính khoảng cách Euclidean đến 5 tâm cụm
-    # Sử dụng vectorization của NumPy
-    distances = sqrt(sum((batch_data[:, None, :] - centroids[None, :, :])**2, axis=2))
-    # Shape: (1M, 5) - mỗi hàng là khoảng cách đến 5 cụm
-    
-    # Chọn cụm gần nhất
-    cluster_labels = argmin(distances, axis=1)
-    # Shape: (1M,) - mỗi giao dịch có 1 cluster_id
-    
-    # Lưu kết quả batch
-    write_results(cluster_labels)
-```
+**Thuật toán tính khoảng cách** (Xử lý từng lô nhỏ):
+
+> **Tại sao xử lý từng lô?** Vì 179 triệu giao dịch quá lớn, không thể load hết vào RAM. Giải pháp: Xử lý từng lô 1 triệu giao dịch.
+
+**Quy trình** (đơn giản hóa):
+1. **Lấy 1 triệu giao dịch** từ file (như đọc 1 triệu dòng)
+2. **Tính khoảng cách** đến 5 tâm cụm (như đo 1 triệu điểm đến 5 điểm mốc)
+3. **Chọn cụm gần nhất** cho mỗi giao dịch (như tìm điểm mốc gần nhất)
+4. **Lưu kết quả** (ghi vào file)
+5. **Lặp lại** 179 lần (179 triệu ÷ 1 triệu = 179 lần)
+
+**Tại sao dùng NumPy vectorization?**
+- **Bình thường**: Dùng vòng lặp Python → chậm (như đếm từng số một)
+- **Vectorization**: NumPy tính toán hàng loạt → nhanh gấp 100-1000 lần (như máy tính đếm hàng loạt)
+
+**Ví dụ**: 
+> Thay vì tính 1 triệu lần khoảng cách riêng lẻ (mất 10 phút), NumPy tính tất cả cùng lúc (mất 6 giây)!
 
 **Tiến trình xử lý** (từ log):
 ```
@@ -718,21 +832,30 @@ Cluster 3: 18 giao dịch (0.00%)          ← Outlier!
 Cluster 4: 3,905,021 giao dịch (2.17%)
 ```
 
-**Tối ưu hóa**:
-- ✅ **NumPy vectorization**: Nhanh hơn Python loop 100-1000x
-- ✅ **Batch processing**: Xử lý 1M rows/batch để tiết kiệm RAM
-- ✅ **Streaming từ HDFS**: Không load toàn bộ vào RAM
-- ✅ **Tổng thời gian**: 3 phút 14 giây cho 179M giao dịch (~58M rows/phút)
+**Tối ưu hóa** (Làm sao để nhanh?):
+- ✅ **NumPy vectorization**: Tính toán hàng loạt, nhanh hơn vòng lặp Python 100-1000 lần
+  - Ví dụ: Thay vì tính từng số một (mất 10 phút), tính cả triệu số cùng lúc (mất 6 giây)
+- ✅ **Batch processing**: Xử lý từng lô 1 triệu → không tốn RAM
+  - Như đọc sách từng chương một thay vì đọc hết quyển sách 1000 trang
+- ✅ **Streaming từ HDFS**: Đọc dữ liệu từng phần, không load hết 31GB vào RAM
+  - Như xem video streaming (từng đoạn) thay vì tải hết video về
+- ✅ **Tốc độ**: Xử lý ~58 triệu giao dịch/phút (cực kỳ nhanh!)
 
 #### BƯỚC 7: Phân tích kết quả 📊
 
-**Mục đích**: Phân tích thống kê chi tiết và xác định cụm có tỷ lệ rửa tiền cao  
+**Mục đích**: Phân tích kết quả và tìm nhóm nào có **tỷ lệ rửa tiền cao nhất**  
 **File thực thi**: `scripts/polars/analyze_polars.py`  
-**Thời gian thực tế**: **30 giây** (Snapshot 29/10/2025 21:31:45 - 21:32:15)  
+**Thời gian thực tế**: **30 giây** (rất nhanh!)  
 **Input**: 
-  - `data/results/clustered_results.txt` (342.75 MB, cluster_id cho mỗi giao dịch)
-  - `data/raw/HI-Large_Trans.csv` (16GB, dữ liệu gốc với nhãn rửa tiền)  
+  - File kết quả phân cụm (342.75 MB) - mỗi giao dịch đã biết thuộc nhóm nào (0-4)
+  - File dữ liệu gốc (16GB) - có nhãn "Is Laundering" (0 = bình thường, 1 = rửa tiền)  
 **Output**: Báo cáo phân tích chi tiết
+
+> **Công việc**: 
+> - Xem trong nhóm 0 có bao nhiêu giao dịch rửa tiền? → Tỷ lệ = ?
+> - Xem trong nhóm 1 có bao nhiêu giao dịch rửa tiền? → Tỷ lệ = ?
+> - ... (làm với 5 nhóm)
+> - Nhóm nào có tỷ lệ cao nhất → cần kiểm tra kỹ!
 
 **Chi tiết các phân tích thực hiện**:
 
@@ -762,20 +885,27 @@ Cluster 3: 18 giao dịch (0.00%)          ← Outlier cực lớn!
 Cluster 4: 3,905,021 giao dịch (2.17%)   ← Cụm nhỏ
 ```
 
-**2. Tỷ lệ rửa tiền trong từng cụm** (từ snapshot):
+**2. Tỷ lệ rửa tiền trong từng cụm** (Kết quả quan trọng nhất!):
 ```
 ╔══════════╦═════════════╦══════════════╦═════════════════╗
-║ Cluster  ║ Tổng giao dịch ║ Rửa tiền  ║ Tỷ lệ (%)       ║
+║ Nhóm     ║ Tổng giao dịch ║ Rửa tiền  ║ Tỷ lệ (%)       ║
 ╠══════════╬═════════════╬══════════════╬═════════════════╣
-║    0     ║ 36,926,395  ║ 29,920      ║ 0.081%          ║
-║    1     ║ 69,939,082  ║ 78,960      ║ 0.113%          ║
-║    2     ║ 68,931,713  ║ 115,057     ║ 0.167% ← CAO    ║
-║    3     ║ 18           ║ 1           ║ 5.556% ← OUTLIER║
-║    4     ║ 3,905,021   ║ 1,608       ║ 0.041% ← THẤP   ║
+║ Nhóm 0   ║ 36,926,395  ║ 29,920      ║ 0.081%          ║
+║ Nhóm 1   ║ 69,939,082  ║ 78,960      ║ 0.113%          ║
+║ Nhóm 2   ║ 68,931,713  ║ 115,057     ║ 0.167% ← CAO    ║
+║ Nhóm 3   ║ 18           ║ 1           ║ 5.556% ← CỰC CAO (nhưng chỉ 18 giao dịch)║
+║ Nhóm 4   ║ 3,905,021   ║ 1,608       ║ 0.041% ← THẤP   ║
 ╚══════════╩═════════════╩══════════════╩═════════════════╝
 
 Tổng: 225,546 giao dịch rửa tiền (0.126% tổng số)
 ```
+
+> **Giải thích**:
+> - **Nhóm 0**: Trong 36 triệu giao dịch, có 29,920 giao dịch rửa tiền → Tỷ lệ = 0.081% (rất thấp, an toàn)
+> - **Nhóm 1**: 0.113% (an toàn)
+> - **Nhóm 2**: 0.167% (cao nhất trong các nhóm lớn, cần chú ý)
+> - **Nhóm 3**: 5.556% (CỰC CAO! Nhưng chỉ có 18 giao dịch → có thể là outlier/cá biệt)
+> - **Nhóm 4**: 0.041% (thấp nhất, rất an toàn)
 
 **3. Cụm có rủi ro cao (>10% rửa tiền)**:
 ```
@@ -1442,37 +1572,29 @@ CMD ["./scripts/pipeline/full_pipeline_spark.sh"]
 <a id="phu-luc"></a>
 ## PHỤ LỤC
 
-### A. Thuật ngữ và Giải thích
+### A. Thuật ngữ và Giải thích (Từ điển cho người mới)
 
-**Big Data**: Dữ liệu có quy mô lớn (>1TB), cần công nghệ đặc biệt để xử lý
-
-**Cluster**: Nhóm máy tính làm việc cùng nhau như một hệ thống
-
-**Distributed Computing**: Xử lý phân tán trên nhiều máy song song
-
-**HDFS**: Hadoop Distributed File System - Hệ thống file phân tán
-
-**In-memory Computing**: Xử lý trong RAM thay vì đọc/ghi disk liên tục
-
-**K-means**: Thuật toán phân cụm không giám sát
-
-**Polars**: Thư viện DataFrame nhanh cho Python
-
-**Spark**: Framework xử lý big data in-memory
-
-**Unsupervised Learning**: Học máy không cần nhãn (tự phân nhóm)
-
-**Centroid**: Tâm cụm - Điểm trung tâm của một nhóm dữ liệu
-
-**Convergence**: Hội tụ - Thuật toán đạt trạng thái ổn định
-
-**Feature Engineering**: Trích xuất đặc trưng từ dữ liệu thô
-
-**Normalize**: Chuẩn hóa - Đưa dữ liệu về cùng scale
-
-**Pipeline**: Quy trình tự động từ input đến output
-
-**Replication**: Sao lưu dữ liệu trên nhiều máy
+| Thuật ngữ | Ý nghĩa đơn giản | Ví dụ |
+|-----------|------------------|-------|
+| **Big Data** | Dữ liệu quá lớn (>1TB), không thể xử lý bằng máy tính thường | Như có 1 triệu quyển sách, không thể đọc hết bằng tay |
+| **Cluster** | Nhiều máy tính làm việc cùng nhau | Như có 10 công nhân cùng làm một công việc lớn |
+| **Distributed Computing** | Xử lý phân tán - chia công việc cho nhiều máy | Như chia 1000 trang sách cho 10 người đọc, mỗi người 100 trang |
+| **HDFS** | Hệ thống lưu trữ file lớn, tự động sao lưu | Như Google Drive nhưng cho dữ liệu cực lớn, tự động backup 3 bản |
+| **In-memory Computing** | Làm việc trong RAM (nhanh) thay vì ổ cứng (chậm) | Như làm việc trên máy tính (RAM) thay vì ghi ra giấy (ổ cứng) |
+| **K-means** | Thuật toán tự động chia dữ liệu thành K nhóm | Như tự động chia học sinh thành 5 lớp dựa trên điểm số |
+| **Polars** | Công cụ xử lý dữ liệu cực nhanh (như Excel nhưng nhanh 100 lần) | Như có máy tính siêu nhanh để đọc file Excel lớn |
+| **Spark** | Framework xử lý Big Data, dùng nhiều máy cùng lúc | Như có nhiều công nhân cùng làm việc song song |
+| **Unsupervised Learning** | Học máy tự học, không cần dạy trước | Như để máy tự tìm pattern trong dữ liệu, không cần gợi ý |
+| **Centroid** | Tâm cụm - điểm đại diện cho một nhóm | Như điểm đại diện của lớp (ví dụ: điểm trung bình của lớp) |
+| **Convergence** | Hội tụ - đạt trạng thái ổn định, không thay đổi nữa | Như làm bài tập đến khi kết quả không thay đổi nữa |
+| **Feature Engineering** | Trích xuất đặc trưng - chuyển dữ liệu thô thành số | Như chuyển "Nam/Nữ" thành số (0/1) để máy tính hiểu |
+| **Normalize** | Chuẩn hóa - đưa tất cả về cùng thang đo | Như quy đổi tất cả về cùng đơn vị (km, m, cm → chỉ dùng km) |
+| **Pipeline** | Quy trình tự động từ đầu đến cuối | Như dây chuyền sản xuất tự động từ nguyên liệu → sản phẩm |
+| **Replication** | Sao lưu dữ liệu trên nhiều máy (3 bản sao) | Như photo 3 bản tài liệu quan trọng, lưu ở 3 nơi khác nhau |
+| **Vectorization** | Tính toán hàng loạt, nhanh hơn vòng lặp | Như tính 1 triệu phép tính cùng lúc thay vì từng phép một |
+| **Lazy Loading** | Chỉ đọc phần cần thiết, không load hết | Như chỉ đọc mục lục trước, đọc nội dung sau khi cần |
+| **Euclidean Distance** | Khoảng cách thẳng giữa 2 điểm (như đo đường chim bay) | Như đo khoảng cách từ điểm A đến điểm B trên bản đồ |
+| **Outlier** | Điểm ngoại lai - giá trị bất thường, khác biệt nhiều | Như có 1 học sinh được 100 điểm trong khi cả lớp chỉ 50-60 điểm |
 
 ### B. Cấu trúc thư mục đầy đủ
 
