@@ -114,7 +114,7 @@ EOF
             exit 0
             ;;
         *)
-            echo "❌ Lỗi: Tham số không hợp lệ: $1"
+            echo "Lỗi: Tham số không hợp lệ: $1"
             echo "Sử dụng --help để xem hướng dẫn"
             exit 1
             ;;
@@ -172,57 +172,57 @@ is_step_skipped() {
 reset_checkpoints() {
     rm -rf "$CHECKPOINT_DIR"
     mkdir -p "$CHECKPOINT_DIR"
-    log "🔄 Đã reset tất cả checkpoints"
+    log "Đã đặt lại tất cả các điểm đánh dấu"
 }
 
 # Hàm kiểm tra điều kiện trước khi chạy
 check_prerequisites() {
     local errors=0
     
-    log "🔍 KIỂM TRA ĐIỀU KIỆN..."
+    log "KIỂM TRA ĐIỀU KIỆN..."
     
     # Kiểm tra Python
     if ! command -v python &> /dev/null; then
-        log "   ❌ Python không tìm thấy"
+        log "   Python không tìm thấy"
         ((errors++))
     else
-        log "   ✅ Python: $(python --version)"
+        log "   Python: $(python --version)"
     fi
     
     # Kiểm tra HDFS
     if ! command -v hdfs &> /dev/null; then
-        log "   ⚠️  HDFS command không tìm thấy (sẽ cần cho bước 4-6)"
+        log "   Lệnh HDFS không tìm thấy (cần cho bước 4-6)"
     elif hdfs dfs -test -e / 2>/dev/null; then
-        log "   ✅ HDFS đang chạy"
+        log "   HDFS đang chạy"
     else
-        log "   ⚠️  HDFS chưa khởi động (sẽ cần cho bước 4-6)"
+        log "   HDFS chưa khởi động (cần cho bước 4-6)"
     fi
     
     # Kiểm tra file CSV
     if [[ ! -f "$DATA_DIR/raw/HI-Large_Trans.csv" ]]; then
-        log "   ❌ File CSV không tìm thấy: $DATA_DIR/raw/HI-Large_Trans.csv"
+        log "   Không tìm thấy tệp CSV: $DATA_DIR/raw/HI-Large_Trans.csv"
         ((errors++))
     else
         local size=$(du -h "$DATA_DIR/raw/HI-Large_Trans.csv" | cut -f1)
-        log "   ✅ File CSV: $size"
+        log "   Tệp CSV: $size"
     fi
     
     # Kiểm tra RAM khả dụng
     local available_ram=$(free -g | awk '/^Mem:/{print $7}')
     if [[ $available_ram -lt 8 ]]; then
-        log "   ⚠️  RAM khả dụng: ${available_ram}GB (khuyến nghị ≥ 8GB)"
+        log "   RAM khả dụng: ${available_ram}GB (khuyến nghị ≥ 8GB)"
     else
-        log "   ✅ RAM khả dụng: ${available_ram}GB"
+        log "   RAM khả dụng: ${available_ram}GB"
     fi
     
     # Kiểm tra disk space
     local available_disk=$(df -h "$ROOT_DIR" | awk 'NR==2 {print $4}')
-    log "   💾 Disk khả dụng: $available_disk"
+    log "   Dung lượng đĩa khả dụng: $available_disk"
     
     log ""
     
     if [[ $errors -gt 0 ]]; then
-        log "❌ Có $errors lỗi phải sửa trước khi chạy!"
+        log "Có $errors lỗi cần sửa trước khi chạy"
         exit 1
     fi
 }
@@ -271,36 +271,48 @@ run_step() {
     local step_time="$4"
     local command="$5"
     
-    term "${COLOR_BOLD}${COLOR_BLUE}\n═══════════════════════════════════════════════════════════════${COLOR_RESET}"
-    term "${COLOR_BOLD}${COLOR_BLUE}🔢 Bước $step_num/${TOTAL_STEPS}:${COLOR_RESET} ${COLOR_BOLD}$step_name${COLOR_RESET}"
-    log "### 🔢 Bước $step_num/${TOTAL_STEPS}: $step_name"
+    term "${COLOR_BOLD}${COLOR_BLUE}\n================================================================${COLOR_RESET}"
+    term "${COLOR_BOLD}${COLOR_BLUE}Bước $step_num/${TOTAL_STEPS}:${COLOR_RESET} ${COLOR_BOLD}$step_name${COLOR_RESET}"
+    term "${COLOR_BOLD}${COLOR_BLUE}├─${COLOR_RESET} Mục đích: $step_desc"
+    term "${COLOR_BOLD}${COLOR_BLUE}└─${COLOR_RESET} Thời gian ước tính: $step_time"
+    log "### Bước $step_num/${TOTAL_STEPS}: $step_name"
     log ""
     log "**Mục đích:** $step_desc"
     log "**Thời gian ước tính:** $step_time"
     log ""
     
     if [[ $FROM_STEP -gt $step_num ]] || is_step_skipped $step_num; then
-        log "⏩ Bỏ qua bước $step_num"
+        term "${COLOR_YELLOW}Bỏ qua bước $step_num${COLOR_RESET}"
+        log "Bỏ qua bước $step_num"
     elif is_step_completed $step_num; then
-        log "✅ Bước $step_num đã hoàn thành trước đó"
+        term "${COLOR_GREEN}Bước $step_num đã hoàn thành trước đó${COLOR_RESET}"
+        log "Bước $step_num đã hoàn thành trước đó"
     elif [[ "$DRY_RUN" == "true" ]]; then
-        log "📖 [Dry Run] Sẽ chạy: $command"
+        term "${COLOR_YELLOW}[Chạy thử] Sẽ chạy: $command${COLOR_RESET}"
+        log "[Chạy thử] Sẽ chạy: $command"
     else
         STEP_START=$(date +%s)
-        term "${COLOR_YELLOW}🛠️  Đang chạy...${COLOR_RESET}"
-        log "🛠️  Đang chạy..."
+        term ""
+        term "${COLOR_YELLOW}Đang chạy bước $step_num...${COLOR_RESET}"
+        term "${COLOR_YELLOW}----------------------------------------------------------------${COLOR_RESET}"
+        log "Đang chạy..."
         
-        if eval "$command" 2>&1 | tee -a "$LOG_FILE"; then
+        # Chạy command và hiển thị output real-time (không buffer)
+        # stdbuf -o0 -e0: disable buffering để thấy output ngay lập tức
+        if stdbuf -o0 -e0 bash -c "$command" 2>&1 | tee -a "$LOG_FILE"; then
             mark_step_completed $step_num
             STEP_END=$(date +%s)
             STEP_TIME_ACTUAL=$((STEP_END - STEP_START))
+            term ""
+            term "${COLOR_YELLOW}----------------------------------------------------------------${COLOR_RESET}"
             log ""
-            term "${COLOR_GREEN}✅ Hoàn thành: ${COLOR_BOLD}Bước $step_num${COLOR_RESET}${COLOR_GREEN} trong $(format_time $STEP_TIME_ACTUAL)${COLOR_RESET}"
-            log "✅ **Bước $step_num hoàn thành trong $(format_time $STEP_TIME_ACTUAL)**"
+            term "${COLOR_GREEN}Hoàn thành: ${COLOR_BOLD}Bước $step_num${COLOR_RESET}${COLOR_GREEN} trong $(format_time $STEP_TIME_ACTUAL)${COLOR_RESET}"
+            log "**Bước $step_num hoàn thành trong $(format_time $STEP_TIME_ACTUAL)**"
         else
+            term ""
+            term "${COLOR_RED}Thất bại: ${COLOR_BOLD}Bước $step_num${COLOR_RESET}${COLOR_RED}. Kiểm tra log ở trên.${COLOR_RESET}"
             log ""
-            term "${COLOR_RED}❌ Thất bại: ${COLOR_BOLD}Bước $step_num${COLOR_RESET}${COLOR_RED}. Kiểm tra log ở trên.${COLOR_RESET}"
-            log "❌ **Bước $step_num thất bại! Kiểm tra log ở trên.**"
+            log "**Bước $step_num thất bại! Kiểm tra log ở trên.**"
             exit 1
         fi
     fi
@@ -325,13 +337,13 @@ TOTAL_START=$(date +%s)
 
 # Khởi tạo file markdown + banner terminal
 term "${COLOR_BOLD}${COLOR_BLUE}===============================================================${COLOR_RESET}"
-term "${COLOR_BOLD}${COLOR_BLUE}🚀 Polars + PySpark Pipeline - Siêu Việt Edition${COLOR_RESET}"
+    term "${COLOR_BOLD}${COLOR_BLUE}Polars + PySpark Pipeline - Siêu Việt Edition 🚀${COLOR_RESET}"
 term "${COLOR_BOLD}${COLOR_BLUE}===============================================================${COLOR_RESET}"
-log "# 🚀 Polars + PySpark Pipeline - Siêu Việt Edition"
+log "# Polars + PySpark Pipeline - Siêu Việt Edition"
 log ""
 log "**Thời gian bắt đầu:** $(date '+%Y-%m-%d %H:%M:%S')"
 log "**File log:** \`$LOG_FILE\`"
-log "**Chế độ:** $([ "$DRY_RUN" == "true" ] && echo "Dry Run" || echo "Thực thi")"
+log "**Chế độ:** $([ "$DRY_RUN" == "true" ] && echo "Chạy thử" || echo "Thực thi")"
 if [[ $FROM_STEP -gt 1 ]]; then
     log "**Bắt đầu từ:** Bước $FROM_STEP"
 fi
@@ -339,20 +351,20 @@ if [[ ${#SKIP_STEPS[@]} -gt 0 ]]; then
     log "**Bỏ qua:** Bước ${SKIP_STEPS[*]}"
 fi
 if [[ -n "$SEED" ]]; then
-    log "**Seed:** $SEED"
-    term "${COLOR_BOLD}${COLOR_BLUE}Seed:${COLOR_RESET} $SEED"
+    log "**Hạt giống (seed):** $SEED"
+    term "${COLOR_BOLD}${COLOR_BLUE}Hạt giống (seed):${COLOR_RESET} $SEED"
 fi
 if [[ -n "$K_OVERRIDE" ]]; then
-    log "**K (override):** $K_OVERRIDE"
-    term "${COLOR_BOLD}${COLOR_BLUE}K:${COLOR_RESET} $K_OVERRIDE"
+    log "**Số cụm K (ghi đè):** $K_OVERRIDE"
+    term "${COLOR_BOLD}${COLOR_BLUE}Số cụm K:${COLOR_RESET} $K_OVERRIDE"
 fi
 if [[ -n "$MAX_ITER_OVERRIDE" ]]; then
-    log "**Max Iter (override):** $MAX_ITER_OVERRIDE"
-    term "${COLOR_BOLD}${COLOR_BLUE}Max Iter:${COLOR_RESET} $MAX_ITER_OVERRIDE"
+    log "**Số vòng lặp tối đa (ghi đè):** $MAX_ITER_OVERRIDE"
+    term "${COLOR_BOLD}${COLOR_BLUE}Số vòng lặp tối đa:${COLOR_RESET} $MAX_ITER_OVERRIDE"
 fi
 if [[ -n "$TOL_OVERRIDE" ]]; then
-    log "**Tol (override):** $TOL_OVERRIDE"
-    term "${COLOR_BOLD}${COLOR_BLUE}Tol:${COLOR_RESET} $TOL_OVERRIDE"
+    log "**Ngưỡng hội tụ (ghi đè):** $TOL_OVERRIDE"
+    term "${COLOR_BOLD}${COLOR_BLUE}Ngưỡng hội tụ:${COLOR_RESET} $TOL_OVERRIDE"
 fi
 log ""
 log "---"
@@ -379,8 +391,8 @@ run_step 1 "Khám Phá Dữ Liệu" \
     "python \"$SCRIPTS_DIR/polars/01_explore_fast.py\""
 
 run_step 2 "Xử Lý Đặc Trưng" \
-    "Feature engineering, normalization, tạo file temp" \
-    "~10 phút" \
+    "Feature engineering: timestamp → giờ/ngày, amount ratio, route hash, normalization" \
+    "~10 phút (6 bước nhỏ)" \
     "python \"$SCRIPTS_DIR/polars/02_prepare_polars.py\""
 
 run_step 3 "Upload Lên HDFS" \
@@ -388,9 +400,9 @@ run_step 3 "Upload Lên HDFS" \
     "~5 phút" \
     "bash \"$SCRIPTS_DIR/spark/setup_hdfs.sh\""
 
-run_step 4 "K-means MLlib (Tối Ưu)" \
-    "K-means với MLlib: k-means++, Catalyst optimizer, Tungsten" \
-    "~10-15 phút (⚡ Nhanh hơn 30-50%)" \
+run_step 4 "K-means MLlib (Tối ưu)" \
+    "K-means MLlib: khởi tạo k-means++, tối ưu hóa Catalyst, Tungsten, hiển thị chi tiết từng vòng lặp" \
+    "~10-15 phút (nhanh hơn 30-50%, 5 bước)" \
     "bash \"$SCRIPTS_DIR/spark/run_spark.sh\" ${K_OVERRIDE:+--k $K_OVERRIDE} ${MAX_ITER_OVERRIDE:+--max-iter $MAX_ITER_OVERRIDE} ${SEED:+--seed $SEED} ${TOL_OVERRIDE:+--tol $TOL_OVERRIDE}"
 
 run_step 5 "Tải Kết Quả Về" \
@@ -414,44 +426,44 @@ TOTAL_TIME=$((TOTAL_END - TOTAL_START))
 log ""
 log "═══════════════════════════════════════════════════════════════"
 log ""
-log "## 🎉 Tổng Kết Pipeline"
+log "## Tổng Kết Pipeline"
 log ""
-log "✅ **Pipeline hoàn thành thành công!**"
+log "**Pipeline hoàn thành thành công!**"
 log ""
 log "**Thời gian kết thúc:** $(date '+%Y-%m-%d %H:%M:%S')"
 log "**Tổng thời gian chạy:** $(format_time $TOTAL_TIME)"
 log ""
 log "---"
 log ""
-log "### 📊 Thống Kê Kết Quả"
+log "### Thống Kê Kết Quả"
 log ""
 
 # Thống kê kết quả
 if [[ -f "$DATA_DIR/results/clustered_results.txt" ]]; then
     total_transactions=$(wc -l < "$DATA_DIR/results/clustered_results.txt")
-    log "- 📊 Tổng giao dịch đã phân cụm: **$(printf "%'d" $total_transactions)**"
+    log "- Tổng giao dịch đã phân cụm: **$(printf "%'d" $total_transactions)**"
 fi
 
 if [[ -f "$DATA_DIR/results/final_centroids.txt" ]]; then
     num_clusters=$(wc -l < "$DATA_DIR/results/final_centroids.txt")
-    log "- 🎯 Số cụm: **$num_clusters**"
+    log "- Số cụm: **$num_clusters**"
 fi
 
 log_size=$(du -h "$LOG_FILE" | cut -f1)
-log "- 📝 Kích thước log: **$log_size**"
+log "- Kích thước log: **$log_size**"
 
 log ""
 log "---"
 log ""
-log "### 🚀 Bước Tiếp Theo"
+log "### Bước Tiếp Theo"
 log ""
-log "#### 1️⃣ **Tạo Snapshot Kết Quả**"
+log "#### 1) Tạo ảnh chụp (snapshot) kết quả"
 log "   Lưu lại kết quả này để so sánh sau này:"
 log "   \`\`\`bash"
 log "   python 02_scripts/data/snapshot_results.py"
 log "   \`\`\`"
 log ""
-log "#### 2️⃣ **Trực Quan Hóa Kết Quả**"
+log "#### 2) Trực quan hóa kết quả"
 log "   Tạo biểu đồ ASCII hoặc chạy Jupyter notebook:"
 log "   \`\`\`bash"
 log "   # Biểu đồ ASCII"
@@ -462,19 +474,19 @@ log "   cd 06_visualizations"
 log "   jupyter lab phan-tich.ipynb"
 log "   \`\`\`"
 log ""
-log "#### 3️⃣ **Kiểm Tra Kết Quả HDFS**"
+log "#### 3) Kiểm tra kết quả HDFS"
 log "   Xem dữ liệu trên HDFS:"
 log "   \`\`\`bash"
 log "   hdfs dfs -ls -h /user/spark/hi_large/"
 log "   hdfs dfs -du -h /user/spark/hi_large/"
 log "   \`\`\`"
 log ""
-log "#### 4️⃣ **Đọc Báo Cáo Chi Tiết**"
+log "#### 4) Đọc báo cáo chi tiết"
 log "   \`\`\`bash"
 log "   cat BAO_CAO_DU_AN.md"
 log "   \`\`\`"
 log ""
-log "#### 5️⃣ **Chạy Lại Với Tham Số Khác**"
+log "#### 5) Chạy lại với tham số khác"
 log "   \`\`\`bash"
 log "   # Reset và chạy lại từ đầu"
 log "   ./02_scripts/pipeline/full_pipeline_spark_v2.sh --reset"
@@ -486,7 +498,7 @@ log "   # Dry run để xem kế hoạch"
 log "   ./02_scripts/pipeline/full_pipeline_spark_v2.sh --dry-run"
 log "   \`\`\`"
 log ""
-log "#### 6️⃣ **Tối Ưu Và Thử Nghiệm**"
+log "#### 6) Tối ưu và thử nghiệm"
 log "   \`\`\`bash"
 log "   # Thử K khác nhau (sửa trong scripts)"
 log "   # Thử feature engineering khác"
@@ -496,7 +508,7 @@ log "   \`\`\`"
 log ""
 log "---"
 log ""
-log "### 💾 Files Quan Trọng"
+log "### Các tệp quan trọng"
 log ""
 log "| File | Vị Trí | Mô Tả |"
 log "|------|----------|--------|"
@@ -508,7 +520,7 @@ log "| Notebook | \`06_visualizations/phan-tich.ipynb\` | Phân tích visual |"
 log ""
 log "---"
 log ""
-log "### 🎯 Gợi Ý Nghiên Cứu Tiếp"
+log "### Gợi Ý Nghiên Cứu Tiếp"
 log ""
 log "1. **Model Comparison**: So sánh K-means vs. DBSCAN, vs. Isolation Forest"
 log "2. **Supervised Learning**: Dùng labels để train Random Forest/XGBoost"
@@ -517,27 +529,27 @@ log "4. **Real-time**: Implement streaming với Spark Streaming + Kafka"
 log "5. **Deployment**: Containerize với Docker + Kubernetes"
 log "6. **Monitoring**: Thêm metrics với Prometheus + Grafana"
 log ""
-log "👍 **Chúc mừng! Pipeline đã chạy thành công.**"
+log "Chúc mừng! Pipeline đã chạy thành công."
 log ""
 log "═══════════════════════════════════════════════════════════════"
 
 if [[ "$DRY_RUN" == "false" ]]; then
     echo ""
-    echo "🎉 PIPELINE HOÀN THÀNH SIÊU VIỆT!"
+    echo "PIPELINE HOÀN THÀNH SIÊU VIỆT!"
     echo ""
-    echo "📝 Log chi tiết: $LOG_FILE"
-    echo "📊 Xem kết quả: cat 01_data/results/clustered_results.txt | head"
-    echo "🚀 Bước tiếp theo: python 02_scripts/data/snapshot_results.py"
-    echo "📈 Visualization: cd 06_visualizations && jupyter lab phan-tich.ipynb"
-    echo "🎯 Chạy với options: $0 --help"
+    echo "Log chi tiết: $LOG_FILE"
+    echo "Xem kết quả: cat 01_data/results/clustered_results.txt | head"
+    echo "Bước tiếp theo: python 02_scripts/data/snapshot_results.py"
+    echo "Trực quan hóa: cd 06_visualizations && jupyter lab phan-tich.ipynb"
+    echo "Chạy với tham số: $0 --help"
     echo ""
-    echo "🌟 Các tính năng mới trong v2.0:"
-    echo "   ✅ Command line arguments (--reset, --from-step, --skip-step, --dry-run)"
-    echo "   ✅ Comprehensive prerequisite checking"
-    echo "   ✅ Visual progress bar"
-    echo "   ✅ Detailed step descriptions"
-    echo "   ✅ Rich suggestions for next steps"
-    echo "   ✅ Better error handling và logging"
-    echo "   ✅ Research suggestions"
+    echo "Các tính năng mới trong v2.0:"
+    echo "   - Tham số dòng lệnh (--reset, --from-step, --skip-step, --dry-run)"
+    echo "   - Kiểm tra điều kiện đầy đủ"
+    echo "   - Thanh tiến độ trực quan"
+    echo "   - Mô tả chi tiết từng bước"
+    echo "   - Gợi ý bước tiếp theo"
+    echo "   - Xử lý lỗi và ghi log tốt hơn"
+    echo "   - Gợi ý nghiên cứu tiếp"
     echo ""
 fi

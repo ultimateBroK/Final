@@ -1,7 +1,7 @@
 #!/bin/bash
 # setup_hdfs.sh - Thiết lập thư mục HDFS và upload dữ liệu cho pipeline Spark
 
-echo "=== THIẾT LẬP HDFS CHO PYSPARK K-MEANS ==="
+echo "=== THIẾT LẬP HDFS CHO PYSPARK K-MEANS ⚙️ ==="
 
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -13,7 +13,7 @@ HDFS_BASE="/user/spark/hi_large"
 
 # Kiểm tra HDFS có đang chạy không
 if ! hdfs dfs -test -e / 2>/dev/null; then
-    echo "❌ HDFS không thể truy cập. Vui lòng khởi động HDFS trước."
+    echo "HDFS không thể truy cập. Vui lòng khởi động HDFS trước."
     echo ""
     echo "Để khởi động HDFS:"
     echo "  1. Format namenode (chỉ lần đầu): hdfs namenode -format"
@@ -22,20 +22,20 @@ if ! hdfs dfs -test -e / 2>/dev/null; then
     exit 1
 fi
 
-echo "✅ HDFS có thể truy cập"
+echo "HDFS có thể truy cập"
 echo ""
 
 # Kiểm tra file dữ liệu tạm có tồn tại không
 INPUT_TEMP="$DATA_PROCESSED/hadoop_input_temp.txt"
 
 if [ ! -f "$INPUT_TEMP" ]; then
-    echo "❌ Không tìm thấy file đầu vào tạm: $INPUT_TEMP"
+    echo "Không tìm thấy tệp đầu vào tạm: $INPUT_TEMP"
     echo "   Vui lòng chạy chuẩn bị dữ liệu trước:"
     echo "   python $ROOT_DIR/02_scripts/polars/02_prepare_polars.py"
     exit 1
 fi
 
-echo "✅ Đã tìm thấy file dữ liệu tạm"
+echo "Đã tìm thấy tệp dữ liệu tạm"
 echo ""
 
 # Tạo thư mục HDFS
@@ -44,35 +44,35 @@ hdfs dfs -mkdir -p "$HDFS_BASE/input"
 hdfs dfs -mkdir -p "$HDFS_BASE/output"
 
 # Dọon dẹp dữ liệu cũ
-echo "Đang dọon dẹp dữ liệu cũ trong HDFS..."
+echo "Đang dọn dẹp dữ liệu cũ trong HDFS..."
 hdfs dfs -rm -f "$HDFS_BASE/input/*" 2>/dev/null
 hdfs dfs -rm -r -f "$HDFS_BASE/output_centroids" 2>/dev/null
 
 # Upload dữ liệu đầu vào
 echo ""
-echo "Đang upload dữ liệu đầu vào lên HDFS..."
+echo "Đang tải dữ liệu đầu vào lên HDFS..."
 echo "  Nguồn: $INPUT_TEMP"
 echo "  Đích: $HDFS_BASE/input/hadoop_input.txt"
 hdfs dfs -put "$INPUT_TEMP" "$HDFS_BASE/input/hadoop_input.txt"
 
 if [ $? -ne 0 ]; then
-    echo "❌ Thất bại khi upload dữ liệu đầu vào"
+    echo "Thất bại khi tải dữ liệu đầu vào"
     exit 1
 fi
 
 # Xóa file tạm sau khi upload thành công (KHÔNG lưu dữ liệu local)
 echo ""
-echo "Đang dọon dẹp file tạm..."
+echo "Đang dọn dẹp tệp tạm..."
 rm -f "$INPUT_TEMP"
-echo "✅ Đã xóa file tạm (dữ liệu chỉ còn trên HDFS)"
-echo "ℹ️  MLlib sẽ tự động khởi tạo centroids với k-means++"
+echo "Đã xóa tệp tạm (dữ liệu chỉ còn trên HDFS)"
+echo "MLlib sẽ tự động khởi tạo tâm cụm với k-means++"
 
 # Xác minh upload
 echo ""
 echo "Đang xác minh upload..."
 INPUT_SIZE=$(hdfs dfs -du -h "$HDFS_BASE/input/hadoop_input.txt" | awk '{print $1 " " $2}')
 
-echo "  ✅ Dữ liệu đầu vào: $INPUT_SIZE"
+echo "  Dữ liệu đầu vào: $INPUT_SIZE"
 
 # Hiển thị cấu trúc thư mục HDFS
 echo ""
@@ -81,7 +81,7 @@ hdfs dfs -ls -R "$HDFS_BASE"
 
 echo ""
 echo "==================================="
-echo "✅ HOÀN TẤT THIẾT LẬP HDFS!"
+echo "HOÀN TẤT THIẾT LẬP HDFS!"
 echo "==================================="
 echo ""
 echo "Đường dẫn HDFS:"

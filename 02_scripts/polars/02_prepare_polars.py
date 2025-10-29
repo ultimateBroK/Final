@@ -20,6 +20,8 @@ Output: 01_data/processed/hadoop_input_temp.txt (33GB, TẠM THỜI)
 import polars as pl
 import numpy as np
 import os
+import time
+from datetime import datetime
 
 # ==================== CẤU HÌNH ĐƯỜNG DẪN ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -29,21 +31,41 @@ DATA_PROCESSED = os.path.join(ROOT_DIR, '01_data', 'processed')
 # Tạo thư mục processed nếu chưa có
 os.makedirs(DATA_PROCESSED, exist_ok=True)
 
+def log_with_time(msg, step_start=None):
+    """In message với timestamp và thời gian elapsed nếu có"""
+    current_time = datetime.now().strftime("%H:%M:%S")
+    if step_start:
+        elapsed = time.time() - step_start
+        print(f"[{current_time}] {msg} (mất {elapsed:.1f}s)")
+    else:
+        print(f"[{current_time}] {msg}")
+
+PIPELINE_START = time.time()
+
 print("="*70)
-print("🔧 BƯỚC 2: XỬ LÝ VÀ TRÍCH XUẤT ĐẶC TRƯNG")
+print("BƯỚC 2: XỬ LÝ VÀ TRÍCH XUẤT ĐẶC TRƯNG 🔧")
 print("="*70)
-print(f"Đọc file: {DATA_RAW}")
-print("Vui lòng đợi (có thể mất 5-10 phút)...\n")
+log_with_time(f"Đọc tệp: {DATA_RAW}")
+log_with_time("Vui lòng đợi (có thể mất 5-10 phút)...")
+print()
 
 # ==================== ĐỌC DỮ LIỆU ====================
+step_start = time.time()
+log_with_time("BƯỚC 2.1/6: Đang thiết lập đọc trì hoãn (không tải toàn bộ)...")
 # Scan_csv = Lazy loading (không load hết vào RAM)
 # Polars sẽ xử lý từng batch và streaming ra disk
 df = pl.scan_csv(DATA_RAW)
 
-print(f"✅ Đã setup lazy loading (không tốn RAM)\n")
+log_with_time("Đã thiết lập đọc trì hoãn (không tốn RAM)", step_start)
+print()
 
 # ==================== TRÍCH XUẤT ĐẶC TRƯNG ====================
-print("🌟 TRÍCH XUẤT ĐẶC TRƯNG TỪ DỮ LIỆU THÔ...")
+step_start = time.time()
+log_with_time("BƯỚC 2.2/6: Đang trích xuất đặc trưng từ dữ liệu thô...")
+log_with_time("   ├─ Timestamp → Giờ, Ngày trong tuần")
+log_with_time("   ├─ Amount → Received, Paid, Ratio")
+log_with_time("   ├─ Route → Hash(From Bank ⊕ To Bank)")
+log_with_time("   └─ Currencies → Label encoding")
 
 # Chọn và tạo các đặc trưng mới
 df_features = df.select([
@@ -80,10 +102,15 @@ df_features = df.select([
     pl.col('Payment Format').alias('payment_format'),
 ])
 
-print(f"✅ Đã trích xuất {len(df_features.collect_schema().names())} đặc trưng\n")
+log_with_time(f"Đã trích xuất {len(df_features.collect_schema().names())} đặc trưng", step_start)
+print()
 
 # ==================== MÃ HÓA BIẾN PHÂN LOẠI ====================
-print("🔢 MÃ HÓA BIẾN PHÂN LOẠI (CATEGORICAL ENCODING)...")
+step_start = time.time()
+log_with_time("BƯỚC 2.3/6: Đang mã hóa biến phân loại...")
+log_with_time("   ├─ Receiving Currency → Số")
+log_with_time("   ├─ Payment Currency → Số")
+log_with_time("   └─ Payment Format → Số")
 
 # Label Encoding: Chuyển chuỗi thành số
 # Ví dụ: "US Dollar" -> 0, "Yuan" -> 1, "Euro" -> 2, ...
@@ -93,9 +120,12 @@ df_features = df_features.with_columns([
     pl.col('payment_format').cast(pl.Categorical).to_physical().alias('payment_format_encoded'),
 ])
 
-print("✅ Đã mã hóa thành số\n")
+log_with_time("Đã mã hóa thành số", step_start)
+print()
 
-# ==================== CHỌ8N ĐẶC TRƯNG SỐ ====================
+# ==================== CHỌN ĐẶC TRƯNG SỐ ====================
+step_start = time.time()
+log_with_time("BƯỚC 2.4/6: Đang chọn các đặc trưng số...")
 # Chỉ giữ lại 9 đặc trưng số (loại bỏ chuỗi)
 df_numeric = df_features.select([
     'amount_received',      # Số tiền nhận
@@ -109,10 +139,17 @@ df_numeric = df_features.select([
     'payment_format_encoded', # Hình thức thanh toán (số)
 ])
 
-print(f"📊 Có {len(df_numeric.collect_schema().names())} đặc trưng số cho K-means\n")
+log_with_time(f"✅ Đã chọn {len(df_numeric.collect_schema().names())} đặc trưng số cho K-means", step_start)
+feature_list = df_numeric.collect_schema().names()
+for i, feat in enumerate(feature_list, 1):
+    print(f"   {i}. {feat}")
+print()
 
 # ==================== CHUẨN HÓA (NORMALIZATION) ====================
-print("📊 CHUẨN HÓA DỮ LIỆU (Min-Max Scaling)...")
+step_start = time.time()
+log_with_time("BƯỚC 2.5/6: Đang chuẩn hóa dữ liệu (chuẩn Z-score)...")
+log_with_time("   Công thức: (x - mean) / std")
+log_with_time("   Mục đích: Đưa tất cả features về cùng scale")
 
 # Chuẩn hóa: Đưa tất cả về khoảng [0, 1]
 # Công thức: (x - mean) / std
@@ -123,36 +160,52 @@ df_normalized = df_numeric.select([
     for c in df_numeric.collect_schema().names()
 ])
 
-print(f"✅ Đã chuẩn hóa {len(df_normalized.collect_schema().names())} đặc trưng\n")
+log_with_time(f"Đã chuẩn hóa {len(df_normalized.collect_schema().names())} đặc trưng", step_start)
+print()
 
 # ==================== LƯU FILE TẠM THỜI ====================
-print("💾 LƯU FILE TẠM THỜI CHO HDFS...")
-print("⚠️  LƯU Ý: File này sẽ tự động xóa sau khi upload HDFS!\n")
+step_start = time.time()
+log_with_time("BƯỚC 2.6/6: Đang lưu tệp tạm thời cho HDFS...")
+log_with_time("Lưu ý: Tệp này sẽ tự động xóa sau khi tải lên HDFS!")
 
 temp_output = os.path.join(DATA_PROCESSED, 'hadoop_input_temp.txt')
-print(f"   Đang ghi: {temp_output}")
-print("   Vui lòng đợi (có thể mất 3-5 phút)...\n")
+log_with_time(f"   Đang ghi: {temp_output}")
+log_with_time("   Vui lòng đợi (có thể mất 3-5 phút)...")
+log_with_time("   Polars đang ghi luồng dữ liệu xuống đĩa (không tốn RAM)")
+print()
 
 # Ghi file không có header (chỉ có số)
 # Sink = streaming write (không tốn RAM)
 df_normalized.sink_csv(temp_output, include_header=False)
 
+log_with_time("Đã ghi xong tệp", step_start)
+
 file_size_mb = os.path.getsize(temp_output) / (1024 * 1024 * 1024)
-print("="*70)
-print("✅ HOÀN TẤT XỬ LÝ DỮ LIỆU!")
-print("="*70)
-print(f"📄 File tạm: {temp_output}")
-print(f"📊 Kích thước: {file_size_mb:.2f} GB")
-print(f"📊 Số dòng: [streaming - không đếm]")
-print(f"📊 Số đặc trưng: {len(df_normalized.collect_schema().names())}")
-print(f"📊 Các đặc trưng: {df_normalized.collect_schema().names()}")
+
+total_time = time.time() - PIPELINE_START
+
 print()
-print("⚠️  QUAN TRỌNG:")
-print("   File này chỉ tồn tại TẠM THỜI!")
-print("   Nó sẽ BỊ XÓA sau khi upload lên HDFS (Bước 4)")
-print("   Dữ liệu chỉ lưu trên HDFS để tuân thủ quy định bảo mật")
+print("="*70)
+log_with_time("HOÀN TẤT XỬ LÝ DỮ LIỆU!")
+print("="*70)
 print()
-print("💡 GỢI Ý TIẾP THEO:")
+print("THỐNG KÊ KẾT QUẢ:")
+print(f"   Tệp tạm: {temp_output}")
+print(f"   Kích thước: {file_size_mb:.2f} GB")
+print(f"   Số dòng: [ghi luồng - không đếm]")
+print(f"   Số đặc trưng: {len(df_normalized.collect_schema().names())}")
+print(f"   Danh sách đặc trưng:")
+for i, feat in enumerate(df_normalized.collect_schema().names(), 1):
+    print(f"      {i}. {feat}")
+print()
+log_with_time(f"Tổng thời gian bước 2: {total_time/60:.1f} phút ({total_time:.1f}s)")
+print()
+print("LƯU Ý QUAN TRỌNG:")
+print("   ├─ File này chỉ tồn tại TẠM THỜI!")
+print("   ├─ Nó sẽ BỊ XÓA sau khi upload lên HDFS (Bước 3)")
+print("   └─ Dữ liệu chỉ lưu trên HDFS để tuân thủ quy định bảo mật")
+print()
+print("GỢI Ý TIẾP THEO:")
 print("   Chạy bước 3: bash 02_scripts/spark/setup_hdfs.sh")
-print("   (Bỏ qua init centroids - MLlib sẽ tự động dùng k-means++)")
+print("   (MLlib sẽ tự động dùng k-means++ initialization)")
 print()

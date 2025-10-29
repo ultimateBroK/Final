@@ -25,7 +25,7 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 DATA_RAW = os.path.join(ROOT_DIR, '01_data', 'raw', 'HI-Large_Trans.csv')
 
 print("="*70)
-print("🔍 BƯỚC 1: KHÁM PHÁ DỮ LIỆU")
+print("BƯỚC 1: KHÁM PHÁ DỮ LIỆU 🔍")
 print("="*70)
 print(f"Đang đọc file: {DATA_RAW}")
 print("Vui lòng đợi...\n")
@@ -35,16 +35,16 @@ print("Vui lòng đợi...\n")
 # Điều này giúp tiết kiệm bộ nhớ khi làm việc với file lớn
 df = pl.scan_csv(DATA_RAW)
 
-print("✅ Đã load metadata thành công!\n")
+print("Đã tải metadata thành công!\n")
 
 # ==================== XEM CẤU TRÚC DỮ LIỆU ====================
-print("📋 SCHEMA (Cấu trúc dữ liệu):")
+print("CẤU TRÚC DỮ LIỆU (SCHEMA):")
 print("-" * 70)
 print(df.collect_schema)
 print()
 
 # ==================== LẤY MẪU ĐỂ PHÂN TÍCH ====================
-print("📊 LẤY MẪU 100,000 DÒNG ĐẦU:")
+print("LẤY MẪU 100,000 DÒNG ĐẦU:")
 print("-" * 70)
 
 # Head = lấy n dòng đầu
@@ -60,7 +60,7 @@ print(sample.describe())
 print()
 
 # ==================== PHÂN TÍCH TỶ LỆ RỬA TIỀN ====================
-print("💰 PHÂN TÍCH TỶ LỆ RỬA TIỀN:")
+print("PHÂN TÍCH TỶ LỆ RỬA TIỀN:")
 print("-" * 70)
 
 # Value_counts = đếm số lượng mỗi giá trị
@@ -70,7 +70,7 @@ print(laundering_dist)
 print()
 
 # ==================== PHÂN TÍCH LOẠI TIỀN TỆ ====================
-print("💵 TOP 10 LOẠI TIỀN TỆ PHỔ BIẾN:")
+print("TOP 10 LOẠI TIỀN TỆ PHỔ BIẾN:")
 print("-" * 70)
 
 # Đếm và sắp xếp theo số lượng
@@ -81,8 +81,8 @@ print(currency_dist)
 print()
 
 print("="*70)
-print("✅ HOÀN TẤT KHÁM PHÁ DỮ LIỆU!")
+print("HOÀN TẤT KHÁM PHÁ DỮ LIỆU!")
 print("="*70)
-print("\n💡 GỢI Ý TIẾP THEO:")
+print("\nGỢI Ý TIẾP THEO:")
 print("   Chạy bước 2: python 02_scripts/polars/prepare_polars.py")
 print()

@@ -1,7 +1,7 @@
 #!/bin/bash
 # run_spark.sh - Chạy thuật toán K-means với PySpark trên HDFS
 
-echo "=== PYSPARK K-MEANS VỚI HDFS ==="
+echo "=== PYSPARK K-MEANS VỚI HDFS 🚀 ==="
 
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -19,14 +19,14 @@ HDFS_OUTPUT="$HDFS_URI$HDFS_BASE/output_centroids"
 
 # Kiểm tra HDFS có đang chạy không
 if ! hdfs dfs -test -e / 2>/dev/null; then
-    echo "❌ HDFS không thể truy cập. Vui lòng khởi động HDFS trước."
+    echo "HDFS không thể truy cập. Vui lòng khởi động HDFS trước."
     echo "   Chạy: start-dfs.sh"
     exit 1
 fi
 
 # Kiểm tra file đầu vào có tồn tại trong HDFS không
 if ! hdfs dfs -test -e "$HDFS_BASE/input/hadoop_input.txt" 2>/dev/null; then
-    echo "❌ Không tìm thấy file đầu vào trong HDFS: $HDFS_BASE/input/hadoop_input.txt"
+    echo "Không tìm thấy tệp đầu vào trong HDFS: $HDFS_BASE/input/hadoop_input.txt"
     echo "   Vui lòng chạy: ./02_scripts/spark/setup_hdfs.sh"
     exit 1
 fi
@@ -45,11 +45,11 @@ echo "  Executor cores: $EXECUTOR_CORES"
 echo "  Executor memory: $EXECUTOR_MEMORY"
 echo "  Driver memory: $DRIVER_MEMORY"
 echo ""
-echo "📊 SỬ DỤNG MLLIB - NHANH HƠN 30-50%"
-echo "   ✅ Catalyst optimizer"
-echo "   ✅ Tungsten execution engine"
-echo "   ✅ K-means++ initialization"
-echo "   ✅ Adaptive query execution"
+echo "Sử dụng MLlib - nhanh hơn 30-50%"
+echo "   - Catalyst optimizer"
+echo "   - Tungsten execution engine"
+echo "   - Khởi tạo k-means++"
+echo "   - Adaptive query execution"
 echo ""
 echo "Đường dẫn HDFS:"
 echo "  Đầu vào: $HDFS_INPUT"
@@ -143,12 +143,12 @@ spark-submit \
     "$TOL"
 
 if [ $? -ne 0 ]; then
-    echo "❌ PySpark job thất bại"
+    echo "PySpark job thất bại"
     exit 1
 fi
 
 echo ""
-echo "✅ K-means MLlib hoàn thành!"
+echo "K-means MLlib hoàn thành!"
 echo "Tâm cụm đã lưu vào: $HDFS_OUTPUT"
 echo ""
 echo "Để xem kết quả:"

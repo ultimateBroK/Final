@@ -1,7 +1,7 @@
 #!/bin/bash
 # download_from_hdfs.sh - Tải kết quả từ HDFS để phân tích local
 
-echo "=== TẢI KẾT QUẢ TỪ HDFS ==="
+echo "=== TẢI KẾT QUẢ TỪ HDFS ⬇️ ==="
 
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -14,18 +14,18 @@ HDFS_OUTPUT="$HDFS_BASE/output_centroids"
 
 # Kiểm tra HDFS có đang chạy không
 if ! hdfs dfs -test -e / 2>/dev/null; then
-    echo "❌ HDFS không thể truy cập."
+    echo "HDFS không thể truy cập."
     exit 1
 fi
 
 # Kiểm tra kết quả có tồn tại trong HDFS không
 if ! hdfs dfs -test -e "$HDFS_OUTPUT" 2>/dev/null; then
-    echo "❌ Không tìm thấy kết quả trong HDFS: $HDFS_OUTPUT"
+    echo "Không tìm thấy kết quả trong HDFS: $HDFS_OUTPUT"
     echo "   Vui lòng chạy PySpark job trước: ./02_scripts/spark/run_spark.sh"
     exit 1
 fi
 
-echo "✅ Đã tìm thấy kết quả trong HDFS"
+echo "Đã tìm thấy kết quả trong HDFS"
 echo ""
 
 # Tạo thư mục results nếu chưa có
@@ -43,11 +43,11 @@ rm -f "$DATA_RESULTS/final_centroids.txt"
 hdfs dfs -getmerge "$HDFS_OUTPUT" "$DATA_RESULTS/final_centroids.txt"
 
 if [ $? -ne 0 ]; then
-    echo "❌ Thất bại khi tải tâm cụm"
+    echo "Thất bại khi tải tâm cụm"
     exit 1
 fi
 
-echo "✅ Đã tải tâm cụm cuối cùng"
+echo "Đã tải tâm cụm cuối cùng"
 echo ""
 
 # Hiển thị thông tin file
@@ -63,7 +63,7 @@ if [ -f "$DATA_RESULTS/final_centroids.txt" ]; then
 fi
 
 echo ""
-echo "✅ Hoàn thành tải xuống!"
+echo "Hoàn thành tải xuống!"
 echo ""
 echo "Bước tiếp theo:"
 echo "  1. Gán cụm: python $ROOT_DIR/02_scripts/polars/04_assign_clusters.py"
