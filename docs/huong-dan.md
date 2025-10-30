@@ -16,7 +16,7 @@
 
 Pipeline này xử lý 179 triệu giao dịch (16GB) để phát hiện rửa tiền bằng K-means clustering.
 
-**Thời gian tổng**: ~35-50 phút  
+**Thời gian tổng**: ~11-15 phút  
 **Công nghệ**: Polars + Apache Spark MLlib + HDFS
 
 ---
@@ -60,7 +60,7 @@ hdfs dfsadmin -report
 ### BƯỚC 1: Khám phá dữ liệu 🔍
 
 **Mục đích**: Hiểu cấu trúc CSV, xem thống kê  
-**Thời gian**: ~30 giây
+**Thời gian**: ~10-30 giây
 
 ```bash
 cd /home/ultimatebrok/Downloads/Final
@@ -79,7 +79,7 @@ python scripts/polars/explore_fast.py
 ### BƯỚC 2: Xử lý và trích xuất đặc trưng 🔧
 
 **Mục đích**: Chuyển dữ liệu thô thành dạng số  
-**Thời gian**: ~10 phút
+**Thời gian**: ~30-60 giây
 
 ```bash
 python scripts/polars/prepare_polars.py
@@ -111,7 +111,7 @@ python scripts/polars/prepare_polars.py
 ### BƯỚC 3: Upload lên HDFS ☁️
 
 **Mục đích**: Chuyển dữ liệu lên hệ thống phân tán  
-**Thời gian**: ~5 phút
+**Thời gian**: ~40-60 giây
 
 ```bash
 ./scripts/spark/setup_hdfs.sh
@@ -143,7 +143,7 @@ hdfs dfs -du -h /user/spark/hi_large/
 ### BƯỚC 4: Chạy K-means trên Spark 🚀
 
 **Mục đích**: Phân cụm 179M giao dịch bằng MLlib K-means  
-**Thời gian**: 10-25 phút (tùy phần cứng) - Nhanh hơn 30-50% nhờ MLlib!
+**Thời gian**: ~5-8 phút (tùy phần cứng) - Nhanh hơn 30-50% nhờ MLlib!
 
 ```bash
 ./scripts/spark/run_spark.sh
@@ -192,7 +192,7 @@ Iteration 15: shift = 0.010  (đã hội tụ ✓)
 ### BƯỚC 5: Tải kết quả về 📥
 
 **Mục đích**: Lấy tâm cụm cuối cùng từ HDFS  
-**Thời gian**: ~30 giây
+**Thời gian**: ~3-10 giây
 
 ```bash
 ./scripts/spark/download_from_hdfs.sh
@@ -210,7 +210,7 @@ Iteration 15: shift = 0.010  (đã hội tụ ✓)
 ### BƯỚC 6: Gán nhãn cụm 🏷️
 
 **Mục đích**: Xác định mỗi giao dịch thuộc cụm nào  
-**Thời gian**: ~10 phút
+**Thời gian**: ~3-5 phút
 
 ```bash
 python scripts/polars/assign_clusters_polars.py
@@ -235,7 +235,7 @@ FOR mỗi giao dịch:
 ### BƯỚC 7: Phân tích kết quả 📊
 
 **Mục đích**: Tìm cụm có tỷ lệ rửa tiền cao  
-**Thời gian**: ~2 phút
+**Thời gian**: ~30-60 giây
 
 ```bash
 python scripts/polars/analyze_polars.py
@@ -296,7 +296,7 @@ Pipeline sẽ tự động:
 - Log chi tiết vào `logs/pipeline_log_*.md`
 - Sử dụng MLlib K-means với k-means++ tự động
 
-**Thời gian**: 35-50 phút (nhanh hơn 30-50% so với trước)
+**Thời gian**: 10-15 phút (nhanh hơn 30-50% so với trước)
 
 ---
 
@@ -426,39 +426,3 @@ head -n 100000 data/raw/HI-Large_Trans.csv > data/raw/sample.csv
 # Terminal 2: Theo dõi log real-time
 tail -f logs/pipeline_log_*.md
 ```
-
----
-
-<a id="checklist"></a>
-## ✅ CHECKLIST TRƯỚC KHI CHẠY
-
-- [ ] Java installed (version 11 hoặc 17)
-- [ ] HDFS đang chạy (`hdfs dfsadmin -report`)
-- [ ] Spark installed (`spark-submit --version`)
-- [ ] Python packages installed (`polars`, `numpy`, `pyspark`)
-- [ ] File CSV tồn tại (`data/raw/HI-Large_Trans.csv`)
-- [ ] Disk space đủ (>50GB trống)
-- [ ] RAM đủ (>16GB, khuyến nghị 32GB)
-
----
-
-<a id="tai-lieu"></a>
-## 📚 TÀI LIỆU THAM KHẢO
-
-- **bao_cao_tieu_luan.md**: Báo cáo chi tiết bằng tiếng Việt
-- **README.md**: Quick start guide
-- **docs/tong-quan.md**: Kiến trúc hệ thống
-- **changelog.md**: Lịch sử thay đổi
-
----
-
-## 🆘 CẦN TRỢ GIÚP?
-
-1. Xem log: `logs/pipeline_log_*.md`
-2. Xem troubleshooting trong `bao_cao_tieu_luan.md`
-3. Check HDFS: `hdfs dfsadmin -report`
-4. Check Spark UI: `http://localhost:4040`
-
----
-
-**Chúc bạn chạy thành công! 🎉**
