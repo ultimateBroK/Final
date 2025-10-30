@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-BƯỚC 6: GÁN NHÃN CỤM CHO TỮNG GIAO DỊCH
+BƯỚC 6: GÁN NHÃN CỤM CHO TỪNG GIAO DỊCH
 
 Mục đích:
 - Xác định mỗi giao dịch thuộc cụm nào (0, 1, 2, 3, 4)
@@ -15,12 +15,17 @@ Input:
 Output: 01_data/results/clustered_results.txt
 
 Kỹ thuật: Batch processing (1M giao dịch/lần) để tiết kiệm RAM
+
+Tham số CLI:
+- --centroids <path>: Đường dẫn file tâm cụm (mặc định 01_data/results/final_centroids.txt)
+- --hdfs-path <path>: Đường dẫn HDFS tới hadoop_input.txt
 """
 
 import polars as pl
 import numpy as np
 import os
 import subprocess
+import argparse
 
 # ==================== CẤU HÌNH ĐƯỜNG DẪN ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -31,7 +36,7 @@ DATA_RESULTS = os.path.join(ROOT_DIR, '01_data', 'results')
 os.makedirs(DATA_RESULTS, exist_ok=True)
 
 print("="*70)
-print("🏷️  BƯỚC 6: GÁN NHÃN CỤM CHO TỮNG GIAO DỊCH")
+print("🏷️  BƯỚC 6: GÁN NHÃN CỤM CHO TỪNG GIAO DỊCH")
 print("="*70)
 print()
 

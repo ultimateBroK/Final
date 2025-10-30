@@ -21,7 +21,7 @@ mkdir -p "$DATA_PROCESSED" "$DATA_RESULTS"
 find "$DATA_PROCESSED" -mindepth 1 -maxdepth 1 -type f -print -delete || true
 find "$DATA_RESULTS" -mindepth 1 -maxdepth 1 -type f -print -delete || true
 
-# 2) Xóa logsqqqq
+# 2) Xóa logs
 echo "[2/6] Dọn 04_logs..."
 mkdir -p "$LOGS_DIR"
 find "$LOGS_DIR" -mindepth 1 -maxdepth 1 -type f -name "*.md" -print -delete || true
@@ -54,6 +54,6 @@ mkdir -p "$CHECKPOINT_DIR"
 
 echo ""
 echo "✅ Dọn sạch xong! Sẵn sàng chạy lại từ đầu."
-echo "Gợi ý chạy: ./02_scripts/pipeline/full_pipeline_spark_v2.sh --reset"
+echo "Gợi ý chạy: ./02_scripts/pipeline/full_pipeline_spark.sh --reset"
 
 

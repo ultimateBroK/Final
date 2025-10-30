@@ -1,7 +1,9 @@
 #!/bin/bash
 # download_from_hdfs.sh - Tải kết quả từ HDFS để phân tích local
 
-echo "=== TẢI KẾT QUẢ TỪ HDFS ⬇️ ==="
+set -euo pipefail
+
+echo "=== TẢI KẾT QUẢ TỪ HDFS ==="
 
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

@@ -15,6 +15,9 @@ Input: 01_data/raw/HI-Large_Trans.csv (16GB, 179M dòng)
 Output: 01_data/processed/hadoop_input_temp.txt (33GB, TẠM THỜI)
 
 ⚠️  LƯU Ý: File output sẽ BỊ XÓA TỰ ĐỘNG sau khi upload lên HDFS!
+Tham số CLI:
+- --raw <path>: Đường dẫn CSV đầu vào
+- --out-dir <dir>: Thư mục output processed (mặc định 01_data/processed)
 """
 
 import polars as pl
@@ -22,14 +25,26 @@ import numpy as np
 import os
 import time
 from datetime import datetime
+import argparse
 
 # ==================== CẤU HÌNH ĐƯỜNG DẪN ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_RAW = os.path.join(ROOT_DIR, '01_data', 'raw', 'HI-Large_Trans.csv')
-DATA_PROCESSED = os.path.join(ROOT_DIR, '01_data', 'processed')
 
-# Tạo thư mục processed nếu chưa có
+def parse_args():
+    parser = argparse.ArgumentParser(description="Chuẩn bị dữ liệu cho K-means (Polars)")
+    parser.add_argument("--raw", type=str, default=None, help="Đường dẫn CSV đầu vào")
+    parser.add_argument("--out-dir", type=str, default=None, help="Thư mục output processed")
+    return parser.parse_args()
+
+args = parse_args()
+
+DATA_RAW = args.raw or os.path.join(ROOT_DIR, '01_data', 'raw', 'HI-Large_Trans.csv')
+DATA_PROCESSED = args.out_dir or os.path.join(ROOT_DIR, '01_data', 'processed')
+
+# Tạo thư mục processed nếu chưa có và kiểm tra input
 os.makedirs(DATA_PROCESSED, exist_ok=True)
+if not os.path.isfile(DATA_RAW):
+    raise FileNotFoundError(f"Không tìm thấy file: {DATA_RAW}")
 
 def log_with_time(msg, step_start=None):
     """In message với timestamp và thời gian elapsed nếu có"""

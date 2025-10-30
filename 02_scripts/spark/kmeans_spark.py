@@ -66,7 +66,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     pipeline_start = time.time()
     
     print("=" * 70)
-    print("🚀 SPARK MLlib K-means - Phiên bản tăng tốc")
+    print("SPARK MLlib K-means - Chế độ tối ưu")
     print("=" * 70)
     log_with_time(f"Đầu vào: {input_path}")
     log_with_time(f"Số cụm: {k}")
@@ -77,7 +77,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     # Đọc dữ liệu từ HDFS
     step_start = time.time()
-    log_with_time("Bước 1/5: Đọc dữ liệu từ HDFS... 📂")
+    log_with_time("Bước 1/5: Đọc dữ liệu từ HDFS...")
     df = spark.read.csv(
         input_path,
         header=False,
@@ -94,7 +94,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     # Chuyển đổi sang vector
     step_start = time.time()
-    log_with_time("Bước 2/5: Tạo vector đặc trưng... 🔧")
+    log_with_time("Bước 2/5: Tạo vector đặc trưng...")
     assembler = VectorAssembler(
         inputCols=[f for f in df.columns],
         outputCol="features"
@@ -111,7 +111,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     # Khởi tạo K-means với k-means++ (k-means||)
     step_start = time.time()
-    log_with_time("Bước 3/5: Cấu hình K-means (k-means++)... 🎯")
+    log_with_time("Bước 3/5: Cấu hình K-means (k-means++)...")
     kmeans = KMeans() \
         .setK(k) \
         .setMaxIter(max_iter) \
@@ -126,8 +126,8 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     # Huấn luyện
     train_start = time.time()
-    log_with_time("Bước 4/5: Đang huấn luyện K-means... 🚀")
-    log_with_time("   Sử dụng Catalyst + Tungsten; vui lòng đợi vài phút...")
+    log_with_time("Bước 4/5: Đang huấn luyện K-means...")
+    log_with_time("   Sử dụng Catalyst + Tungsten; vui lòng đợi...")
     print()
     
     # Huấn luyện mô hình
@@ -148,7 +148,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     log_with_time("Hoàn thành phân cụm K-means! ✅")
     print("=" * 70)
     print()
-    print("📊 Thông tin huấn luyện:")
+    print("Thông tin huấn luyện:")
     print(f"   - Số vòng lặp thực tế: {num_iterations}")
     print(f"   - Số vòng lặp tối đa: {max_iter}")
     if training_cost is not None:
@@ -157,7 +157,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     # Lưu tâm cụm vào HDFS
     step_start = time.time()
-    log_with_time(f"Bước 5/5: Lưu {len(centroids)} tâm cụm vào HDFS... 💾")
+    log_with_time(f"Bước 5/5: Lưu {len(centroids)} tâm cụm vào HDFS...")
     log_with_time(f"   Đường dẫn: {output_path}")
     
     # Chuyển centroids thành text format
@@ -178,7 +178,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     # Tính toán phân cụm cuối cùng
     step_start = time.time()
-    log_with_time("Phân tích kết quả... 📈")
+    log_with_time("Phân tích kết quả...")
     predictions = model.transform(vector_df)
     
     # Đếm số điểm mỗi cụm
@@ -197,7 +197,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     
     if training_cost is not None and total_points:
         print()
-        print("📈 Chỉ số chất lượng cụm:")
+        print("Chỉ số chất lượng cụm:")
         print(f"   - WSSSE: {training_cost:.2f}")
         print(f"   - Trung bình SSE/điểm: {training_cost/total_points:.6f}")
     
@@ -205,7 +205,7 @@ def run_kmeans(input_path: str, output_path: str, k: int = 5, max_iter: int = 15
     total_time = time.time() - pipeline_start
     print()
     print("=" * 70)
-    log_with_time("Hoàn thành toàn bộ tiến trình! ✅")
+    log_with_time("Hoàn thành toàn bộ tiến trình!")
     log_with_time(f"Tổng thời gian: {total_time/60:.1f} phút ({total_time:.1f}s)")
     print("=" * 70)
     print()

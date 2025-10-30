@@ -1,7 +1,9 @@
 #!/bin/bash
 # run_spark.sh - Chạy thuật toán K-means với PySpark trên HDFS
 
-echo "=== PYSPARK K-MEANS VỚI HDFS 🚀 ==="
+set -euo pipefail
+
+echo "=== PYSPARK K-MEANS VỚI HDFS ==="
 
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -45,11 +47,7 @@ echo "  Executor cores: $EXECUTOR_CORES"
 echo "  Executor memory: $EXECUTOR_MEMORY"
 echo "  Driver memory: $DRIVER_MEMORY"
 echo ""
-echo "Sử dụng MLlib - nhanh hơn 30-50%"
-echo "   - Catalyst optimizer"
-echo "   - Tungsten execution engine"
-echo "   - Khởi tạo k-means++"
-echo "   - Adaptive query execution"
+echo "Sử dụng MLlib (Catalyst, Tungsten, k-means++, AQE)"
 echo ""
 echo "Đường dẫn HDFS:"
 echo "  Đầu vào: $HDFS_INPUT"

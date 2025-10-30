@@ -8,14 +8,21 @@ Mục đích:
 - Lưu với timestamp để theo dõi lịch sử
 - Bao gồm: centroids, clusters, logs, và metadata
 
-Sử dụng:
+Sử dụng cơ bản:
     python 02_scripts/data/snapshot_results.py
+
+Tham số CLI (tiếng Việt):
+- --list: Liệt kê tất cả snapshots có sẵn
+- --name <ten_tuy_chon>: Đặt tên snapshot tùy chọn (mặc định dùng timestamp)
+- --extra <path1> [<path2> ...]: Thêm file bổ sung vào snapshot (đường dẫn tuyệt đối hoặc tương đối tính từ root dự án)
 """
 
 import os
 import shutil
 from datetime import datetime
 import json
+import argparse
+from typing import List, Dict, Any
 
 # ==================== CẤU HÌNH ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -23,12 +30,20 @@ RESULTS_DIR = os.path.join(ROOT_DIR, '01_data', 'results')
 SNAPSHOTS_DIR = os.path.join(ROOT_DIR, '05_snapshots')
 LOGS_DIR = os.path.join(ROOT_DIR, '04_logs')
 
-def create_snapshot():
-    """Tạo snapshot của kết quả hiện tại"""
-    
-    # Tạo timestamp cho snapshot
+def create_snapshot(snapshot_name: str | None = None, extra_paths: List[str] | None = None) -> str:
+    """Tạo snapshot của kết quả hiện tại.
+
+    Tham số:
+    - snapshot_name: Tên thư mục snapshot (nếu None sẽ tạo theo timestamp)
+    - extra_paths: Danh sách file bổ sung cần copy vào snapshot
+
+    Trả về:
+    - Đường dẫn tuyệt đối tới thư mục snapshot vừa tạo
+    """
+
+    # Tạo timestamp cho snapshot nếu chưa cung cấp tên
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    snapshot_name = f"snapshot_{timestamp}"
+    snapshot_name = snapshot_name or f"snapshot_{timestamp}"
     snapshot_path = os.path.join(SNAPSHOTS_DIR, snapshot_name)
     
     print("="*70)
@@ -54,7 +69,7 @@ def create_snapshot():
             ('01_data/results/suspicious_transactions.csv', 'suspicious_transactions.csv')
         )
     
-    copied_files = []
+    copied_files: List[Dict[str, Any]] = []
     for src_rel, dst_name in files_to_snapshot:
         src = os.path.join(ROOT_DIR, src_rel)
         dst = os.path.join(snapshot_path, dst_name)
@@ -72,6 +87,27 @@ def create_snapshot():
             print(f"   ⚠️  Không tìm thấy: {src_rel}")
     
     print()
+
+    # ==================== Copy EXTRA FILES (nếu có) ====================
+    if extra_paths:
+        print("➕ Đang thêm file bổ sung...")
+        for p in extra_paths:
+            # Hỗ trợ cả đường dẫn tuyệt đối và tương đối tính từ ROOT_DIR
+            abs_src = p if os.path.isabs(p) else os.path.join(ROOT_DIR, p)
+            if os.path.isfile(abs_src):
+                dst_name = os.path.basename(abs_src)
+                dst = os.path.join(snapshot_path, dst_name)
+                shutil.copy2(abs_src, dst)
+                file_size = os.path.getsize(abs_src)
+                copied_files.append({
+                    'name': dst_name,
+                    'size_bytes': file_size,
+                    'size_mb': round(file_size / (1024 * 1024), 2)
+                })
+                print(f"   ✅ {dst_name}")
+            else:
+                print(f"   ⚠️  Bỏ qua (không tồn tại file): {p}")
+        print()
     
     # ==================== Copy latest log ====================
     print("📝 Đang copy log mới nhất...")
@@ -121,7 +157,7 @@ def create_snapshot():
     
     return snapshot_path
 
-def list_snapshots():
+def list_snapshots() -> None:
     """Liệt kê tất cả snapshots"""
     
     if not os.path.exists(SNAPSHOTS_DIR):
@@ -158,9 +194,26 @@ def list_snapshots():
             print()
 
 if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) > 1 and sys.argv[1] == '--list':
+    # ==================== CLI ====================
+    parser = argparse.ArgumentParser(
+        description="Tạo và quản lý snapshots kết quả phân tích",
+    )
+    parser.add_argument(
+        "--list", action="store_true",
+        help="Liệt kê tất cả snapshots hiện có"
+    )
+    parser.add_argument(
+        "--name", type=str, default=None,
+        help="Đặt tên snapshot tùy chọn (mặc định: snapshot_<timestamp>)"
+    )
+    parser.add_argument(
+        "--extra", nargs='*', default=None,
+        help="Các file bổ sung cần thêm vào snapshot (đường dẫn tuyệt đối hoặc tương đối)"
+    )
+
+    args = parser.parse_args()
+
+    if args.list:
         list_snapshots()
     else:
-        create_snapshot()
+        create_snapshot(snapshot_name=args.name, extra_paths=args.extra)
