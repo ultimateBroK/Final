@@ -78,7 +78,7 @@ pip install -r requirements.txt
 
 ```bash
 # Chạy installation script
-./02_scripts/setup/install_spark.sh
+./scripts/setup/install_spark.sh
 
 # Reload shell
 source ~/.zshrc
@@ -304,7 +304,7 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 
 # 5. Cài Spark (optional)
-./02_scripts/setup/install_spark.sh
+./scripts/setup/install_spark.sh
 source ~/.zshrc
 
 # 6. Test

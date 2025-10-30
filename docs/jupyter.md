@@ -12,7 +12,7 @@ Hướng dẫn nhanh để chạy Jupyter notebook với kernel từ `.venv` c�
 cd /home/ultimatebrok/Downloads/Final
 
 # Chạy script setup (tự động register kernel)
-./02_scripts/setup/setup_jupyter_kernel.sh
+./scripts/setup/setup_jupyter_kernel.sh
 ```
 
 ### Bước 2: Khởi động Jupyter Lab
@@ -27,7 +27,7 @@ jupyter lab
 
 ### Bước 3: Chọn kernel trong notebook
 
-1. Mở notebook: `06_visualizations/analysis_notebook.ipynb`
+1. Mở notebook: `visualizations/analysis_notebook.ipynb`
 2. Click vào kernel selector (góc trên phải)
 3. Chọn: **"Python (Final Project)"**
 
@@ -236,7 +236,7 @@ source .venv/bin/activate
 jupyter lab
 
 # Work in notebook...
-# 06_visualizations/analysis_notebook.ipynb
+# visualizations/analysis_notebook.ipynb
 
 # Evening
 # Save work
@@ -248,18 +248,18 @@ deactivate
 
 ```bash
 # 1. Chạy pipeline
-./02_scripts/pipeline/full_pipeline_spark.sh
+./scripts/pipeline/full_pipeline_spark.sh
 
 # 2. Start Jupyter
 source .venv/bin/activate
 jupyter lab
 
 # 3. Analyze trong notebook
-# Open: 06_visualizations/analysis_notebook.ipynb
+# Open: visualizations/analysis_notebook.ipynb
 # Run all cells
 
 # 4. Export results
-# Notebook sẽ tạo files trong 06_visualizations/
+# Notebook sẽ tạo files trong visualizations/
 ```
 
 ---
@@ -267,7 +267,7 @@ jupyter lab
 ## 📚 Tài liệu liên quan
 
 - [INSTALLATION.md](INSTALLATION.md) - Cài đặt dependencies
-- [06_visualizations/README.md](06_visualizations/README.md) - Hướng dẫn visualization
+- [visualizations/README.md](visualizations/README.md) - Hướng dẫn visualization
 - [requirements.txt](requirements.txt) - List packages
 
 ---
@@ -297,7 +297,7 @@ rm -rf ~/.local/share/jupyter/kernels/final_project
 
 # Setup lại
 cd /home/ultimatebrok/Downloads/Final
-./02_scripts/setup/setup_jupyter_kernel.sh
+./scripts/setup/setup_jupyter_kernel.sh
 ```
 
 ---

@@ -14,18 +14,18 @@ TÓM TẮT
 - Công nghệ: Polars (đọc stream từ HDFS) + NumPy (vectorized distance).
 
 I/O & THỜI GIAN
-- Input : 01_data/results/final_centroids.txt (centroids tải từ HDFS)
+- Input : data/results/final_centroids.txt (centroids tải từ HDFS)
 - Input : HDFS /user/spark/hi_large/input/hadoop_input.txt (179M dòng)
-- Output: 01_data/results/clustered_results.txt (ID cụm mỗi giao dịch)
+- Output: data/results/clustered_results.txt (ID cụm mỗi giao dịch)
 - Thời gian chạy: ~10 phút (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/assign_clusters_polars.py \
-    --centroids 01_data/results/final_centroids.txt \
+  python scripts/polars/assign_clusters_polars.py \
+    --centroids data/results/final_centroids.txt \
     --hdfs-path /user/spark/hi_large/input/hadoop_input.txt
 
 THAM SỐ CLI
-- --centroids <path> : Đường dẫn file tâm cụm (mặc định 01_data/results/final_centroids.txt)
+- --centroids <path> : Đường dẫn file tâm cụm (mặc định data/results/final_centroids.txt)
 - --hdfs-path <path> : Đường dẫn HDFS tới hadoop_input.txt
 
 GHI CHÚ
@@ -40,8 +40,8 @@ import argparse
 
 # ==================== CẤU HÌNH ĐƯỜNG DẪN ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_PROCESSED = os.path.join(ROOT_DIR, '01_data', 'processed')
-DATA_RESULTS = os.path.join(ROOT_DIR, '01_data', 'results')
+DATA_PROCESSED = os.path.join(ROOT_DIR, 'data', 'processed')
+DATA_RESULTS = os.path.join(ROOT_DIR, 'data', 'results')
 
 # Tạo thư mục results nếu chưa có
 os.makedirs(DATA_RESULTS, exist_ok=True)
@@ -80,7 +80,7 @@ except (ValueError, OSError) as e:
     print()
     print("💡 HƯỚNG DẪN:")
     print("   1. Chạy bước 6 trước:")
-    print("      ./02_scripts/spark/download_from_hdfs.sh")
+    print("      ./scripts/spark/download_from_hdfs.sh")
     print("   2. Rồi chạy lại script này")
     print()
     exit(1)
@@ -138,7 +138,7 @@ except Exception as e:
     print("   2. Kiểm tra file tồn tại:")
     print("      hdfs dfs -ls /user/spark/hi_large/input/")
     print("   3. Nếu không có, chạy lại bước 4:")
-    print("      ./02_scripts/spark/setup_hdfs.sh")
+    print("      ./scripts/spark/setup_hdfs.sh")
     print()
     exit(1)
 
@@ -208,7 +208,7 @@ for cluster_id, count in enumerate(cluster_counts):
     print(f"   Cluster {cluster_id}: {count:,} giao dịch ({percent:.2f}%)")
 print()
 print("💡 GỢI Ý TIẾP THEO:")
-print("   Chạy bước 7: python 02_scripts/polars/analyze.py")
+print("   Chạy bước 7: python scripts/polars/analyze.py")
 print()
 
 

@@ -36,7 +36,7 @@ jupyter lab --port=8888
 
 Trong browser, navigate đến:
 ```
-06_visualizations/analysis_notebook.ipynb
+visualizations/analysis_notebook.ipynb
 ```
 
 ---
@@ -201,13 +201,13 @@ jupyter labextension install jupyterlab-plotly
 
 ```bash
 # 1. Chạy pipeline
-./02_scripts/pipeline/full_pipeline_spark.sh
+./scripts/pipeline/full_pipeline_spark.sh
 
 # 2. Khởi động Jupyter
 jupyter lab
 
 # 3. Mở notebook và chạy
-# 06_visualizations/analysis_notebook.ipynb
+# visualizations/analysis_notebook.ipynb
 
 # 4. Export results
 # Trong notebook: Run "Export Results" cell
@@ -220,10 +220,10 @@ jupyter lab
 
 ## 📊 Output Files
 
-Sau khi chạy notebook, các files sẽ được tạo trong `06_visualizations/`:
+Sau khi chạy notebook, các files sẽ được tạo trong `visualizations/`:
 
 ```
-06_visualizations/
+visualizations/
 ├── analysis_notebook.ipynb
 ├── cluster_statistics.csv       # Thống kê clusters
 ├── high_risk_transactions.csv   # Giao dịch rủi ro cao (nếu có)

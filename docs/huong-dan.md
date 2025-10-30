@@ -146,7 +146,7 @@ hdfs dfs -du -h /user/spark/hi_large/
 **Thời gian**: 10-25 phút (tùy phần cứng) - Nhanh hơn 30-50% nhờ MLlib!
 
 ```bash
-./02_scripts/spark/run_spark.sh
+./scripts/spark/run_spark.sh
 ```
 
 **MLlib K-means với k-means++ initialization**:
@@ -268,7 +268,7 @@ python scripts/polars/analyze_polars.py
 Thay vì chạy từng bước, dùng script tự động:
 
 ```bash
-./02_scripts/pipeline/full_pipeline_spark_v2.sh
+./scripts/pipeline/full_pipeline_spark_v2.sh
 
 ### Flags quan trọng (chạy ngay từ CLI)
 
@@ -286,7 +286,7 @@ Thay vì chạy từng bước, dùng script tự động:
 --dry-run      # chỉ in kế hoạch
 
 # Ví dụ
-./02_scripts/pipeline/full_pipeline_spark_v2.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
+./scripts/pipeline/full_pipeline_spark_v2.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
 ```
 ```
 

@@ -14,8 +14,8 @@ TÓM TẮT
 - Công nghệ: Polars (lazy, streaming sink) — ghi xuống đĩa theo luồng.
 
 I/O & THỜI GIAN
-- Input : 01_data/raw/HI-Large_Trans.csv (~16GB, 179M dòng)
-- Output: 01_data/processed/hadoop_input_temp.txt (~33GB, TẠM THỜI)
+- Input : data/raw/HI-Large_Trans.csv (~16GB, 179M dòng)
+- Output: data/processed/hadoop_input_temp.txt (~33GB, TẠM THỜI)
 - Thời gian chạy: ~10 phút (tùy máy)
 
 QUY TẮC LƯU TRỮ
@@ -23,13 +23,13 @@ QUY TẮC LƯU TRỮ
 - Dữ liệu dài hạn chỉ lưu trên HDFS theo policy của dự án.
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/prepare_polars.py \
-    --raw 01_data/raw/HI-Large_Trans.csv \
-    --out-dir 01_data/processed
+  python scripts/polars/prepare_polars.py \
+    --raw data/raw/HI-Large_Trans.csv \
+    --out-dir data/processed
 
 THAM SỐ CLI
 - --raw <path>     : Đường dẫn CSV đầu vào
-- --out-dir <dir>  : Thư mục output processed (mặc định 01_data/processed)
+- --out-dir <dir>  : Thư mục output processed (mặc định data/processed)
 """
 
 import polars as pl
@@ -50,8 +50,8 @@ def parse_args():
 
 args = parse_args()
 
-DATA_RAW = args.raw or os.path.join(ROOT_DIR, '01_data', 'raw', 'HI-Large_Trans.csv')
-DATA_PROCESSED = args.out_dir or os.path.join(ROOT_DIR, '01_data', 'processed')
+DATA_RAW = args.raw or os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
+DATA_PROCESSED = args.out_dir or os.path.join(ROOT_DIR, 'data', 'processed')
 
 # Tạo thư mục processed nếu chưa có và kiểm tra input
 os.makedirs(DATA_PROCESSED, exist_ok=True)
@@ -233,7 +233,7 @@ print("   ├─ Nó sẽ BỊ XÓA sau khi upload lên HDFS (Bước 3)")
 print("   └─ Dữ liệu chỉ lưu trên HDFS để tuân thủ quy định bảo mật")
 print()
 print("GỢI Ý TIẾP THEO:")
-print("   Chạy bước 3: bash 02_scripts/spark/setup_hdfs.sh")
+print("   Chạy bước 3: bash scripts/spark/setup_hdfs.sh")
 print("   (MLlib sẽ tự động dùng k-means++ initialization)")
 print()
 

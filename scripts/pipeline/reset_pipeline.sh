@@ -6,9 +6,9 @@
 # Mục tiêu: Xoá các dấu mốc tiến độ (.pipeline_checkpoints) để chạy lại
 #           một phần hoặc toàn bộ pipeline.
 # Cách chạy nhanh:
-#   ./02_scripts/pipeline/reset_pipeline.sh all
-#   ./02_scripts/pipeline/reset_pipeline.sh status
-#   ./02_scripts/pipeline/reset_pipeline.sh from 5
+#   ./scripts/pipeline/reset_pipeline.sh all
+#   ./scripts/pipeline/reset_pipeline.sh status
+#   ./scripts/pipeline/reset_pipeline.sh from 5
 
 set -euo pipefail
 

@@ -11,7 +11,7 @@ Mục đích:
 - Bao gồm: centroids, clusters, logs, và metadata
 
 Sử dụng cơ bản:
-    python 02_scripts/data/snapshot_results.py
+    python scripts/data/snapshot_results.py
 
 Tham số CLI (tiếng Việt):
 - --list: Liệt kê tất cả snapshots có sẵn
@@ -28,9 +28,9 @@ from typing import List, Dict, Any
 
 # ==================== CẤU HÌNH ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-RESULTS_DIR = os.path.join(ROOT_DIR, '01_data', 'results')
-SNAPSHOTS_DIR = os.path.join(ROOT_DIR, '05_snapshots')
-LOGS_DIR = os.path.join(ROOT_DIR, '04_logs')
+RESULTS_DIR = os.path.join(ROOT_DIR, 'data', 'results')
+SNAPSHOTS_DIR = os.path.join(ROOT_DIR, 'snapshots')
+LOGS_DIR = os.path.join(ROOT_DIR, 'logs')
 
 def create_snapshot(snapshot_name: str | None = None, extra_paths: List[str] | None = None) -> str:
     """Tạo snapshot của kết quả hiện tại.
@@ -60,15 +60,15 @@ def create_snapshot(snapshot_name: str | None = None, extra_paths: List[str] | N
     print("📂 Đang copy kết quả...")
     
     files_to_snapshot = [
-        ('01_data/results/final_centroids.txt', 'final_centroids.txt'),
-        ('01_data/results/clustered_results.txt', 'clustered_results.txt'),
+        ('data/results/final_centroids.txt', 'final_centroids.txt'),
+        ('data/results/clustered_results.txt', 'clustered_results.txt'),
     ]
     
     # Copy suspicious transactions nếu có
     suspicious_file = os.path.join(RESULTS_DIR, 'suspicious_transactions.csv')
     if os.path.exists(suspicious_file):
         files_to_snapshot.append(
-            ('01_data/results/suspicious_transactions.csv', 'suspicious_transactions.csv')
+            ('data/results/suspicious_transactions.csv', 'suspicious_transactions.csv')
         )
     
     copied_files: List[Dict[str, Any]] = []

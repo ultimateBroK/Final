@@ -6,10 +6,10 @@
 # Mục tiêu: Tạo thư mục HDFS, dọn dẹp dữ liệu cũ, upload dữ liệu chuẩn hoá
 #            (temp local) lên HDFS và (mặc định) xoá temp local.
 # I/O:
-#   - Input(local tạm): 01_data/processed/hadoop_input_temp.txt (~33GB)
+#   - Input(local tạm): data/processed/hadoop_input_temp.txt (~33GB)
 #   - Output (HDFS)   : /user/spark/hi_large/input/hadoop_input.txt
 # Cách chạy nhanh:
-#   bash 02_scripts/spark/setup_hdfs.sh [--no-delete]
+#   bash scripts/spark/setup_hdfs.sh [--no-delete]
 # Tham số:
 #   --input <path>     : đường dẫn file tạm local
 #   --hdfs-base <dir>  : thư mục gốc HDFS (mặc định /user/spark/hi_large)
@@ -21,7 +21,7 @@ echo "=== BƯỚC 3: THIẾT LẬP HDFS CHO PYSPARK K-MEANS ==="
 
 usage() {
   echo "Cách dùng: $0 [--input <local_temp_path>] [--hdfs-base <hdfs_base_dir>] [--no-delete]"
-  echo "  --input       Đường dẫn file tạm local (mặc định: 01_data/processed/hadoop_input_temp.txt)"
+  echo "  --input       Đường dẫn file tạm local (mặc định: data/processed/hadoop_input_temp.txt)"
   echo "  --hdfs-base   Thư mục gốc trên HDFS (mặc định: /user/spark/hi_large)"
   echo "  --no-delete   Không xóa file tạm local sau khi upload"
 }
@@ -29,7 +29,7 @@ usage() {
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-DATA_PROCESSED="$ROOT_DIR/01_data/processed"
+DATA_PROCESSED="$ROOT_DIR/data/processed"
 
 # Cấu hình HDFS (có thể override qua CLI)
 HDFS_BASE="/user/spark/hi_large"
@@ -72,7 +72,7 @@ done
 if [ ! -f "$INPUT_TEMP" ]; then
     echo "Không tìm thấy tệp đầu vào tạm: $INPUT_TEMP"
     echo "   Vui lòng chạy chuẩn bị dữ liệu trước:"
-    echo "   python $ROOT_DIR/02_scripts/polars/prepare_polars.py"
+    echo "   python $ROOT_DIR/scripts/polars/prepare_polars.py"
     exit 1
 fi
 
@@ -134,6 +134,6 @@ echo "  Đầu vào: hdfs://localhost:9000$HDFS_BASE/input/hadoop_input.txt"
 echo "  Đầu ra: hdfs://localhost:9000$HDFS_BASE/output_centroids"
 echo ""
 echo "Bước tiếp theo (Bước 4): Chạy K-means với MLlib"
-echo "  bash ./02_scripts/spark/run_spark.sh"
+echo "  bash ./scripts/spark/run_spark.sh"
 echo ""
 echo "Ghi chú: MLlib dùng k-means++ để khởi tạo centroids tự động"

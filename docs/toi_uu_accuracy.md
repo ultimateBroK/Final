@@ -26,7 +26,7 @@ Tăng tốc K-means **50-70%** (30 phút → 9-15 phút) mà **KHÔNG làm giả
 
 #### 1. Tăng Partitions: 200 → 800 ✅ **ĐÃ ÁP DỤNG**
 ```bash
-# File: 02_scripts/spark/run_spark.sh
+# File: scripts/spark/run_spark.sh
 # Dòng 89-90
 --conf spark.sql.shuffle.partitions=800 \  # Thay 200 → 800
 --conf spark.default.parallelism=800 \     # Thay 200 → 800
@@ -39,7 +39,7 @@ Tăng tốc K-means **50-70%** (30 phút → 9-15 phút) mà **KHÔNG làm giả
 
 #### 2. Persistent Caching Tốt Hơn ✅ **ĐÃ ÁP DỤNG**
 ```python
-# File: 02_scripts/spark/kmeans_spark.py
+# File: scripts/spark/kmeans_spark.py
 # Dòng 75-77 (thay cache() → persist())
 from pyspark import StorageLevel
 
@@ -55,7 +55,7 @@ data_rdd = sc.textFile(input_path) \
 
 #### 3. Repartition Evenly ✅ **ĐÃ ÁP DỤNG**
 ```python
-# File: 02_scripts/spark/kmeans_spark.py
+# File: scripts/spark/kmeans_spark.py
 # Thêm sau .map(parse_point)
 data_rdd = sc.textFile(input_path) \
     .map(parse_point) \
@@ -70,7 +70,7 @@ data_rdd = sc.textFile(input_path) \
 
 #### 4. Tăng Memory (Nếu có ≥16GB RAM) ✅ **ĐÃ ÁP DỤNG**
 ```bash
-# File: 02_scripts/spark/run_spark.sh
+# File: scripts/spark/run_spark.sh
 # Dòng 45-46
 DRIVER_MEMORY="8g"      # ĐÃ thay 4g → 8g
 EXECUTOR_MEMORY="8g"    # ĐÃ thay 4g → 8g
@@ -93,7 +93,7 @@ EXECUTOR_MEMORY="8g"    # ĐÃ thay 4g → 8g
 ⚠️ **Đặc biệt:** Không chỉ nhanh hơn mà còn **CHO KẾT QUẢ TỐT HƠN**!
 
 ```python
-# File: 02_scripts/polars/03_init_centroids.py
+# File: scripts/polars/03_init_centroids.py
 # Thay random choice bằng K-means++
 
 def kmeans_plusplus_init(data, k, seed=42):
@@ -138,7 +138,7 @@ centroids = kmeans_plusplus_init(data, k=5)
 
 ✅ **Đã cập nhật `kmeans_spark.py` dùng MLlib trực tiếp!**
 
-Code đã tích hợp vào: `02_scripts/spark/kmeans_spark.py`
+Code đã tích hợp vào: `scripts/spark/kmeans_spark.py`
 
 ```python
 #!/usr/bin/env python3
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 #### 7. Numba JIT Compilation
 
 ```python
-# File: 02_scripts/spark/kmeans_spark.py
+# File: scripts/spark/kmeans_spark.py
 # Thêm import và optimize closest_centroid
 
 from numba import jit
@@ -268,7 +268,7 @@ pip install numba
 #### 8. Early Stopping (Smarter Convergence)
 
 ```python
-# File: 02_scripts/spark/kmeans_spark.py
+# File: scripts/spark/kmeans_spark.py
 # Trong vòng lặp K-means
 
 # Track history
@@ -364,6 +364,6 @@ if sample_converged(sample):  # Check trên sample
 
 ## 📚 Chi Tiết
 
-Xem file đầy đủ: **`03_docs/toi-uu-kmeans.md`**
+Xem file đầy đủ: **`docs/toi-uu-kmeans.md`**
 
 **Đảm bảo:** Tất cả optimizations đều giữ **100% accuracy**! ✅

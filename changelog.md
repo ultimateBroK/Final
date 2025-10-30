@@ -32,13 +32,13 @@
 - ✅ **Adaptive query execution** - Tự động điều chỉnh partitions
 
 **Files đã cập nhật:**
-- `02_scripts/spark/kmeans_spark.py` - Chuyển sang MLlib KMeans
-- `02_scripts/spark/run_spark.sh` - Bỏ tham số centroids.txt
-- `02_scripts/spark/setup_hdfs.sh` - Không upload centroids nữa
-- `02_scripts/pipeline/full_pipeline_spark_v2.sh` - Giảm 8→7 bước
-- `02_scripts/polars/04_assign_clusters.py` - Đọc từ results/ thay vì processed/
+- `scripts/spark/kmeans_spark.py` - Chuyển sang MLlib KMeans
+- `scripts/spark/run_spark.sh` - Bỏ tham số centroids.txt
+- `scripts/spark/setup_hdfs.sh` - Không upload centroids nữa
+- `scripts/pipeline/full_pipeline_spark_v2.sh` - Giảm 8→7 bước
+- `scripts/polars/04_assign_clusters.py` - Đọc từ results/ thay vì processed/
 - `README.md` - Cập nhật hướng dẫn
-- `03_docs/cau-truc.md` - Cập nhật workflow
+- `docs/cau-truc.md` - Cập nhật workflow
 
 ### ✨ Cải tiến hiệu suất
 
@@ -88,24 +88,24 @@ centroids = random.sample(data, k=5)  # May mắn
   - Dễ quản lý và tìm kiếm hơn
 
 #### Đã di chuyển:
-- 📂 Tất cả file hướng dẫn vào `03_docs/`:
-  - `INSTALLATION.md` → `03_docs/cai-dat.md`
-  - `JUPYTER_SETUP.md` → `03_docs/jupyter.md`
-  - `HUONG_DAN_CHAY.md` → `03_docs/huong-dan.md`
-  - `MIGRATION_GUIDE.md` → `03_docs/migration.md`
-  - `CAU_TRUC_DU_AN.md` → `03_docs/cau-truc.md`
-  - `PROJECT_OVERVIEW.md` → `03_docs/tong-quan.md`
-  - `HADOOP_ALTERNATIVES.md` → `03_docs/hadoop-alternatives.md`
+- 📂 Tất cả file hướng dẫn vào `docs/`:
+  - `INSTALLATION.md` → `docs/cai-dat.md`
+  - `JUPYTER_SETUP.md` → `docs/jupyter.md`
+  - `HUONG_DAN_CHAY.md` → `docs/huong-dan.md`
+  - `MIGRATION_GUIDE.md` → `docs/migration.md`
+  - `CAU_TRUC_DU_AN.md` → `docs/cau-truc.md`
+  - `PROJECT_OVERVIEW.md` → `docs/tong-quan.md`
+  - `HADOOP_ALTERNATIVES.md` → `docs/hadoop-alternatives.md`
 
 #### Đã đổi tên cho dễ đọc:
 - 📝 `CHANGELOG.md` → `changelog.md`
 - 📓 `phan_tich_clustering.ipynb` → `phan-tich.ipynb`
-- 🗂️ Tất cả file trong `03_docs/` dùng kebab-case (dễ gõ hơn)
+- 🗂️ Tất cả file trong `docs/` dùng kebab-case (dễ gõ hơn)
 
 ### ✨ Cải thiện
 
 1. **Giảm trùng lặp**: Chỉ giữ 1 notebook tiếng Việt, 1 báo cáo gộp
-2. **Bố cục rõ ràng**: Tất cả tài liệu tập trung trong `03_docs/`
+2. **Bố cục rõ ràng**: Tất cả tài liệu tập trung trong `docs/`
 3. **Tên ngắn gọn**: Dùng kebab-case cho file markdown
 4. **Dễ tìm**: Cấu trúc logic, không phân tán
 
@@ -124,7 +124,7 @@ centroids = random.sample(data, k=5)  # May mắn
 - 1 notebook tiếng Việt
 - 1 báo cáo gộp
 - 3 file .md ở root (README, changelog, BAO_CAO_DU_AN)
-- 7 file .md trong 03_docs/ (tất cả hướng dẫn)
+- 7 file .md trong docs/ (tất cả hướng dẫn)
 ```
 
 ---

@@ -521,7 +521,7 @@ Giá trị giao dịch:
 
 **Bước 2.6/6: Lưu tệp tạm thời cho HDFS**
 - Thời gian: **34.7 giây** (chiếm phần lớn thời gian của bước 2)
-- Đường dẫn: `/home/ultimatebrok/Downloads/Final/01_data/processed/hadoop_input_temp.txt`
+- Đường dẫn: `/home/ultimatebrok/Downloads/Final/data/processed/hadoop_input_temp.txt`
 - Kích thước: **31.00 GB** (sau khi normalize)
 - Ghi chú: Polars streaming write - không tốn RAM
 - **Cảnh báo**: File này sẽ tự động xóa sau khi upload lên HDFS!
@@ -556,7 +556,7 @@ Giá trị giao dịch:
    - Kết quả: HDFS có thể truy cập
 
 2. **Tìm file dữ liệu tạm**
-   - Kiểm tra: `/home/ultimatebrok/Downloads/Final/01_data/processed/hadoop_input_temp.txt`
+   - Kiểm tra: `/home/ultimatebrok/Downloads/Final/data/processed/hadoop_input_temp.txt`
    - Xác nhận: File tồn tại (31GB)
 
 3. **Tạo thư mục HDFS**
@@ -568,7 +568,7 @@ Giá trị giao dịch:
    - Xóa: `/user/spark/hi_large/output_centroids` (nếu tồn tại)
 
 5. **Upload dữ liệu lên HDFS**
-   - Nguồn: `/home/ultimatebrok/Downloads/Final/01_data/processed/hadoop_input_temp.txt`
+   - Nguồn: `/home/ultimatebrok/Downloads/Final/data/processed/hadoop_input_temp.txt`
    - Đích: `/user/spark/hi_large/input/hadoop_input.txt`
    - Thời gian upload: ~35-40 giây (31GB qua mạng nội bộ)
 

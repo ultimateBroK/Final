@@ -531,13 +531,13 @@ rm -f "$INPUT_TEMP"
 ```bash
 # Tải về từ HDFS (tạm thời)
 hdfs dfs -get /user/spark/hi_large/input/hadoop_input.txt \
-             01_data/processed/
+             data/processed/
 
 # Sử dụng
-python 02_scripts/polars/04_assign_clusters.py
+python scripts/polars/04_assign_clusters.py
 
 # XÓA lại sau khi dùng xong (tuân thủ quy định)
-rm 01_data/processed/hadoop_input.txt
+rm data/processed/hadoop_input.txt
 ```
 
 **Lưu ý:**
@@ -1065,7 +1065,7 @@ Cuối cùng: Chọn 5 tốt nhất từ 50
 
 ```bash
 # Kiểm tra log
-cat 04_logs/pipeline_log_*.md
+cat logs/pipeline_log_*.md
 
 # Tìm dòng lỗi
 # Ví dụ output:
@@ -1122,7 +1122,7 @@ free -h
 
 ```bash
 # Chạy manual để xem lỗi chi tiết
-./02_scripts/spark/run_spark.sh
+./scripts/spark/run_spark.sh
 
 # Xem output/error messages
 # Các lỗi phổ biến:
@@ -1144,7 +1144,7 @@ ls .pipeline_checkpoints/
 # (step_4.done không có → bước 4 chưa hoàn thành)
 
 # Nếu cần chạy lại từ đầu:
-./02_scripts/pipeline/reset_pipeline.sh
+./scripts/pipeline/reset_pipeline.sh
 ```
 
 **Bước 7: Test với dữ liệu nhỏ**
@@ -1160,7 +1160,7 @@ hdfs dfs -put test.txt /user/spark/test_input.txt
 # INPUT: /user/spark/test_input.txt
 
 # Chạy K-means với test data
-./02_scripts/spark/run_spark.sh
+./scripts/spark/run_spark.sh
 
 # Nếu thành công → Vấn đề là dữ liệu lớn (out of memory)
 # Nếu vẫn lỗi → Vấn đề là config hoặc code

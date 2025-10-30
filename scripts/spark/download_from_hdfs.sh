@@ -3,12 +3,12 @@
 # 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
 # BƯỚC 5/7: TẢI KẾT QUẢ TỪ HDFS VỀ LOCAL
 # ─────────────────────────────────────────────────────────────────────────────
-# Mục tiêu: Gộp (getmerge) centroids từ HDFS về 01_data/results/final_centroids.txt
+# Mục tiêu: Gộp (getmerge) centroids từ HDFS về data/results/final_centroids.txt
 # I/O:
 #   - Input (HDFS): /user/spark/hi_large/output_centroids/
-#   - Output(local): 01_data/results/final_centroids.txt
+#   - Output(local): data/results/final_centroids.txt
 # Cách chạy nhanh:
-#   bash 02_scripts/spark/download_from_hdfs.sh
+#   bash scripts/spark/download_from_hdfs.sh
 # Ghi chú: Yêu cầu bước 4 đã chạy xong và có thư mục output trên HDFS.
 
 set -euo pipefail
@@ -18,7 +18,7 @@ echo "=== TẢI KẾT QUẢ TỪ HDFS ==="
 # Xác định đường dẫn thư mục
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-DATA_RESULTS="$ROOT_DIR/01_data/results"
+DATA_RESULTS="$ROOT_DIR/data/results"
 
 # Cấu hình HDFS
 HDFS_BASE="/user/spark/hi_large"
@@ -33,7 +33,7 @@ fi
 # Kiểm tra kết quả có tồn tại trong HDFS không
 if ! hdfs dfs -test -e "$HDFS_OUTPUT" 2>/dev/null; then
     echo "Không tìm thấy kết quả trong HDFS: $HDFS_OUTPUT"
-    echo "   Vui lòng chạy PySpark job trước: ./02_scripts/spark/run_spark.sh"
+    echo "   Vui lòng chạy PySpark job trước: ./scripts/spark/run_spark.sh"
     exit 1
 fi
 
@@ -78,5 +78,5 @@ echo ""
 echo "Hoàn thành tải xuống!"
 echo ""
 echo "Bước tiếp theo:"
-echo "  1. Gán cụm: python $ROOT_DIR/02_scripts/polars/assign_clusters_polars.py"
-echo "  2. Phân tích kết quả: python $ROOT_DIR/02_scripts/polars/analyze.py"
+echo "  1. Gán cụm: python $ROOT_DIR/scripts/polars/assign_clusters_polars.py"
+echo "  2. Phân tích kết quả: python $ROOT_DIR/scripts/polars/analyze.py"

@@ -5,40 +5,40 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Mục tiêu: Xóa sạch artefacts local để chuẩn bị chạy lại pipeline từ đầu.
 # Phạm vi xóa:
-#   - 01_data/processed/*, 01_data/results/*
-#   - 04_logs/*.md
-#   - 05_snapshots/*
-#   - 06_visualizations artefacts (giữ notebook/README)
+#   - data/processed/*, data/results/*
+#   - logs/*.md
+#   - snapshots/*
+#   - visualizations artefacts (giữ notebook/README)
 #   - .pipeline_checkpoints
 # Cách chạy nhanh:
-#   bash 02_scripts/pipeline/clean_all.sh
+#   bash scripts/pipeline/clean_all.sh
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-DATA_PROCESSED="$ROOT_DIR/01_data/processed"
-DATA_RESULTS="$ROOT_DIR/01_data/results"
-LOGS_DIR="$ROOT_DIR/04_logs"
-SNAPSHOTS_DIR="$ROOT_DIR/05_snapshots"
-VIZ_DIR="$ROOT_DIR/06_visualizations"
+DATA_PROCESSED="$ROOT_DIR/data/processed"
+DATA_RESULTS="$ROOT_DIR/data/results"
+LOGS_DIR="$ROOT_DIR/logs"
+SNAPSHOTS_DIR="$ROOT_DIR/snapshots"
+VIZ_DIR="$ROOT_DIR/visualizations"
 CHECKPOINT_DIR="$ROOT_DIR/.pipeline_checkpoints"
 
 echo "=== DỌN SẠCH TOÀN BỘ DỰ ÁN ==="
 echo "Root: $ROOT_DIR"
 
 # 1) Xóa dữ liệu đã xử lý và kết quả
-echo "[1/6] Dọn 01_data/processed và 01_data/results..."
+echo "[1/6] Dọn data/processed và data/results..."
 mkdir -p "$DATA_PROCESSED" "$DATA_RESULTS"
 find "$DATA_PROCESSED" -mindepth 1 -maxdepth 1 -type f -print -delete || true
 find "$DATA_RESULTS" -mindepth 1 -maxdepth 1 -type f -print -delete || true
 
 # 2) Xóa logs
-echo "[2/6] Dọn 04_logs..."
+echo "[2/6] Dọn logs..."
 mkdir -p "$LOGS_DIR"
 find "$LOGS_DIR" -mindepth 1 -maxdepth 1 -type f -name "*.md" -print -delete || true
 
 # 3) Xóa snapshots
-echo "[3/6] Dọn 05_snapshots..."
+echo "[3/6] Dọn snapshots..."
 if [ -d "$SNAPSHOTS_DIR" ]; then
   find "$SNAPSHOTS_DIR" -mindepth 1 -maxdepth 1 -print -exec rm -rf {} + || true
 else
@@ -46,7 +46,7 @@ else
 fi
 
 # 4) Xóa artefacts visualization giữ lại notebook/README
-echo "[4/6] Dọn 06_visualizations artefacts..."
+echo "[4/6] Dọn visualizations artefacts..."
 mkdir -p "$VIZ_DIR"
 rm -f "$VIZ_DIR"/latest_summary.txt || true
 rm -f "$VIZ_DIR"/visual_report_*.md || true
@@ -65,6 +65,6 @@ mkdir -p "$CHECKPOINT_DIR"
 
 echo ""
 echo "✅ Dọn sạch xong! Sẵn sàng chạy lại từ đầu."
-echo "Gợi ý chạy: ./02_scripts/pipeline/full_pipeline_spark.sh --reset"
+echo "Gợi ý chạy: ./scripts/pipeline/full_pipeline_spark.sh --reset"
 
 

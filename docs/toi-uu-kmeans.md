@@ -277,7 +277,7 @@ centroids = model.clusterCenters()
 
 ## 🛠️ Quick Wins (Làm Ngay - 15 Phút)
 
-### File: `02_scripts/spark/run_spark.sh`
+### File: `scripts/spark/run_spark.sh`
 
 ```bash
 # Thay đổi dòng 89-90
@@ -285,7 +285,7 @@ centroids = model.clusterCenters()
 --conf spark.default.parallelism=800 \     # 200 → 800
 ```
 
-### File: `02_scripts/spark/kmeans_spark.py`
+### File: `scripts/spark/kmeans_spark.py`
 
 ```python
 # Thay dòng 75-77
@@ -302,7 +302,7 @@ data_rdd = sc.textFile(input_path) \
 
 ## 🚀 Advanced: Chuyển Sang MLlib (30-60 Phút)
 
-Tạo file mới: `02_scripts/spark/kmeans_mllib.py`
+Tạo file mới: `scripts/spark/kmeans_mllib.py`
 
 ```python
 #!/usr/bin/env python3

@@ -14,13 +14,13 @@ TÓM TẮT
 - Công nghệ: Polars (scan_csv, lazy evaluation) — không tải toàn bộ vào RAM.
 
 I/O & THỜI GIAN
-- Input : 01_data/raw/HI-Large_Trans.csv (~16GB)
+- Input : data/raw/HI-Large_Trans.csv (~16GB)
 - Output: In ra màn hình (schema, sample, describe, distributions)
 - Thời gian chạy: ~30 giây (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/explore_fast.py \
-    --raw 01_data/raw/HI-Large_Trans.csv \
+  python scripts/polars/explore_fast.py \
+    --raw data/raw/HI-Large_Trans.csv \
     --sample-rows 100000
 
 THAM SỐ CLI
@@ -45,7 +45,7 @@ def parse_args():
 args = parse_args()
 
 # Đường dẫn đến file CSV gốc (16GB, 179M dòng)
-DATA_RAW = args.raw or os.path.join(ROOT_DIR, '01_data', 'raw', 'HI-Large_Trans.csv')
+DATA_RAW = args.raw or os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
 
 print("="*70)
 print("BƯỚC 1: KHÁM PHÁ DỮ LIỆU")
@@ -110,7 +110,7 @@ print("="*70)
 print("HOÀN TẤT KHÁM PHÁ DỮ LIỆU!")
 print("="*70)
 print("\nGỢI Ý TIẾP THEO:")
-print("   Chạy bước 2: python 02_scripts/polars/prepare_polars.py")
+print("   Chạy bước 2: python scripts/polars/prepare_polars.py")
 print()
 
 

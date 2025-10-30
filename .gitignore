@@ -1,20 +1,20 @@
 ### Project data and outputs
 # Raw and processed data
-01_data/raw/
-01_data/processed/
-01_data/results/
+data/raw/
+data/processed/
+data/results/
 
 # Checkpoints
 .pipeline_checkpoints/
 
 # Logs and snapshots
-04_logs/
-05_snapshots/
+logs/
+snapshots/
 
 # Visualization artifacts (keep README.md and notebooks)
-06_visualizations/latest_summary.txt
-06_visualizations/visual_report_*.md
-06_visualizations/thong_ke_cum.csv
+visualizations/latest_summary.txt
+visualizations/visual_report_*.md
+visualizations/thong_ke_cum.csv
 
 ### Python
 __pycache__/

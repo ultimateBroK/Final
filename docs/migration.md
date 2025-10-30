@@ -15,14 +15,14 @@ Dự án đã được tổ chức lại với cấu trúc xếp theo thứ tự
 
 | Tên cũ | Tên mới | Mục đích |
 |--------|---------|----------|
-| `data/` | `01_data/` | Dữ liệu (raw, processed, results) |
-| `scripts/` | `02_scripts/` | Scripts xếp theo thứ tự |
-| `docs/` | `03_docs/` | Tài liệu |
-| `logs/` | `04_logs/` | Logs với timestamp |
-| *(mới)* | `05_snapshots/` | Lưu kết quả mỗi lần chạy |
-| *(mới)* | `06_visualizations/` | Biểu đồ trực quan |
+| `data/` | `data/` | Dữ liệu (raw, processed, results) |
+| `scripts/` | `scripts/` | Scripts xếp theo thứ tự |
+| `docs/` | `docs/` | Tài liệu |
+| `logs/` | `logs/` | Logs với timestamp |
+| *(mới)* | `snapshots/` | Lưu kết quả mỗi lần chạy |
+| *(mới)* | `visualizations/` | Biểu đồ trực quan |
 
-### Scripts đã đổi tên (02_scripts/polars/)
+### Scripts đã đổi tên (scripts/polars/)
 
 | Tên cũ | Tên mới |
 |--------|------|
@@ -36,8 +36,8 @@ Dự án đã được tổ chức lại với cấu trúc xếp theo thứ tự
 
 | File | Mô tả |
 |------|-------|
-| `02_scripts/data/snapshot_results.py` | Tự động snapshot kết quả |
-| `02_scripts/data/visualize_results.py` | Tạo biểu đồ trực quan |
+| `scripts/data/snapshot_results.py` | Tự động snapshot kết quả |
+| `scripts/data/visualize_results.py` | Tạo biểu đồ trực quan |
 
 ---
 
@@ -47,35 +47,35 @@ Dự án đã được tổ chức lại với cấu trúc xếp theo thứ tự
 
 ```bash
 # CŨ → MỚI
-data/raw/                  → 01_data/raw/
-data/processed/            → 01_data/processed/
-data/results/              → 01_data/results/
+data/raw/                  → data/raw/
+data/processed/            → data/processed/
+data/results/              → data/results/
 ```
 
 ### Đường dẫn scripts
 
 ```bash
 # CŨ → MỚI
-scripts/polars/explore_fast.py          → 02_scripts/polars/explore_fast.py
-scripts/polars/prepare_polars.py        → 02_scripts/polars/prepare_polars.py
+scripts/polars/explore_fast.py          → scripts/polars/explore_fast.py
+scripts/polars/prepare_polars.py        → scripts/polars/prepare_polars.py
 # scripts/polars/init_centroids.py      → ❌ ĐÃ LOẠI BỎ (MLlib k-means++ tự động)
-scripts/polars/assign_clusters_polars.py → 02_scripts/polars/03_assign_clusters.py
-scripts/polars/analyze_polars.py        → 02_scripts/polars/04_analyze.py
+scripts/polars/assign_clusters_polars.py → scripts/polars/03_assign_clusters.py
+scripts/polars/analyze_polars.py        → scripts/polars/04_analyze.py
 
-scripts/spark/setup_hdfs.sh             → 02_scripts/spark/setup_hdfs.sh
-scripts/spark/run_spark.sh              → 02_scripts/spark/run_spark.sh
-scripts/spark/download_from_hdfs.sh     → 02_scripts/spark/download_from_hdfs.sh
+scripts/spark/setup_hdfs.sh             → scripts/spark/setup_hdfs.sh
+scripts/spark/run_spark.sh              → scripts/spark/run_spark.sh
+scripts/spark/download_from_hdfs.sh     → scripts/spark/download_from_hdfs.sh
 
-scripts/pipeline/full_pipeline_spark.sh → 02_scripts/pipeline/full_pipeline_spark.sh
-scripts/pipeline/clean_spark.sh         → 02_scripts/pipeline/clean_spark.sh
-scripts/pipeline/reset_pipeline.sh      → 02_scripts/pipeline/reset_pipeline.sh
+scripts/pipeline/full_pipeline_spark.sh → scripts/pipeline/full_pipeline_spark.sh
+scripts/pipeline/clean_spark.sh         → scripts/pipeline/clean_spark.sh
+scripts/pipeline/reset_pipeline.sh      → scripts/pipeline/reset_pipeline.sh
 ```
 
 ### Đường dẫn logs
 
 ```bash
 # CŨ → MỚI
-logs/pipeline_log_*.md     → 04_logs/pipeline_log_*.md
+logs/pipeline_log_*.md     → logs/pipeline_log_*.md
 ```
 
 ---
@@ -89,7 +89,7 @@ logs/pipeline_log_*.md     → 04_logs/pipeline_log_*.md
 ./scripts/pipeline/full_pipeline_spark.sh
 
 # MỚI
-./02_scripts/pipeline/full_pipeline_spark.sh
+./scripts/pipeline/full_pipeline_spark.sh
 ```
 
 ### Chạy từng bước
@@ -101,24 +101,24 @@ python scripts/polars/prepare_polars.py
 # ... etc
 
 # MỚI
-python 02_scripts/polars/explore_fast.py
-python 02_scripts/polars/prepare_polars.py
+python scripts/polars/explore_fast.py
+python scripts/polars/prepare_polars.py
 # (Bước 3 init centroids đã loại bỏ)
-python 02_scripts/polars/03_assign_clusters.py
-python 02_scripts/polars/04_analyze.py
+python scripts/polars/03_assign_clusters.py
+python scripts/polars/04_analyze.py
 ```
 
 ### Snapshot và visualization
 
 ```bash
 # Tạo snapshot (MỚI)
-python 02_scripts/data/snapshot_results.py
+python scripts/data/snapshot_results.py
 
 # Xem danh sách snapshots
-python 02_scripts/data/snapshot_results.py --list
+python scripts/data/snapshot_results.py --list
 
 # Tạo visualization (MỚI)
-python 02_scripts/data/visualize_results.py
+python scripts/data/visualize_results.py
 ```
 
 ### Cleanup
@@ -128,7 +128,7 @@ python 02_scripts/data/visualize_results.py
 ./scripts/pipeline/clean_spark.sh
 
 # MỚI
-./02_scripts/pipeline/clean_spark.sh
+./scripts/pipeline/clean_spark.sh
 ```
 
 ---
@@ -176,7 +176,7 @@ python 02_scripts/data/visualize_results.py
 Nếu bạn đang chạy pipeline dở, cần reset checkpoints:
 
 ```bash
-./02_scripts/pipeline/reset_pipeline.sh all
+./scripts/pipeline/reset_pipeline.sh all
 ```
 
 ### HDFS
@@ -203,22 +203,22 @@ Xem chi tiết cấu trúc mới tại:
 
 ### Lỗi: "No such file or directory"
 Có thể bạn đang dùng lệnh cũ. Kiểm tra lại paths:
-- Dùng `01_data/` thay vì `data/`
-- Dùng `02_scripts/` thay vì `scripts/`
+- Dùng `data/` thay vì `data/`
+- Dùng `scripts/` thay vì `scripts/`
 
 ### Lỗi: Permission denied
 Đảm bảo scripts có quyền executable:
 ```bash
-chmod +x 02_scripts/pipeline/*.sh
-chmod +x 02_scripts/spark/*.sh
-chmod +x 02_scripts/data/*.py
+chmod +x scripts/pipeline/*.sh
+chmod +x scripts/spark/*.sh
+chmod +x scripts/data/*.py
 ```
 
 ### Reset toàn bộ
 Nếu gặp vấn đề, reset và chạy lại:
 ```bash
-./02_scripts/pipeline/clean_spark.sh
-./02_scripts/pipeline/full_pipeline_spark.sh
+./scripts/pipeline/clean_spark.sh
+./scripts/pipeline/full_pipeline_spark.sh
 ```
 
 ---

@@ -503,7 +503,7 @@ cluster_ids = np.argmin(distances, axis=0)
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
 │ Raw CSV     │ ───> │ Temp Files   │ ───> │ HDFS        │
-│ (01_data/   │      │ (tạm thời)   │      │ (permanent) │
+│ (data/   │      │ (tạm thời)   │      │ (permanent) │
 │  raw/)      │      │              │      │             │
 └─────────────┘      └──────────────┘      └─────────────┘
                             │                      
@@ -519,11 +519,11 @@ cluster_ids = np.argmin(distances, axis=0)
 2. **Bước 3**: `setup_hdfs.sh` upload lên HDFS
 3. **Bước 3**: **Tự động xóa file temp** ngay sau upload:
    ```bash
-   rm -rf "$PROJECT_ROOT/01_data/processed/"*
+   rm -rf "$PROJECT_ROOT/data/processed/"*
    ```
 4. **Xác minh**: Kiểm tra sau khi upload
    ```bash
-   du -sh 01_data/processed/  # → 0 (đã xóa!)
+   du -sh data/processed/  # → 0 (đã xóa!)
    hdfs dfs -du -h /user/spark/hi_large/  # → 31GB (trên HDFS)
    ```
 
@@ -547,13 +547,13 @@ cluster_ids = np.argmin(distances, axis=0)
 
 ```bash
 # 1. Tải về từ HDFS (tạm thời)
-hdfs dfs -get /user/spark/hi_large/input/hadoop_input.txt 01_data/processed/
+hdfs dfs -get /user/spark/hi_large/input/hadoop_input.txt data/processed/
 
 # 2. Sử dụng (vd: debug, phân tích)
-python 02_scripts/polars/assign_clusters_polars.py
+python scripts/polars/assign_clusters_polars.py
 
 # 3. XÓA lại sau khi dùng xong (tuân thủ quy định)
-rm 01_data/processed/hadoop_input.txt
+rm data/processed/hadoop_input.txt
 ```
 
 **Lưu ý:**
@@ -596,7 +596,7 @@ if is_step_completed 1; then
     log "⏭️  Bước 1 đã hoàn thành, đang bỏ qua..."
 else
     # Chạy bước 1
-    python "02_scripts/polars/explore_fast.py"
+    python "scripts/polars/explore_fast.py"
     # Đánh dấu hoàn thành
     mark_step_completed 1
 fi
@@ -609,7 +609,7 @@ fi
 
 **Reset checkpoints:**
 ```bash
-./02_scripts/pipeline/reset_pipeline.sh  # Xóa tất cả checkpoints
+./scripts/pipeline/reset_pipeline.sh  # Xóa tất cả checkpoints
 ```
 
 ---
@@ -623,7 +623,7 @@ fi
 
 ```bash
 # 1. Chạy script setup
-./02_scripts/setup/setup_jupyter_kernel.sh
+./scripts/setup/setup_jupyter_kernel.sh
 
 # Script sẽ tự động:
 # - Cài đặt jupyter, ipykernel
@@ -664,11 +664,11 @@ df = spark.read.csv("hdfs://localhost:9000/user/spark/hi_large/input/hadoop_inpu
 df.describe().show()
 
 # Đọc kết quả bằng Polars
-results = pl.read_csv("01_data/results/clustered_results.txt")
+results = pl.read_csv("data/results/clustered_results.txt")
 ```
 
 **Notebook có sẵn:**
-- `06_visualizations/phan-tich.ipynb` - Phân tích và visualization
+- `visualizations/phan-tich.ipynb` - Phân tích và visualization
 
 ---
 

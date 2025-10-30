@@ -253,7 +253,7 @@ hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 - Tên snapshot: `snapshot_20251029_213229`
 - Thời gian: `2025-10-29 21:32:30`
 - Kích thước: `342.75 MB`
-- Thư mục: `05_snapshots/snapshot_20251029_213229/`
+- Thư mục: `snapshots/snapshot_20251029_213229/`
 - Thành phần:
   - `final_centroids.txt` (436 bytes)
   - `clustered_results.txt` (342.75 MB)

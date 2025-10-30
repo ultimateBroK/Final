@@ -14,13 +14,13 @@ TÓM TẮT
 - Công nghệ: Polars (scan_csv, lazy evaluation) — gắn nhãn cụm rồi tổng hợp.
 
 I/O & THỜI GIAN
-- Input : 01_data/results/clustered_results.txt (labels từ bước 6)
-- Input : 01_data/raw/HI-Large_Trans.csv (dữ liệu gốc)
-- Output: In báo cáo + 01_data/results/suspicious_transactions.csv (nếu có)
+- Input : data/results/clustered_results.txt (labels từ bước 6)
+- Input : data/raw/HI-Large_Trans.csv (dữ liệu gốc)
+- Output: In báo cáo + data/results/suspicious_transactions.csv (nếu có)
 - Thời gian chạy: ~2 phút (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/analyze.py
+  python scripts/polars/analyze.py
 
 GHI CHÚ
 - Xác định cụm rủi ro cao theo ngưỡng > 10% rửa tiền.
@@ -34,8 +34,8 @@ import gc
 
 # ==================== CẤU HÌNH ĐƯỜNG DẪN ====================
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DATA_RAW = os.path.join(ROOT_DIR, '01_data', 'raw', 'HI-Large_Trans.csv')
-DATA_RESULTS = os.path.join(ROOT_DIR, '01_data', 'results')
+DATA_RAW = os.path.join(ROOT_DIR, 'data', 'raw', 'HI-Large_Trans.csv')
+DATA_RESULTS = os.path.join(ROOT_DIR, 'data', 'results')
 
 print("="*70)
 print("📊 BƯỚC 7: PHÂN TÍCH KẾT QUẢ")
@@ -226,7 +226,7 @@ else:
 print()
 print("🎉 PIPELINE HOÀN TẤT!")
 print("   Tất cả 7 bước đã chạy thành công.")
-print("   Xem kết quả trong thư mục 01_data/results/")
+print("   Xem kết quả trong thư mục data/results/")
 print()
 
 

@@ -6,12 +6,12 @@ Dự án phân tích phát hiện rửa tiền sử dụng K-means clustering v�
 
 ```
 Final/
-├── 01_data/                      # DỮ LIỆU
+├── data/                      # DỮ LIỆU
 │   ├── raw/                      # Dữ liệu gốc (16GB CSV)
 │   ├── processed/                # Files tạm (tự động xóa sau upload HDFS)
 │   └── results/                  # Kết quả nhỏ từ HDFS
 │
-├── 02_scripts/                   # SCRIPTS (Xếp theo thứ tự chạy)
+├── scripts/                   # SCRIPTS (Xếp theo thứ tự chạy)
 │   ├── polars/                   # Data processing với Polars
 │   │   ├── explore_fast.py       # Bước 1: Khám phá dữ liệu
 │   │   ├── prepare_polars.py     # Bước 2: Feature engineering
@@ -36,21 +36,21 @@ Final/
 │       ├── snapshot_results.py   # Snapshot kết quả với timestamp
 │       └── visualize_results.py  # Tạo biểu đồ trực quan
 │
-├── 03_docs/                      # TÀI LIỆU
+├── docs/                      # TÀI LIỆU
 │   ├── HADOOP_ALTERNATIVES.md    # So sánh các phương pháp clustering
 │   └── PROJECT_OVERVIEW.md       # Tổng quan dự án
 │
-├── 04_logs/                      # LOGS
+├── logs/                      # LOGS
 │   └── pipeline_log_*.md         # Logs với timestamp
 │
-├── 05_snapshots/                 # SNAPSHOTS
+├── snapshots/                 # SNAPSHOTS
 │   └── snapshot_YYYYMMDD_HHMMSS/ # Kết quả mỗi lần chạy thành công
 │       ├── final_centroids.txt
 │       ├── clustered_results.txt
 │       ├── pipeline_log.md
 │       └── metadata.json
 │
-├── 06_visualizations/            # BIỂU ĐỒ
+├── visualizations/            # BIỂU ĐỒ
 │   ├── visual_report_*.md        # Báo cáo trực quan với timestamp
 │   └── latest_summary.txt        # Tóm tắt kết quả mới nhất
 │
@@ -73,8 +73,8 @@ Final/
 | 5 | `download_from_hdfs.sh` | HDFS | final_centroids.txt | Download centroids |
 | 6 | `assign_clusters_polars.py` | CSV + centroids | clustered_results.txt | Gán nhãn |
 | 7 | `analyze.py` | Clustered data | Console + CSV | Phân tích |
-| 8 | `snapshot_results.py` | Results folder | 05_snapshots/ | Lưu snapshot |
-| 9 | `visualize_results.py` | Clustered data | 06_visualizations/ | Biểu đồ |
+| 8 | `snapshot_results.py` | Results folder | snapshots/ | Lưu snapshot |
+| 9 | `visualize_results.py` | Clustered data | visualizations/ | Biểu đồ |
 
 **⚡ Cải tiến:** MLlib tự động dùng k-means++ khởi tạo - không cần bước 3 nữa!
 
@@ -90,30 +90,30 @@ Temp files (33GB) → HDFS → [Spark K-means] → Results
                                                   ↓
                                     ┌─────────────┴─────────────┐
                                     ↓                           ↓
-                              01_data/results/           05_snapshots/
+                              data/results/           snapshots/
                               (kết quả mới)              (lịch sử)
                                     ↓
-                            06_visualizations/
+                            visualizations/
                             (biểu đồ)
 ```
 
 ## 🎯 Mục đích từng folder
 
-### 01_data/
+### data/
 - **raw/**: Dữ liệu gốc, không thay đổi
 - **processed/**: Tạm thời, tự động xóa sau upload HDFS
 - **results/**: Kết quả nhỏ, được phép lưu local
 
-### 02_scripts/
+### scripts/
 - Scripts xếp theo thứ tự chạy (01_, 02_, ...)
 - Mỗi script độc lập, có thể chạy riêng để debug
 
-### 05_snapshots/
+### snapshots/
 - Tự động snapshot mỗi lần pipeline chạy thành công
 - Format: `snapshot_YYYYMMDD_HHMMSS/`
 - Bao gồm: centroids, clusters, logs, metadata
 
-### 06_visualizations/
+### visualizations/
 - Báo cáo trực quan với ASCII charts
 - Dễ xem trên terminal
 - Format Markdown
@@ -122,30 +122,30 @@ Temp files (33GB) → HDFS → [Spark K-means] → Results
 
 ```bash
 # Chạy toàn bộ pipeline
-./02_scripts/pipeline/full_pipeline_spark.sh
+./scripts/pipeline/full_pipeline_spark.sh
 
 # Sau khi hoàn tất:
-# - Xem logs: 04_logs/pipeline_log_*.md
-# - Xem snapshots: 05_snapshots/snapshot_*/
-# - Xem biểu đồ: 06_visualizations/visual_report_*.md
+# - Xem logs: logs/pipeline_log_*.md
+# - Xem snapshots: snapshots/snapshot_*/
+# - Xem biểu đồ: visualizations/visual_report_*.md
 ```
 
 ## 🔄 Snapshot workflow
 
 ```bash
 # Pipeline chạy thành công → Tự động:
-# 1. Lưu kết quả vào 01_data/results/
-# 2. Tạo snapshot trong 05_snapshots/
-# 3. Tạo visualization trong 06_visualizations/
+# 1. Lưu kết quả vào data/results/
+# 2. Tạo snapshot trong snapshots/
+# 3. Tạo visualization trong visualizations/
 
 # Xem lại snapshots cũ:
-python 02_scripts/data/snapshot_results.py --list
+python scripts/data/snapshot_results.py --list
 
 # Tạo snapshot thủ công:
-python 02_scripts/data/snapshot_results.py
+python scripts/data/snapshot_results.py
 
 # Tạo visualization:
-python 02_scripts/data/visualize_results.py
+python scripts/data/visualize_results.py
 ```
 
 ## 📝 Naming Convention
@@ -166,7 +166,7 @@ python 02_scripts/data/visualize_results.py
 
 1. **Không lưu dữ liệu lớn local**: Temp files tự động xóa sau upload HDFS
 2. **Snapshots**: Lưu lịch sử kết quả để so sánh qua các lần chạy
-   - Latest: `05_snapshots/snapshot_20251029_213229/` (342.75 MB, 2025-10-29 21:32:30)
+   - Latest: `snapshots/snapshot_20251029_213229/` (342.75 MB, 2025-10-29 21:32:30)
 3. **Visualizations**: Tạo báo cáo dễ đọc với ASCII charts
 4. **Logs**: Mỗi lần chạy tạo log riêng với timestamp
 

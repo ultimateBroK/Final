@@ -9,7 +9,7 @@
 #   - Input (HDFS) : hdfs://.../user/spark/hi_large/input/hadoop_input.txt
 #   - Output (HDFS): hdfs://.../user/spark/hi_large/output_centroids
 # Cách chạy nhanh:
-#   bash 02_scripts/spark/run_spark.sh [--k 5 --max-iter 15 --seed 42 --tol 1e-4]
+#   bash scripts/spark/run_spark.sh [--k 5 --max-iter 15 --seed 42 --tol 1e-4]
 # Ghi chú: tự động dọn output cũ và in thông tin cấu hình thực thi.
 
 set -euo pipefail
@@ -40,7 +40,7 @@ fi
 # Kiểm tra file đầu vào có tồn tại trong HDFS không
 if ! hdfs dfs -test -e "$HDFS_BASE/input/hadoop_input.txt" 2>/dev/null; then
     echo "Không tìm thấy tệp đầu vào trong HDFS: $HDFS_BASE/input/hadoop_input.txt"
-    echo "   Vui lòng chạy: ./02_scripts/spark/setup_hdfs.sh"
+    echo "   Vui lòng chạy: ./scripts/spark/setup_hdfs.sh"
     exit 1
 fi
 

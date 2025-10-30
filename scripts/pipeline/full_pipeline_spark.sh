@@ -6,7 +6,7 @@
 # Mục tiêu: Điều phối 7 bước từ khám phá dữ liệu → xử lý → HDFS → Spark MLlib
 #           → tải kết quả → gán nhãn → phân tích cuối cùng.
 # Cách chạy nhanh:
-#   ./02_scripts/pipeline/full_pipeline_spark.sh [OPTIONS]
+#   ./scripts/pipeline/full_pipeline_spark.sh [OPTIONS]
 # Tuỳ chọn chính:
 #   --reset            Reset checkpoints và chạy lại từ đầu
 #   --from-step N      Bắt đầu từ bước N
@@ -21,11 +21,11 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
 # ==================== CẤU HÌNH ====================
 ROOT_DIR="$(cd "$(dirname "$0")/../.."; pwd)"
-SCRIPTS_DIR="$ROOT_DIR/02_scripts"
-LOGS_DIR="$ROOT_DIR/04_logs"
-DATA_DIR="$ROOT_DIR/01_data"
-SNAPSHOTS_DIR="$ROOT_DIR/05_snapshots"
-VIZ_DIR="$ROOT_DIR/06_visualizations"
+SCRIPTS_DIR="$ROOT_DIR/scripts"
+LOGS_DIR="$ROOT_DIR/logs"
+DATA_DIR="$ROOT_DIR/data"
+SNAPSHOTS_DIR="$ROOT_DIR/snapshots"
+VIZ_DIR="$ROOT_DIR/visualizations"
 TOTAL_STEPS=7
 
 # Flags
@@ -454,9 +454,9 @@ log "---"
 log ""
 log "### Bước Tiếp Theo"
 log ""
-log "1) Tạo snapshot: python 02_scripts/data/snapshot_results.py"
-log "2) Trực quan hóa: python 02_scripts/data/visualize_results.py"
-log "3) Xem notebook: jupyter lab 06_visualizations/phan-tich.ipynb"
+log "1) Tạo snapshot: python scripts/data/snapshot_results.py"
+log "2) Trực quan hóa: python scripts/data/visualize_results.py"
+log "3) Xem notebook: jupyter lab visualizations/phan-tich.ipynb"
 log ""
 log "---"
 log ""
@@ -465,10 +465,10 @@ log ""
 log "| File | Vị Trí | Mô Tả |"
 log "|------|----------|--------|"
 log "| Log này | \`$LOG_FILE\` | Chi tiết thực thi |"
-log "| Kết quả | \`01_data/results/clustered_results.txt\` | Nhãn cụm |"
-log "| Tâm cụm | \`01_data/results/final_centroids.txt\` | 5 tâm cụm (MLlib) |"
+log "| Kết quả | \`data/results/clustered_results.txt\` | Nhãn cụm |"
+log "| Tâm cụm | \`data/results/final_centroids.txt\` | 5 tâm cụm (MLlib) |"
 log "| Báo cáo | \`BAO_CAO_DU_AN.md\` | Báo cáo đầy đủ |"
-log "| Notebook | \`06_visualizations/phan-tich.ipynb\` | Phân tích visual |"
+log "| Notebook | \`visualizations/phan-tich.ipynb\` | Phân tích visual |"
 log ""
 log "---"
 log ""
@@ -479,9 +479,9 @@ if [[ "$DRY_RUN" == "false" ]]; then
     echo "Pipeline hoàn thành."
     echo ""
     echo "Log chi tiết: $LOG_FILE"
-    echo "Xem kết quả: cat 01_data/results/clustered_results.txt | head"
-    echo "Bước tiếp theo: python 02_scripts/data/snapshot_results.py"
-    echo "Trực quan hóa: cd 06_visualizations && jupyter lab phan-tich.ipynb"
+    echo "Xem kết quả: cat data/results/clustered_results.txt | head"
+    echo "Bước tiếp theo: python scripts/data/snapshot_results.py"
+    echo "Trực quan hóa: cd visualizations && jupyter lab phan-tich.ipynb"
     echo "Chạy với tham số: $0 --help"
     echo ""
 fi
