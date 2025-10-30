@@ -1,23 +1,35 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# ==============================================================================
+# File: 02_prepare_polars.py
+# ==============================================================================
 """
-BƯỚC 2: XỬ LÝ VÀ TRÍCH XUẤT ĐẶC TRƯNG (FEATURE ENGINEERING)
+──────────────────────────────────────────────────────────────────────────────
+📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means Clustering (Polars + Spark)
+BƯỚC 2/7: XỬ LÝ & TRÍCH XUẤT ĐẶC TRƯNG (FEATURE ENGINEERING)
+──────────────────────────────────────────────────────────────────────────────
 
-Mục đích:
-- Chuyển dữ liệu thô thành dạng số để thuật toán K-means xử lý
-- Trích xuất đặc trưng từ timestamp (giờ, ngày trong tuần)
-- Tính toán các tỷ lệ (amount_ratio)
-- Mã hóa biến phân loại (categorical encoding)
-- Chuẩn hóa tất cả features về [0, 1]
+TÓM TẮT
+- Mục tiêu: Biến đổi dữ liệu thô → đặc trưng số cho K-means, mã hóa
+  categorical, và chuẩn hóa (Z-score).
+- Công nghệ: Polars (lazy, streaming sink) — ghi xuống đĩa theo luồng.
 
-Thời gian chạy: ~10 phút
-Input: 01_data/raw/HI-Large_Trans.csv (16GB, 179M dòng)
-Output: 01_data/processed/hadoop_input_temp.txt (33GB, TẠM THỜI)
+I/O & THỜI GIAN
+- Input : 01_data/raw/HI-Large_Trans.csv (~16GB, 179M dòng)
+- Output: 01_data/processed/hadoop_input_temp.txt (~33GB, TẠM THỜI)
+- Thời gian chạy: ~10 phút (tùy máy)
 
-⚠️  LƯU Ý: File output sẽ BỊ XÓA TỰ ĐỘNG sau khi upload lên HDFS!
-Tham số CLI:
-- --raw <path>: Đường dẫn CSV đầu vào
-- --out-dir <dir>: Thư mục output processed (mặc định 01_data/processed)
+QUY TẮC LƯU TRỮ
+- File output là tạm thời và sẽ BỊ XÓA sau khi upload HDFS (bước 3).
+- Dữ liệu dài hạn chỉ lưu trên HDFS theo policy của dự án.
+
+CÁCH CHẠY NHANH
+  python 02_scripts/polars/02_prepare_polars.py \
+    --raw 01_data/raw/HI-Large_Trans.csv \
+    --out-dir 01_data/processed
+
+THAM SỐ CLI
+- --raw <path>     : Đường dẫn CSV đầu vào
+- --out-dir <dir>  : Thư mục output processed (mặc định 01_data/processed)
 """
 
 import polars as pl

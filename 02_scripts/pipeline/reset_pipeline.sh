@@ -1,5 +1,14 @@
 #!/bin/bash
-# Script hỗ trợ reset các checkpoint của pipeline (7 bước)
+# ─────────────────────────────────────────────────────────────────────────────
+# 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
+# TIỆN ÍCH: RESET CHECKPOINTS PIPELINE (7 BƯỚC)
+# ─────────────────────────────────────────────────────────────────────────────
+# Mục tiêu: Xoá các dấu mốc tiến độ (.pipeline_checkpoints) để chạy lại
+#           một phần hoặc toàn bộ pipeline.
+# Cách chạy nhanh:
+#   ./02_scripts/pipeline/reset_pipeline.sh all
+#   ./02_scripts/pipeline/reset_pipeline.sh status
+#   ./02_scripts/pipeline/reset_pipeline.sh from 5
 
 set -euo pipefail
 

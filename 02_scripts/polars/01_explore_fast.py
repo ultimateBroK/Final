@@ -1,21 +1,31 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# ==============================================================================
+# File: 01_explore_fast.py
+# ==============================================================================
 """
-BƯỚC 1: KHÁM PHÁ DỮ LIỆU (DATA EXPLORATION)
+──────────────────────────────────────────────────────────────────────────────
+📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means Clustering (Polars + Spark)
+BƯỚC 1/7: KHÁM PHÁ DỮ LIỆU (DATA EXPLORATION)
+──────────────────────────────────────────────────────────────────────────────
 
-Mục đích:
-- Hiểu cấu trúc của file CSV (179 triệu dòng)
-- Xem thống kê mô tả (min, max, mean, std)
-- Kiểm tra tỷ lệ rửa tiền
-- Phân tích loại tiền tệ phổ biến
+TÓM TẮT
+- Mục tiêu: Hiểu cấu trúc CSV (179M dòng), thống kê mô tả, phân phối nhãn,
+  và top loại tiền tệ.
+- Công nghệ: Polars (scan_csv, lazy evaluation) — không tải toàn bộ vào RAM.
 
-Thời gian chạy: ~30 giây
-Input: 01_data/raw/HI-Large_Trans.csv (16GB)
-Output: In ra màn hình
+I/O & THỜI GIAN
+- Input : 01_data/raw/HI-Large_Trans.csv (~16GB)
+- Output: In ra màn hình (schema, sample, describe, distributions)
+- Thời gian chạy: ~30 giây (tùy máy)
 
-Tham số CLI:
-- --raw <path>: Đường dẫn file CSV gốc
-- --sample-rows <n>: Số dòng mẫu để mô tả (mặc định 100000)
+CÁCH CHẠY NHANH
+  python 02_scripts/polars/01_explore_fast.py \
+    --raw 01_data/raw/HI-Large_Trans.csv \
+    --sample-rows 100000
+
+THAM SỐ CLI
+- --raw <path>         : Đường dẫn file CSV gốc
+- --sample-rows <int>  : Số dòng mẫu để mô tả (mặc định 100000)
 """
 
 import polars as pl

@@ -1,5 +1,16 @@
 #!/bin/bash
-# run_spark.sh - Chạy thuật toán K-means với PySpark trên HDFS
+# ─────────────────────────────────────────────────────────────────────────────
+# 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
+# BƯỚC 4/7: CHẠY PYSPARK K-MEANS TRÊN HDFS
+# ─────────────────────────────────────────────────────────────────────────────
+# Mục tiêu: Điều phối spark-submit với cấu hình tối ưu (local-cluster) để
+#           huấn luyện K-means MLlib trên dữ liệu HDFS đã chuẩn hoá.
+# I/O:
+#   - Input (HDFS) : hdfs://.../user/spark/hi_large/input/hadoop_input.txt
+#   - Output (HDFS): hdfs://.../user/spark/hi_large/output_centroids
+# Cách chạy nhanh:
+#   bash 02_scripts/spark/run_spark.sh [--k 5 --max-iter 15 --seed 42 --tol 1e-4]
+# Ghi chú: tự động dọn output cũ và in thông tin cấu hình thực thi.
 
 set -euo pipefail
 

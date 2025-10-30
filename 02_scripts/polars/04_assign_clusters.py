@@ -1,24 +1,35 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# ==============================================================================
+# File: 04_assign_clusters.py
+# ==============================================================================
 """
-BƯỚC 6: GÁN NHÃN CỤM CHO TỪNG GIAO DỊCH
+──────────────────────────────────────────────────────────────────────────────
+📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means Clustering (Polars + Spark)
+BƯỚC 6/7: GÁN NHÃN CỤM CHO TỪNG GIAO DỊCH
+──────────────────────────────────────────────────────────────────────────────
 
-Mục đích:
-- Xác định mỗi giao dịch thuộc cụm nào (0, 1, 2, 3, 4)
-- Tính khoảng cách từ mỗi giao dịch đến 5 tâm cụm
-- Gán vào cụm gần nhất (khoảng cách Euclidean nhỏ nhất)
+TÓM TẮT
+- Mục tiêu: Tính khoảng cách Euclidean tới các tâm cụm cuối cùng và gán nhãn
+  cụm (0..K-1) cho từng giao dịch theo batch để tiết kiệm RAM.
+- Công nghệ: Polars (đọc stream từ HDFS) + NumPy (vectorized distance).
 
-Thời gian chạy: ~10 phút
-Input:
-  - 01_data/processed/final_centroids.txt (5 tâm cụm từ bước 6)
-  - HDFS: /user/spark/hi_large/input/hadoop_input.txt (179M dòng)
-Output: 01_data/results/clustered_results.txt
+I/O & THỜI GIAN
+- Input : 01_data/results/final_centroids.txt (centroids tải từ HDFS)
+- Input : HDFS /user/spark/hi_large/input/hadoop_input.txt (179M dòng)
+- Output: 01_data/results/clustered_results.txt (ID cụm mỗi giao dịch)
+- Thời gian chạy: ~10 phút (tùy máy)
 
-Kỹ thuật: Batch processing (1M giao dịch/lần) để tiết kiệm RAM
+CÁCH CHẠY NHANH
+  python 02_scripts/polars/04_assign_clusters.py \
+    --centroids 01_data/results/final_centroids.txt \
+    --hdfs-path /user/spark/hi_large/input/hadoop_input.txt
 
-Tham số CLI:
-- --centroids <path>: Đường dẫn file tâm cụm (mặc định 01_data/results/final_centroids.txt)
-- --hdfs-path <path>: Đường dẫn HDFS tới hadoop_input.txt
+THAM SỐ CLI
+- --centroids <path> : Đường dẫn file tâm cụm (mặc định 01_data/results/final_centroids.txt)
+- --hdfs-path <path> : Đường dẫn HDFS tới hadoop_input.txt
+
+GHI CHÚ
+- Xử lý theo batch 1,000,000 bản ghi/lượt để ổn định bộ nhớ.
 """
 
 import polars as pl

@@ -1,5 +1,19 @@
 #!/bin/bash
-# setup_hdfs.sh - Thiết lập thư mục HDFS và upload dữ liệu cho pipeline Spark (Bước 3)
+# ─────────────────────────────────────────────────────────────────────────────
+# 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
+# BƯỚC 3/7: THIẾT LẬP HDFS & UPLOAD DỮ LIỆU
+# ─────────────────────────────────────────────────────────────────────────────
+# Mục tiêu: Tạo thư mục HDFS, dọn dẹp dữ liệu cũ, upload dữ liệu chuẩn hoá
+#            (temp local) lên HDFS và (mặc định) xoá temp local.
+# I/O:
+#   - Input(local tạm): 01_data/processed/hadoop_input_temp.txt (~33GB)
+#   - Output (HDFS)   : /user/spark/hi_large/input/hadoop_input.txt
+# Cách chạy nhanh:
+#   bash 02_scripts/spark/setup_hdfs.sh [--no-delete]
+# Tham số:
+#   --input <path>     : đường dẫn file tạm local
+#   --hdfs-base <dir>  : thư mục gốc HDFS (mặc định /user/spark/hi_large)
+#   --no-delete        : KHÔNG xoá file tạm sau khi upload
 
 set -euo pipefail
 

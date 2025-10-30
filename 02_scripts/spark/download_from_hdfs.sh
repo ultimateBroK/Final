@@ -1,5 +1,15 @@
 #!/bin/bash
-# download_from_hdfs.sh - Tải kết quả từ HDFS để phân tích local
+# ─────────────────────────────────────────────────────────────────────────────
+# 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
+# BƯỚC 5/7: TẢI KẾT QUẢ TỪ HDFS VỀ LOCAL
+# ─────────────────────────────────────────────────────────────────────────────
+# Mục tiêu: Gộp (getmerge) centroids từ HDFS về 01_data/results/final_centroids.txt
+# I/O:
+#   - Input (HDFS): /user/spark/hi_large/output_centroids/
+#   - Output(local): 01_data/results/final_centroids.txt
+# Cách chạy nhanh:
+#   bash 02_scripts/spark/download_from_hdfs.sh
+# Ghi chú: Yêu cầu bước 4 đã chạy xong và có thư mục output trên HDFS.
 
 set -euo pipefail
 

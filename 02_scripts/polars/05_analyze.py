@@ -1,21 +1,30 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# ==============================================================================
+# File: 05_analyze.py
+# ==============================================================================
 """
-BƯỚC 7: PHÂN TÍCH KẾT QUẢ (CLUSTER ANALYSIS)
+──────────────────────────────────────────────────────────────────────────────
+📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means Clustering (Polars + Spark)
+BƯỚC 7/7: PHÂN TÍCH KẾT QUẢ (CLUSTER ANALYSIS)
+──────────────────────────────────────────────────────────────────────────────
 
-Mục đích:
-- Phân tích tỷ lệ rửa tiền trong từng cụm
-- Tìm cụm có rủi ro cao (>10% rửa tiền)
-- Tính đặc trưng trung bình của mỗi cụm
-- Xuất danh sách giao dịch nghi ngờ
+TÓM TẮT
+- Mục tiêu: Tính kích thước cụm, tỷ lệ rửa tiền theo cụm, đặc trưng trung bình,
+  đánh giá rủi ro và (nếu có) xuất danh sách giao dịch nghi ngờ.
+- Công nghệ: Polars (scan_csv, lazy evaluation) — gắn nhãn cụm rồi tổng hợp.
 
-Thời gian chạy: ~2 phút
-Input:
-  - 01_data/results/clustered_results.txt (từ bước 6)
-  - 01_data/raw/HI-Large_Trans.csv (file gốc)
-Output: Báo cáo phân tích + file suspicious_transactions.csv (nếu có)
+I/O & THỜI GIAN
+- Input : 01_data/results/clustered_results.txt (labels từ bước 6)
+- Input : 01_data/raw/HI-Large_Trans.csv (dữ liệu gốc)
+- Output: In báo cáo + 01_data/results/suspicious_transactions.csv (nếu có)
+- Thời gian chạy: ~2 phút (tùy máy)
 
-Kỹ thuật: Lazy evaluation để tiết kiệm RAM
+CÁCH CHẠY NHANH
+  python 02_scripts/polars/05_analyze.py
+
+GHI CHÚ
+- Xác định cụm rủi ro cao theo ngưỡng > 10% rửa tiền.
+- Tất cả phép tính thực hiện sau khi gắn cột `cluster` vào dữ liệu gốc.
 """
 
 import polars as pl

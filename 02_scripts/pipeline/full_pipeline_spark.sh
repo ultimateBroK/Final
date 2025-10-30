@@ -1,20 +1,21 @@
 #!/bin/bash
-#
-# POLARS + PYSPARK K-MEANS PIPELINE
-#
-# Mô tả: Pipeline tự động 7 bước sử dụng MLlib k-means++
-# Ngày: 2025-10-29
-#
-# Sử dụng:
-#   ./02_scripts/pipeline/full_pipeline_spark_v2.sh [OPTIONS]
-#
-# OPTIONS:
-#   --reset        Reset tất cả checkpoints và chạy lại từ đầu
-#   --from-step N  Bắt đầu từ bước N
-#   --skip-step N  Bỏ qua bước N
-#   --dry-run      Chỉ hiển thị kế hoạch, không chạy
-#   --help         Hiển thị hướng dẫn
-#
+# ─────────────────────────────────────────────────────────────────────────────
+# 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
+# PIPELINE 7 BƯỚC: TỰ ĐỘNG HOÁ TOÀN BỘ QUY TRÌNH
+# ─────────────────────────────────────────────────────────────────────────────
+# Mục tiêu: Điều phối 7 bước từ khám phá dữ liệu → xử lý → HDFS → Spark MLlib
+#           → tải kết quả → gán nhãn → phân tích cuối cùng.
+# Cách chạy nhanh:
+#   ./02_scripts/pipeline/full_pipeline_spark.sh [OPTIONS]
+# Tuỳ chọn chính:
+#   --reset            Reset checkpoints và chạy lại từ đầu
+#   --from-step N      Bắt đầu từ bước N
+#   --skip-step N      Bỏ qua bước N
+#   --dry-run          Chỉ hiển thị kế hoạch
+#   --seed N           Seed cho KMeans
+#   --k N              Số cụm K cho KMeans
+#   --max-iter N       Số vòng lặp tối đa
+#   --tol FLOAT        Ngưỡng hội tụ
 
 set -euo pipefail  # Exit on error, undefined vars, pipe failures
 

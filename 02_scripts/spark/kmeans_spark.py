@@ -1,21 +1,44 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# ==============================================================================
+# File: kmeans_spark.py
+# ==============================================================================
 """
-BƯỚC 4: THUẬT TOÁN K-MEANS VỚI SPARK MLlib (TỐI ƯU)
+──────────────────────────────────────────────────────────────────────────────
+📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means Clustering (Polars + Spark)
+BƯỚC 4/7: K-MEANS VỚI SPARK MLlib (TỐI ƯU)
+──────────────────────────────────────────────────────────────────────────────
 
-Pipeline 7 bước:
+TÓM TẮT
+- Mục tiêu: Chạy K-means trên dữ liệu lớn (179M) trực tiếp từ HDFS.
+- Công nghệ: Spark MLlib với Catalyst + Tungsten, khởi tạo k-means++ (k-means||).
+
+- Pipeline 7 bước:
   1) Khám phá dữ liệu
   2) Chuẩn bị đặc trưng
   3) Tải lên HDFS
-  4) K-means MLlib <- Bước này
+  4) K-means MLlib
   5) Tải kết quả
   6) Gán nhãn cụm
   7) Phân tích
 
-Mục đích:
-- Chạy K-means trên dữ liệu lớn (179M dòng)
-- Dùng Spark MLlib (Catalyst + Tungsten), khởi tạo k-means++ (k-means||)
-- Lưu trên HDFS để tuân thủ bảo mật
+I/O & THỜI GIAN
+- Input : hdfs://.../user/spark/hi_large/input/hadoop_input.txt (không header)
+- Output: hdfs://.../user/spark/hi_large/output_centroids (thư mục kết quả)
+- Thời gian chạy: ~10–15 phút (tùy cấu hình máy/cluster)
+
+CÁCH CHẠY NHANH
+  spark-submit kmeans_spark.py \
+    hdfs://localhost:9000/user/spark/hi_large/input/hadoop_input.txt \
+    hdfs://localhost:9000/user/spark/hi_large/output_centroids \
+    5 15 42 1e-4
+
+THAM SỐ
+- <hdfs_input>   : Đường dẫn HDFS tới dữ liệu đầu vào
+- <hdfs_output>  : Đường dẫn HDFS thư mục kết quả centroids
+- [k] [max_iter] [seed] [tol] (tuỳ chọn; mặc định 5, 15, 42, 1e-4)
+
+GHI CHÚ
+- Yêu cầu dữ liệu đã chuẩn hoá và đã upload lên HDFS ở bước 3.
 """
 
 import sys

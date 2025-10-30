@@ -1,6 +1,17 @@
 #!/bin/bash
-
-# clean_all.sh - Dọn sạch toàn bộ artefacts để chạy lại từ đầu
+# ─────────────────────────────────────────────────────────────────────────────
+# 📊 DỰ ÁN: Phân Tích Rửa Tiền — K-means (Polars + Spark)
+# TIỆN ÍCH: DỌN SẠCH TOÀN BỘ ARTEFACTS (CLEAN ALL)
+# ─────────────────────────────────────────────────────────────────────────────
+# Mục tiêu: Xóa sạch artefacts local để chuẩn bị chạy lại pipeline từ đầu.
+# Phạm vi xóa:
+#   - 01_data/processed/*, 01_data/results/*
+#   - 04_logs/*.md
+#   - 05_snapshots/*
+#   - 06_visualizations artefacts (giữ notebook/README)
+#   - .pipeline_checkpoints
+# Cách chạy nhanh:
+#   bash 02_scripts/pipeline/clean_all.sh
 
 set -euo pipefail
 
