@@ -41,7 +41,7 @@ Final/
 │   ├── polars/                   # Data processing
 │   │   ├── explore_fast.py
 │   │   ├── prepare_polars.py
-│   │   ├── assign_clusters.py
+│   │   ├── assign_clusters_polars.py
 │   │   └── analyze.py
 │   ├── spark/                    # PySpark MLlib K-means
 │   │   ├── setup_hdfs.sh
@@ -194,7 +194,7 @@ python 02_scripts/polars/prepare_polars.py
 02_scripts/spark/download_from_hdfs.sh
 
 # 6. Gán clusters
-python 02_scripts/polars/assign_clusters.py
+python 02_scripts/polars/assign_clusters_polars.py
 
 # 7. Phân tích kết quả
 python 02_scripts/polars/analyze.py
@@ -293,7 +293,7 @@ python 02_scripts/data/visualize_results.py
 | 3 | `02_scripts/spark/setup_hdfs.sh` | Upload HDFS & xóa temp files | ~5 phút |
 | 4 | `02_scripts/spark/run_spark.sh` | K-means MLlib (⚡ k-means++) | ~10-15 phút |
 | 5 | `02_scripts/spark/download_from_hdfs.sh` | Tải centroids từ HDFS | ~30s |
-| 6 | `02_scripts/polars/assign_clusters.py` | Gán clusters cho data | ~10 phút |
+| 6 | `02_scripts/polars/assign_clusters_polars.py` | Gán clusters cho data | ~10 phút |
 | 7 | `02_scripts/polars/analyze.py` | Phân tích & báo cáo | ~2 phút |
 | 8 | `02_scripts/data/snapshot_results.py` | Snapshot kết quả | ~10s |
 | 9 | `02_scripts/data/visualize_results.py` | Tạo biểu đồ trực quan | ~2 phút |

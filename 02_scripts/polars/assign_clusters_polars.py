@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# File: assign_clusters.py
+# File: assign_clusters_polars.py
 # ==============================================================================
 """
 ──────────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ I/O & THỜI GIAN
 - Thời gian chạy: ~10 phút (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/assign_clusters.py \
+  python 02_scripts/polars/assign_clusters_polars.py \
     --centroids 01_data/results/final_centroids.txt \
     --hdfs-path /user/spark/hi_large/input/hadoop_input.txt
 

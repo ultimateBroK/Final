@@ -230,7 +230,7 @@ Kết quả chính:
    - Output: `final_centroids.txt`
 
 6. **Bước 6: Gán nhãn cụm (3 phút 14s)**
-   - Script: `assign_clusters.py`
+   - Script: `assign_clusters_polars.py`
    - Công việc:
      - Đọc streaming từ HDFS
      - Tính khoảng cách Euclidean đến 5 centroids
@@ -550,7 +550,7 @@ cluster_ids = np.argmin(distances, axis=0)
 hdfs dfs -get /user/spark/hi_large/input/hadoop_input.txt 01_data/processed/
 
 # 2. Sử dụng (vd: debug, phân tích)
-python 02_scripts/polars/assign_clusters.py
+python 02_scripts/polars/assign_clusters_polars.py
 
 # 3. XÓA lại sau khi dùng xong (tuân thủ quy định)
 rm 01_data/processed/hadoop_input.txt

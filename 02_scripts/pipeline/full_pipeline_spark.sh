@@ -410,7 +410,7 @@ run_step 5 "Tải Kết Quả Về" \
 run_step 6 "Gán Nhãn Cụm" \
     "Gán nhãn cụm cho từng giao dịch" \
     "~10 phút" \
-    "python \"$SCRIPTS_DIR/polars/assign_clusters.py\""
+    "python \"$SCRIPTS_DIR/polars/assign_clusters_polars.py\""
 
 run_step 7 "Phân Tích Kết Quả" \
     "Phân tích thống kê và tìm cụm rủi ro cao" \

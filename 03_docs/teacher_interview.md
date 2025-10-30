@@ -548,7 +548,7 @@ rm 01_data/processed/hadoop_input.txt
 ---
 
 ### ❓ Câu 8: Batch Processing
-**Giáo viên hỏi:** Trong `assign_clusters.py`, em thấy:
+**Giáo viên hỏi:** Trong `assign_clusters_polars.py`, em thấy:
 
 ```python
 chunk_size = 1000000  # 1M giao dịch/batch
