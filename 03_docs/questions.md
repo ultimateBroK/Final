@@ -195,12 +195,12 @@ Kết quả chính:
 **Pipeline 7 bước (Thời gian thực tế: 11 phút 22 giây):**
 
 1. **Bước 1: Khám phá dữ liệu (13s)**
-   - Script: `01_explore_fast.py`
+   - Script: `explore_fast.py`
    - Công việc: Đọc 100K dòng đầu, thống kê mô tả, phân tích phân phối
    - Output: In ra terminal (không tạo file)
 
 2. **Bước 2: Feature Engineering (36s)**
-   - Script: `02_prepare_polars.py`
+   - Script: `prepare_polars.py`
    - Công việc:
      - Parse timestamp → hour, day_of_week
      - Tính amount_ratio = received / paid
@@ -230,7 +230,7 @@ Kết quả chính:
    - Output: `final_centroids.txt`
 
 6. **Bước 6: Gán nhãn cụm (3 phút 14s)**
-   - Script: `04_assign_clusters.py`
+   - Script: `assign_clusters.py`
    - Công việc:
      - Đọc streaming từ HDFS
      - Tính khoảng cách Euclidean đến 5 centroids
@@ -238,7 +238,7 @@ Kết quả chính:
    - Output: `clustered_results.txt` (342.75 MB)
 
 7. **Bước 7: Phân tích (30s)**
-   - Script: `05_analyze.py`
+   - Script: `analyze.py`
    - Công việc:
      - Gắn cluster_id vào dữ liệu gốc
      - Tính tỷ lệ rửa tiền mỗi cụm
@@ -550,7 +550,7 @@ cluster_ids = np.argmin(distances, axis=0)
 hdfs dfs -get /user/spark/hi_large/input/hadoop_input.txt 01_data/processed/
 
 # 2. Sử dụng (vd: debug, phân tích)
-python 02_scripts/polars/04_assign_clusters.py
+python 02_scripts/polars/assign_clusters.py
 
 # 3. XÓA lại sau khi dùng xong (tuân thủ quy định)
 rm 01_data/processed/hadoop_input.txt
@@ -596,7 +596,7 @@ if is_step_completed 1; then
     log "⏭️  Bước 1 đã hoàn thành, đang bỏ qua..."
 else
     # Chạy bước 1
-    python "02_scripts/polars/01_explore_fast.py"
+    python "02_scripts/polars/explore_fast.py"
     # Đánh dấu hoàn thành
     mark_step_completed 1
 fi

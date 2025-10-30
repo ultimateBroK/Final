@@ -26,8 +26,8 @@ Dự án đã được tổ chức lại với cấu trúc xếp theo thứ tự
 
 | Tên cũ | Tên mới |
 |--------|------|
-| `explore_fast.py` | `01_explore_fast.py` |
-| `prepare_polars.py` | `02_prepare_polars.py` |
+| `explore_fast.py` | `explore_fast.py` |
+| `prepare_polars.py` | `prepare_polars.py` |
 | ~~`init_centroids.py`~~ | ❌ **Đã loại bỏ** (MLlib tự động dùng k-means++) |
 | `assign_clusters_polars.py` | `03_assign_clusters.py` |
 | `analyze_polars.py` | `04_analyze.py` |
@@ -56,8 +56,8 @@ data/results/              → 01_data/results/
 
 ```bash
 # CŨ → MỚI
-scripts/polars/explore_fast.py          → 02_scripts/polars/01_explore_fast.py
-scripts/polars/prepare_polars.py        → 02_scripts/polars/02_prepare_polars.py
+scripts/polars/explore_fast.py          → 02_scripts/polars/explore_fast.py
+scripts/polars/prepare_polars.py        → 02_scripts/polars/prepare_polars.py
 # scripts/polars/init_centroids.py      → ❌ ĐÃ LOẠI BỎ (MLlib k-means++ tự động)
 scripts/polars/assign_clusters_polars.py → 02_scripts/polars/03_assign_clusters.py
 scripts/polars/analyze_polars.py        → 02_scripts/polars/04_analyze.py
@@ -101,8 +101,8 @@ python scripts/polars/prepare_polars.py
 # ... etc
 
 # MỚI
-python 02_scripts/polars/01_explore_fast.py
-python 02_scripts/polars/02_prepare_polars.py
+python 02_scripts/polars/explore_fast.py
+python 02_scripts/polars/prepare_polars.py
 # (Bước 3 init centroids đã loại bỏ)
 python 02_scripts/polars/03_assign_clusters.py
 python 02_scripts/polars/04_analyze.py

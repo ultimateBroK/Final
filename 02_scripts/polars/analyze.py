@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# File: 05_analyze.py
+# File: analyze.py
 # ==============================================================================
 """
 ──────────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ I/O & THỜI GIAN
 - Thời gian chạy: ~2 phút (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/05_analyze.py
+  python 02_scripts/polars/analyze.py
 
 GHI CHÚ
 - Xác định cụm rủi ro cao theo ngưỡng > 10% rửa tiền.
@@ -96,7 +96,7 @@ print(cluster_counts)
 print()
 
 # ==================== PHÂN TÍCH TỶ LỆ RỬA TIỀN ====================
-print("💰 TỶ LỆ RỬA TIỀN TRONG TỮNG CỤM:")
+print("💰 TỶ LỆ RỬA TIỀN TRONG TỪNG CỤM:")
 print("-" * 70)
 
 # Tính tỷ lệ rửa tiền cho mỗi cụm
@@ -155,11 +155,11 @@ min_rate = laundering_stats['laundering_rate'].min()
 
 max_cluster = laundering_stats.filter(
     pl.col('laundering_rate') == max_rate
-)['cluster'][0]
+)["cluster"][0]
 
 min_cluster = laundering_stats.filter(
     pl.col('laundering_rate') == min_rate
-)['cluster'][0]
+)["cluster"][0]
 
 print(f"1. CỤm nghi ngờ NHẤT: Cluster {max_cluster} ({max_rate:.2f}% rửa tiền)")
 print(f"   ➡️  Nên kiểm tra kỹ các giao dịch trong cụm này")
@@ -228,3 +228,5 @@ print("🎉 PIPELINE HOÀN TẤT!")
 print("   Tất cả 7 bước đã chạy thành công.")
 print("   Xem kết quả trong thư mục 01_data/results/")
 print()
+
+

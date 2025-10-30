@@ -13,10 +13,10 @@ Final/
 │
 ├── 02_scripts/                   # SCRIPTS (Xếp theo thứ tự chạy)
 │   ├── polars/                   # Data processing với Polars
-│   │   ├── 01_explore_fast.py    # Bước 1: Khám phá dữ liệu
-│   │   ├── 02_prepare_polars.py  # Bước 2: Feature engineering
-│   │   ├── 04_assign_clusters.py # Bước 6: Gán nhãn clusters
-│   │   └── 05_analyze.py         # Bước 7: Phân tích kết quả
+│   │   ├── explore_fast.py       # Bước 1: Khám phá dữ liệu
+│   │   ├── prepare_polars.py     # Bước 2: Feature engineering
+│   │   ├── assign_clusters.py    # Bước 6: Gán nhãn clusters
+│   │   └── analyze.py            # Bước 7: Phân tích kết quả
 │   │
 │   ├── spark/                    # PySpark MLlib (k-means++)
 │   │   ├── setup_hdfs.sh         # Bước 3: Upload HDFS
@@ -66,13 +66,13 @@ Final/
 
 | Bước | Script | Input | Output | Mô tả |
 |------|--------|-------|--------|-------|
-| 1 | `01_explore_fast.py` | CSV gốc | Console | Khám phá dữ liệu |
-| 2 | `02_prepare_polars.py` | CSV gốc | Temp files | Feature engineering |
+| 1 | `explore_fast.py` | CSV gốc | Console | Khám phá dữ liệu |
+| 2 | `prepare_polars.py` | CSV gốc | Temp files | Feature engineering |
 | 3 | `setup_hdfs.sh` | Temp files | HDFS | Upload & **xóa temp** |
 | 4 | `run_spark.sh` | HDFS | HDFS results | K-means MLlib (⚡ k-means++) |
 | 5 | `download_from_hdfs.sh` | HDFS | final_centroids.txt | Download centroids |
-| 6 | `04_assign_clusters.py` | CSV + centroids | clustered_results.txt | Gán nhãn |
-| 7 | `05_analyze.py` | Clustered data | Console + CSV | Phân tích |
+| 6 | `assign_clusters.py` | CSV + centroids | clustered_results.txt | Gán nhãn |
+| 7 | `analyze.py` | Clustered data | Console + CSV | Phân tích |
 | 8 | `snapshot_results.py` | Results folder | 05_snapshots/ | Lưu snapshot |
 | 9 | `visualize_results.py` | Clustered data | 06_visualizations/ | Biểu đồ |
 

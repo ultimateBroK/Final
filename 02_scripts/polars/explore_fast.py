@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# File: 01_explore_fast.py
+# File: explore_fast.py
 # ==============================================================================
 """
 ──────────────────────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ I/O & THỜI GIAN
 - Thời gian chạy: ~30 giây (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/01_explore_fast.py \
+  python 02_scripts/polars/explore_fast.py \
     --raw 01_data/raw/HI-Large_Trans.csv \
     --sample-rows 100000
 
@@ -110,5 +110,7 @@ print("="*70)
 print("HOÀN TẤT KHÁM PHÁ DỮ LIỆU!")
 print("="*70)
 print("\nGỢI Ý TIẾP THEO:")
-print("   Chạy bước 2: python 02_scripts/polars/02_prepare_polars.py")
+print("   Chạy bước 2: python 02_scripts/polars/prepare_polars.py")
 print()
+
+

@@ -72,7 +72,7 @@ done
 if [ ! -f "$INPUT_TEMP" ]; then
     echo "Không tìm thấy tệp đầu vào tạm: $INPUT_TEMP"
     echo "   Vui lòng chạy chuẩn bị dữ liệu trước:"
-    echo "   python $ROOT_DIR/02_scripts/polars/02_prepare_polars.py"
+    echo "   python $ROOT_DIR/02_scripts/polars/prepare_polars.py"
     exit 1
 fi
 

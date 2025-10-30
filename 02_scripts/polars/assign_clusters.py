@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# File: 04_assign_clusters.py
+# File: assign_clusters.py
 # ==============================================================================
 """
 ──────────────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ I/O & THỜI GIAN
 - Thời gian chạy: ~10 phút (tùy máy)
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/04_assign_clusters.py \
+  python 02_scripts/polars/assign_clusters.py \
     --centroids 01_data/results/final_centroids.txt \
     --hdfs-path /user/spark/hi_large/input/hadoop_input.txt
 
@@ -208,5 +208,7 @@ for cluster_id, count in enumerate(cluster_counts):
     print(f"   Cluster {cluster_id}: {count:,} giao dịch ({percent:.2f}%)")
 print()
 print("💡 GỢI Ý TIẾP THEO:")
-print("   Chạy bước 8: python 02_scripts/polars/05_analyze.py")
+print("   Chạy bước 7: python 02_scripts/polars/analyze.py")
 print()
+
+

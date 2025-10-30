@@ -385,12 +385,12 @@ log ""
 run_step 1 "Khám Phá Dữ Liệu" \
     "Phân tích thống kê sơ bộ CSV, hiểu cấu trúc dữ liệu" \
     "~30 giây" \
-    "python \"$SCRIPTS_DIR/polars/01_explore_fast.py\""
+    "python \"$SCRIPTS_DIR/polars/explore_fast.py\""
 
 run_step 2 "Xử Lý Đặc Trưng" \
     "Trích xuất đặc trưng: thời gian → giờ/ngày, tỷ lệ số tiền, mã tuyến, chuẩn hóa" \
     "~10 phút (6 bước nhỏ)" \
-    "python \"$SCRIPTS_DIR/polars/02_prepare_polars.py\""
+    "python \"$SCRIPTS_DIR/polars/prepare_polars.py\""
 
 run_step 3 "Upload Lên HDFS" \
     "Tải dữ liệu lên HDFS, xóa tệp tạm trên máy" \
@@ -410,12 +410,12 @@ run_step 5 "Tải Kết Quả Về" \
 run_step 6 "Gán Nhãn Cụm" \
     "Gán nhãn cụm cho từng giao dịch" \
     "~10 phút" \
-    "python \"$SCRIPTS_DIR/polars/04_assign_clusters.py\""
+    "python \"$SCRIPTS_DIR/polars/assign_clusters.py\""
 
 run_step 7 "Phân Tích Kết Quả" \
     "Phân tích thống kê và tìm cụm rủi ro cao" \
     "~2 phút" \
-    "python \"$SCRIPTS_DIR/polars/05_analyze.py\""
+    "python \"$SCRIPTS_DIR/polars/analyze.py\""
 
 # ==================== TỔNG KẾT ====================
 TOTAL_END=$(date +%s)

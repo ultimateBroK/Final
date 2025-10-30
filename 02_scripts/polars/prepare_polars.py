@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# File: 02_prepare_polars.py
+# File: prepare_polars.py
 # ==============================================================================
 """
 ──────────────────────────────────────────────────────────────────────────────
@@ -23,7 +23,7 @@ QUY TẮC LƯU TRỮ
 - Dữ liệu dài hạn chỉ lưu trên HDFS theo policy của dự án.
 
 CÁCH CHẠY NHANH
-  python 02_scripts/polars/02_prepare_polars.py \
+  python 02_scripts/polars/prepare_polars.py \
     --raw 01_data/raw/HI-Large_Trans.csv \
     --out-dir 01_data/processed
 
@@ -236,3 +236,5 @@ print("GỢI Ý TIẾP THEO:")
 print("   Chạy bước 3: bash 02_scripts/spark/setup_hdfs.sh")
 print("   (MLlib sẽ tự động dùng k-means++ initialization)")
 print()
+
+

@@ -7,7 +7,7 @@
 ## 🔍 PHẦN 1: HIỂU BIẾT CODE - FEATURE ENGINEERING (30%)
 
 ### ❓ Câu 1: Parse Timestamp
-**Giáo viên hỏi:** Em giải thích chi tiết đoạn code này trong `02_prepare_polars.py`:
+**Giáo viên hỏi:** Em giải thích chi tiết đoạn code này trong `prepare_polars.py`:
 
 ```python
 pl.col('Timestamp').str.strptime(pl.Datetime, format='%Y/%m/%d %H:%M').dt.hour().alias('hour')
@@ -327,7 +327,7 @@ minmax5 = (10000 - 100) / (10000 - 100) = 1.00
 ## 🔄 PHẦN 2: WORKFLOW & PIPELINE (30%)
 
 ### ❓ Câu 6: Lazy Evaluation
-**Giáo viên hỏi:** Trong `02_prepare_polars.py`, em thấy:
+**Giáo viên hỏi:** Trong `prepare_polars.py`, em thấy:
 
 ```python
 df = pl.scan_csv(DATA_RAW)  # Lazy loading
@@ -548,7 +548,7 @@ rm 01_data/processed/hadoop_input.txt
 ---
 
 ### ❓ Câu 8: Batch Processing
-**Giáo viên hỏi:** Trong `04_assign_clusters.py`, em thấy:
+**Giáo viên hỏi:** Trong `assign_clusters.py`, em thấy:
 
 ```python
 chunk_size = 1000000  # 1M giao dịch/batch
