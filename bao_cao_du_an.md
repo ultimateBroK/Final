@@ -844,7 +844,7 @@ Cluster 4: 3,905,021 giao dịch (2.17%)
 #### BƯỚC 7: Phân tích kết quả 📊
 
 **Mục đích**: Phân tích kết quả và tìm nhóm nào có **tỷ lệ rửa tiền cao nhất**  
-**File thực thi**: `scripts/polars/analyze_polars.py`  
+**File thực thi**: `scripts/polars/analyze.py`  
 **Thời gian thực tế**: **30 giây** (rất nhanh!)  
 **Input**: 
   - File kết quả phân cụm (342.75 MB) - mỗi giao dịch đã biết thuộc nhóm nào (0-4)
@@ -1163,7 +1163,7 @@ Nếu cần xem lại dữ liệu đã xử lý:
 hdfs dfs -get /user/spark/hi_large/input/hadoop_input.txt data/processed/
 
 # Sử dụng
-python scripts/polars/analyze_polars.py
+python scripts/polars/analyze.py
 
 # Xóa lại sau khi dùng xong
 rm data/processed/hadoop_input.txt
@@ -1233,7 +1233,7 @@ hadoop version
 #### Bước 3: Cài đặt Spark (tự động)
 ```bash
 cd /home/ultimatebrok/Downloads/Final
-./scripts/setup/install_spark.sh
+# (Tùy chọn) Cài đặt Spark theo hướng dẫn trong tài liệu Spark chính thức
 
 # Script sẽ tự động:
 # - Download Spark 4.0.1
@@ -1312,7 +1312,7 @@ scripts/spark/download_from_hdfs.sh
 python scripts/polars/assign_clusters_polars.py
 
 # Bước 7
-python scripts/polars/analyze_polars.py
+python scripts/polars/analyze.py
 ```
 
 ### 7.4. Xem kết quả
@@ -1382,7 +1382,7 @@ java.lang.OutOfMemoryError: Java heap space
 rm -rf data/processed/*
 
 # Hoặc chạy script cleanup
-./scripts/pipeline/clean_spark.sh
+./scripts/pipeline/clean_all.sh
 ```
 
 #### Lỗi 4: Polars báo lỗi memory
@@ -1613,7 +1613,7 @@ Final/
 │   │   ├── explore_fast.py
 │   │   ├── prepare_polars.py
 │   │   ├── assign_clusters_polars.py
-│   │   └── analyze_polars.py
+│   │   └── analyze.py
 │   │
 │   ├── spark/
 │   │   ├── setup_hdfs.sh
@@ -1623,28 +1623,26 @@ Final/
 │   │
 │   ├── pipeline/
 │   │   ├── full_pipeline_spark.sh
-│   │   ├── clean_spark.sh
+│   │   ├── clean_all.sh
 │   │   └── reset_pipeline.sh
 │   │
-│   └── setup/
-│       └── install_spark.sh
+│   └── setup/                 (không có)
 │
 ├── docs/
-│   ├── PROJECT_OVERVIEW.md
-│   └── HADOOP_ALTERNATIVES.md
+│   ├── tong-quan.md
+│   └── hadoop-alternatives.md
 │
 ├── logs/
 │   └── pipeline_log_20251028_202850.md
 │
-├── archive/
-│   └── hadoop/                (legacy code)
+├── archive/                    (không có)
 │
 ├── .venv/                     (Python virtual env)
 ├── .git/                      (Version control)
 ├── .gitignore
 ├── README.md
-├── CHANGELOG.md
-└── PROJECT_REPORT.md          (Báo cáo này)
+├── changelog.md
+└── bao_cao_du_an.md           (Báo cáo này)
 ```
 
 ### C. Thống kê dự án
