@@ -52,7 +52,6 @@ Final/
 │   │   ├── full_pipeline_spark.sh
 │   │   ├── clean_spark.sh
 │   │   └── reset_pipeline.sh
-│   ├── setup/                    # Installation (manual per docs/jupyter.md)
 │   └── data/                     # Utilities
 │       ├── snapshot_results.py
 │       └── (no visualize script; see visualizations/)
