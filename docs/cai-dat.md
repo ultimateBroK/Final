@@ -76,14 +76,9 @@ pip install -r requirements.txt
 
 ### 4. Apache Spark
 
+Cài đặt Spark theo hướng dẫn của hệ điều hành (pacman/apt/brew). Sau khi cài đặt, kiểm tra:
+
 ```bash
-# Chạy installation script
-./scripts/setup/install_spark.sh
-
-# Reload shell
-source ~/.zshrc
-
-# Kiểm tra
 spark-submit --version
 ```
 
@@ -315,9 +310,9 @@ python -c "import polars, pyspark, plotly; print('✅ OK!')"
 
 ## 📚 Tài liệu liên quan
 
-- [README.md](README.md) - Tổng quan project
-- [CAU_TRUC_DU_AN.md](CAU_TRUC_DU_AN.md) - Cấu trúc thư mục
-- [HUONG_DAN_CHAY.md](HUONG_DAN_CHAY.md) - Hướng dẫn chạy pipeline
+- [README.md](../README.md) - Tổng quan project
+- [cau-truc.md](cau-truc.md) - Cấu trúc thư mục
+- [huong-dan.md](huong-dan.md) - Hướng dẫn chạy pipeline
 
 ---
 
@@ -388,5 +383,5 @@ pip freeze > requirements_freeze.txt
 
 ---
 
-**Cập nhật:** 2025-10-29  
-**Hỗ trợ:** Xem [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) nếu cần
+**Cập nhật:** 2025-10-30  
+**Hỗ trợ:** Xem [migration.md](migration.md) nếu cần

@@ -16,7 +16,7 @@ Final/
 │   │   ├── explore_fast.py       # Bước 1: Khám phá dữ liệu
 │   │   ├── prepare_polars.py     # Bước 2: Feature engineering
 │   │   ├── assign_clusters_polars.py    # Bước 6: Gán nhãn clusters
-│   │   └── analyze.py            # Bước 7: Phân tích kết quả
+│   │   └── analyze_polars.py     # Bước 7: Phân tích kết quả
 │   │
 │   ├── spark/                    # PySpark MLlib (k-means++)
 │   │   ├── setup_hdfs.sh         # Bước 3: Upload HDFS
@@ -29,16 +29,13 @@ Final/
 │   │   ├── clean_spark.sh        # Dọn dẹp project
 │   │   └── reset_pipeline.sh     # Reset checkpoints
 │   │
-│   ├── setup/                    # Cài đặt môi trường
-│   │   └── install_spark.sh      # Cài Apache Spark
-│   │
 │   └── data/                     # Data utilities
 │       ├── snapshot_results.py   # Snapshot kết quả với timestamp
 │       └── visualize_results.py  # Tạo biểu đồ trực quan
 │
 ├── docs/                      # TÀI LIỆU
-│   ├── HADOOP_ALTERNATIVES.md    # So sánh các phương pháp clustering
-│   └── PROJECT_OVERVIEW.md       # Tổng quan dự án
+│   ├── hadoop-alternatives.md    # So sánh các phương pháp clustering
+│   └── tong-quan.md              # Tổng quan dự án
 │
 ├── logs/                      # LOGS
 │   └── pipeline_log_*.md         # Logs với timestamp
@@ -51,8 +48,8 @@ Final/
 │       └── metadata.json
 │
 ├── visualizations/            # BIỂU ĐỒ
-│   ├── visual_report_*.md        # Báo cáo trực quan với timestamp
-│   └── latest_summary.txt        # Tóm tắt kết quả mới nhất
+│   ├── phan-tich.ipynb           # Notebook phân tích
+│   └── README.md                 # Hướng dẫn trực quan hóa
 │
 ├── README.md                     # Hướng dẫn tổng quan
 ├── HUONG_DAN_CHAY.md            # Hướng dẫn chi tiết từng bước
@@ -72,7 +69,7 @@ Final/
 | 4 | `run_spark.sh` | HDFS | HDFS results | K-means MLlib (⚡ k-means++) |
 | 5 | `download_from_hdfs.sh` | HDFS | final_centroids.txt | Download centroids |
 | 6 | `assign_clusters_polars.py` | CSV + centroids | clustered_results.txt | Gán nhãn |
-| 7 | `analyze.py` | Clustered data | Console + CSV | Phân tích |
+| 7 | `analyze_polars.py` | Clustered data | Console + CSV | Phân tích |
 | 8 | `snapshot_results.py` | Results folder | snapshots/ | Lưu snapshot |
 | 9 | `visualize_results.py` | Clustered data | visualizations/ | Biểu đồ |
 
@@ -166,17 +163,17 @@ python scripts/data/visualize_results.py
 
 1. **Không lưu dữ liệu lớn local**: Temp files tự động xóa sau upload HDFS
 2. **Snapshots**: Lưu lịch sử kết quả để so sánh qua các lần chạy
-   - Latest: `snapshots/snapshot_20251029_213229/` (342.75 MB, 2025-10-29 21:32:30)
+   - Latest: `snapshots/snapshot_20251030_095037/` (2025-10-30 09:50:37)
 3. **Visualizations**: Tạo báo cáo dễ đọc với ASCII charts
 4. **Logs**: Mỗi lần chạy tạo log riêng với timestamp
 
 ## 📚 Tài liệu liên quan
 
 - **README.md**: Hướng dẫn tổng quan
-- **HUONG_DAN_CHAY.md**: Chi tiết từng bước
-- **BAO_CAO_TIEU_LUAN.md**: Báo cáo đầy đủ
+- **huong-dan.md**: Chi tiết từng bước
+- **bao_cao_tieu_luan.md**: Báo cáo đầy đủ
 
 ---
 
-**Cập nhật**: 2025-10-29
-**Phiên bản**: 2.1 (MLlib k-means++ - Nhanh hơn 30-50%)
+**Cập nhật**: 2025-10-30
+**Phiên bản**: 2.1 (MLlib k-means++)

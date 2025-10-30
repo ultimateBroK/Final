@@ -82,12 +82,12 @@ Final/
 │   │   └── reset_pipeline.sh       → Reset checkpoints
 │   │
 │   └── setup/
-│       └── install_spark.sh        → Cài Spark (Arch)
+│       └── (manual per docs)
 │
 ├── docs/
-│   ├── PROJECT_OVERVIEW.md         → Document này
-│   ├── HADOOP_ALTERNATIVES.md      → So sánh phương pháp
-│   └── Polars_Hadoop_HI_Large.md   → Legacy workflow
+│   ├── tong-quan.md                → Document này
+│   ├── hadoop-alternatives.md      → So sánh phương pháp
+│   └── jupyter.md                  → Notebook/Jupyter hướng dẫn
 │
 ├── logs/                       # Pipeline logs
 ├── archive/hadoop/             # Legacy MapReduce code
@@ -203,7 +203,7 @@ cp /path/to/HI-Large_Trans.csv data/raw/
 /user/spark/hi_large/
 ├── input/
 │   └── hadoop_input.txt        # 33GB normalized data
-├── centroids.txt               # K initial centroids
+├── centroids.txt               # (legacy) initial centroids (không bắt buộc)
 └── output_centroids/           # Final centroids after convergence
     └── part-00000
 ```
@@ -250,14 +250,13 @@ hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 
 ## 🆕 Snapshot gần nhất
 
-- Tên snapshot: `snapshot_20251029_213229`
-- Thời gian: `2025-10-29 21:32:30`
-- Kích thước: `342.75 MB`
-- Thư mục: `snapshots/snapshot_20251029_213229/`
+- Tên snapshot: `snapshot_20251030_095037`
+- Thời gian: `2025-10-30 09:50:37`
+- Thư mục: `snapshots/snapshot_20251030_095037/`
 - Thành phần:
-  - `final_centroids.txt` (436 bytes)
-  - `clustered_results.txt` (342.75 MB)
-  - `suspicious_transactions.csv` (558 bytes)
+  - `final_centroids.txt`
+  - `clustered_results.txt`
+  - `suspicious_transactions.csv`
   - `pipeline_log.md`
 
 Tham khảo báo cáo chi tiết: `bao_cao_du_an.md` (đã đồng bộ theo snapshot này).
@@ -373,9 +372,9 @@ ls -la .pipeline_checkpoints/
 ## 🎓 Tài liệu tham khảo
 
 - **README.md**: Quick start guide
-- **HADOOP_ALTERNATIVES.md**: So sánh các phương pháp clustering
-- **Polars_Hadoop_HI_Large.md**: Legacy Hadoop workflow
-- **CHANGELOG.md**: Lịch sử thay đổi project
+- **hadoop-alternatives.md**: So sánh các phương pháp clustering
+- **jupyter.md**: Hướng dẫn Jupyter/Notebook
+- **changelog.md**: Lịch sử thay đổi project
 
 ---
 
@@ -386,7 +385,7 @@ ls -la .pipeline_checkpoints/
 1. Tạo script trong thư mục phù hợp (`scripts/polars/` hoặc `scripts/spark/`)
 2. Cập nhật `scripts/pipeline/full_pipeline_spark.sh`
 3. Thêm checkpoint nếu cần
-4. Update docs (README.md, PROJECT_OVERVIEW.md)
+4. Update docs (README.md, tong-quan.md)
 
 ### Testing:
 
@@ -422,5 +421,5 @@ Nếu gặp vấn đề:
 
 ---
 
-**Last Updated**: 2025-10-28  
-**Project Version**: 2.0 (Spark-based)
+**Last Updated**: 2025-10-30  
+**Project Version**: 2.1 (Spark MLlib)

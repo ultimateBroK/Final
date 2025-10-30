@@ -1,5 +1,21 @@
 # Changelog
 
+## [2025-10-30-01] - Đồng bộ tài liệu với trạng thái hiện tại
+
+### 📝 Cập nhật tài liệu
+
+- `README.md`: Sửa đường dẫn script, bỏ `full_pipeline_spark_v2.sh`, cập nhật snapshot mới nhất `snapshot_20251030_095037`, sửa `analyze_polars.py`, cập nhật mục HDFS và trực quan hóa bằng notebook.
+- `docs/huong-dan.md`: Đổi `full_pipeline_spark_v2.sh` → `full_pipeline_spark.sh`, sửa liên kết tài liệu sang dạng lowercase hiện có, giữ `analyze_polars.py`.
+- `docs/cai-dat.md`: Bỏ tham chiếu script cài Spark không tồn tại, hướng dẫn kiểm tra `spark-submit --version`, sửa liên kết tài liệu.
+- `docs/cau-truc.md`: Đồng bộ tên file thực tế (`analyze_polars.py`, docs lowercase), cập nhật `visualizations/` theo thực tế, cập nhật snapshot mới nhất.
+- `docs/tong-quan.md`: Cập nhật danh mục, liên kết docs lowercase, đánh dấu `centroids.txt` là legacy, cập nhật snapshot mới nhất.
+
+### 📦 Snapshot
+
+- Snapshot mới nhất: `snapshot_20251030_095037`
+- Thư mục: `snapshots/snapshot_20251030_095037/`
+- Thành phần: `final_centroids.txt`, `clustered_results.txt`, `suspicious_transactions.csv`, `pipeline_log.md`
+
 ## [2025-10-29-03] - Snapshot cập nhật
 
 ### 📦 Tạo snapshot mới nhất

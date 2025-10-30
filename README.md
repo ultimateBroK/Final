@@ -42,7 +42,7 @@ Final/
 │   │   ├── explore_fast.py
 │   │   ├── prepare_polars.py
 │   │   ├── assign_clusters_polars.py
-│   │   └── analyze.py
+│   │   └── analyze_polars.py
 │   ├── spark/                    # PySpark MLlib K-means
 │   │   ├── setup_hdfs.sh
 │   │   ├── run_spark.sh
@@ -52,12 +52,10 @@ Final/
 │   │   ├── full_pipeline_spark.sh
 │   │   ├── clean_spark.sh
 │   │   └── reset_pipeline.sh
-│   ├── setup/                    # Installation
-│   │   ├── install_spark.sh
-│   │   └── setup_jupyter_kernel.sh
+│   ├── setup/                    # Installation (manual per docs/jupyter.md)
 │   └── data/                     # Utilities
 │       ├── snapshot_results.py
-│       └── visualize_results.py
+│       └── (no visualize script; see visualizations/)
 ├── docs/                      # Tài liệu
 │   ├── cai-dat.md                # Hướng dẫn cài đặt
 │   ├── cau-truc.md               # Cấu trúc dự án
@@ -71,7 +69,7 @@ Final/
 ├── visualizations/            # Visualization
 │   ├── phan-tich.ipynb           # Notebook phân tích
 │   └── README.md
-├── BAO_CAO_DU_AN.md              # Báo cáo chính (gộp)
+├── bao_cao_du_an.md              # Báo cáo chính (gộp)
 ├── changelog.md                  # Lịch sử thay đổi
 ├── README.md                     # File này
 └── requirements.txt              # Dependencies
@@ -82,14 +80,9 @@ Final/
 
 ### Apache Spark
 
+Tham khảo `docs/jupyter.md` và tài liệu hệ điều hành để cài Spark. Sau khi cài đặt, kiểm tra:
+
 ```bash
-# Cài đặt Spark (CachyOS/Arch Linux)
-./scripts/setup/install_spark.sh
-
-# Reload shell để áp dụng biến môi trường
-source ~/.zshrc
-
-# Kiểm tra cài đặt
 spark-submit --version
 ```
 
@@ -153,8 +146,8 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 ### Quick Start
 
 ```bash
-# Chạy toàn bộ pipeline (V2 khuyến nghị)
-./scripts/pipeline/full_pipeline_spark_v2.sh
+# Chạy toàn bộ pipeline
+./scripts/pipeline/full_pipeline_spark.sh
 
 # Tùy chọn flags (KMeans):
 #   --seed N       : đặt seed (vd 42)
@@ -165,7 +158,7 @@ Project này tuân thủ quy tắc **KHÔNG lưu dữ liệu lớn ở local**.
 #   --reset, --from-step N, --skip-step N, --dry-run
 
 # Ví dụ: K=6, maxIter=20, seed=33, tol=1e-5
-./scripts/pipeline/full_pipeline_spark_v2.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
+./scripts/pipeline/full_pipeline_spark.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
 ```
 
 Pipeline sẽ tự động:
@@ -197,13 +190,13 @@ scripts/spark/download_from_hdfs.sh
 python scripts/polars/assign_clusters_polars.py
 
 # 7. Phân tích kết quả
-python scripts/polars/analyze.py
+python scripts/polars/analyze_polars.py
 
 # 8. (Tùy chọn) Tạo snapshot kết quả
 python scripts/data/snapshot_results.py
 
-# 9. (Tùy chọn) Trực quan hóa
-python scripts/data/visualize_results.py
+# 9. (Tùy chọn) Xem notebook trực quan hóa
+jupyter lab visualizations/phan-tich.ipynb
 ```
 
 ### Logs & Snapshots
@@ -214,14 +207,13 @@ Visualization được lưu tại `visualizations/`.
 
 #### Latest snapshot
 
-- Tên: `snapshot_20251029_213229`
-- Thời gian: `2025-10-29 21:32:30`
-- Kích thước: `342.75 MB`
-- Đường dẫn: `snapshots/snapshot_20251029_213229/`
+- Tên: `snapshot_20251030_095037`
+- Thời gian: `2025-10-30 09:50:37`
+- Đường dẫn: `snapshots/snapshot_20251030_095037/`
 - Files:
-  - `final_centroids.txt` (436 bytes)
-  - `clustered_results.txt` (342.75 MB)
-  - `suspicious_transactions.csv` (558 bytes)
+  - `final_centroids.txt`
+  - `clustered_results.txt`
+  - `suspicious_transactions.csv`
   - `pipeline_log.md`
 
 Tham chiếu: xem báo cáo cập nhật trong `bao_cao_du_an.md`.
@@ -279,8 +271,8 @@ python scripts/data/snapshot_results.py
 # Xem danh sách snapshots
 python scripts/data/snapshot_results.py --list
 
-# Tạo biểu đồ trực quan
-python scripts/data/visualize_results.py
+# Mở notebook trực quan hóa
+jupyter lab visualizations/phan-tich.ipynb
 ```
 
 <a id="chi-tiet-steps"></a>
@@ -294,7 +286,7 @@ python scripts/data/visualize_results.py
 | 4 | `scripts/spark/run_spark.sh` | K-means MLlib (⚡ k-means++) | ~10-15 phút |
 | 5 | `scripts/spark/download_from_hdfs.sh` | Tải centroids từ HDFS | ~30s |
 | 6 | `scripts/polars/assign_clusters_polars.py` | Gán clusters cho data | ~10 phút |
-| 7 | `scripts/polars/analyze.py` | Phân tích & báo cáo | ~2 phút |
+| 7 | `scripts/polars/analyze_polars.py` | Phân tích & báo cáo | ~2 phút |
 | 8 | `scripts/data/snapshot_results.py` | Snapshot kết quả | ~10s |
 | 9 | `scripts/data/visualize_results.py` | Tạo biểu đồ trực quan | ~2 phút |
 
@@ -363,4 +355,4 @@ python scripts/data/visualize_results.py
 <a id="phuong-phap-khac"></a>
 ### So sánh với các phương pháp khác:
 
-Xem chi tiết tại: [`docs/HADOOP_ALTERNATIVES.md`](docs/HADOOP_ALTERNATIVES.md)
+Xem chi tiết tại: [`docs/hadoop-alternatives.md`](docs/hadoop-alternatives.md)

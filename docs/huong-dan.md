@@ -268,7 +268,7 @@ python scripts/polars/analyze_polars.py
 Thay vì chạy từng bước, dùng script tự động:
 
 ```bash
-./scripts/pipeline/full_pipeline_spark_v2.sh
+./scripts/pipeline/full_pipeline_spark.sh
 
 ### Flags quan trọng (chạy ngay từ CLI)
 
@@ -286,7 +286,7 @@ Thay vì chạy từng bước, dùng script tự động:
 --dry-run      # chỉ in kế hoạch
 
 # Ví dụ
-./scripts/pipeline/full_pipeline_spark_v2.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
+./scripts/pipeline/full_pipeline_spark.sh --k 6 --max-iter 20 --seed 33 --tol 1e-5
 ```
 ```
 
@@ -445,17 +445,17 @@ tail -f logs/pipeline_log_*.md
 <a id="tai-lieu"></a>
 ## 📚 TÀI LIỆU THAM KHẢO
 
-- **BAO_CAO_TIEU_LUAN.md**: Báo cáo chi tiết bằng tiếng Việt
+- **bao_cao_tieu_luan.md**: Báo cáo chi tiết bằng tiếng Việt
 - **README.md**: Quick start guide
-- **docs/PROJECT_OVERVIEW.md**: Kiến trúc hệ thống
-- **CHANGELOG.md**: Lịch sử thay đổi
+- **docs/tong-quan.md**: Kiến trúc hệ thống
+- **changelog.md**: Lịch sử thay đổi
 
 ---
 
 ## 🆘 CẦN TRỢ GIÚP?
 
 1. Xem log: `logs/pipeline_log_*.md`
-2. Xem troubleshooting trong `BAO_CAO_TIEU_LUAN.md`
+2. Xem troubleshooting trong `bao_cao_tieu_luan.md`
 3. Check HDFS: `hdfs dfsadmin -report`
 4. Check Spark UI: `http://localhost:4040`
 

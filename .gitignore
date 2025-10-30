@@ -4,6 +4,15 @@ data/raw/
 data/processed/
 data/results/
 
+# Docs
+docs/hadoop-alternatives.md
+docs/migration.md
+docs/questions.md
+docs/jupyter.md
+docs/toi-uu-kmeans.md
+docs/toi-uu-accuracy.md
+docs/teacher_interview.md
+
 # Checkpoints
 .pipeline_checkpoints/
 
