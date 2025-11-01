@@ -103,7 +103,7 @@ Final/
 
 ```
 [1] Explore → [2] Prepare → [3] Upload → [4] Spark (MLlib) → [5] Download → [6] Assign → [7] Analyze
-     30s        10 min      5 min      10-25 min           30s         10 min      2 min
+     9s         33s         41s        6m 6s               3s          3m 21s      33s
 ```
 
 ⚠️ **Thay đổi quan trọng**: Bước khởi tạo centroids (bước 3 cũ) đã **loại bỏ** vì MLlib K-means tự động dùng **k-means++**!
@@ -113,15 +113,15 @@ Final/
 #### 1. Explore Data (`explore_fast.py`)
 - Scan CSV với Polars (lazy loading)
 - Xem schema, sample, distribution
-- **Thời gian**: ~30 giây
+- **Thời gian thực tế**: 9 giây
 
 #### 2. Feature Engineering (`prepare_polars.py`)
 - Parse timestamp → hour, day_of_week
 - Tính amount_ratio, route_hash
 - Encode categorical features
 - Normalize tất cả features
-- **Output**: `data/processed/hadoop_input.txt` (temp)
-- **Thời gian**: ~10 phút
+- **Output**: `data/processed/hadoop_input_temp.txt` (temp)
+- **Thời gian thực tế**: 33 giây
 
 #### ~~3. Initialize Centroids~~ ❌ **ĐÃ LOẠI BỎ**
 - MLlib K-means tự động sử dụng k-means++ để khởi tạo centroids
@@ -129,34 +129,34 @@ Final/
 - Tiết kiệm 30 giây và cho kết quả tốt hơn
 
 #### 3. Upload to HDFS (`setup_hdfs.sh`)
-- Upload hadoop_input.txt → `/user/spark/hi_large/input/`
+- Upload `hadoop_input_temp.txt` → `/user/spark/hi_large/input/hadoop_input.txt`
 - **XÓA tự động** temp files từ `data/processed/`
-- **Thời gian**: ~5 phút
+- **Thời gian thực tế**: 41 giây
 
 #### 4. Spark K-means (`run_spark.sh`)
 - Chạy `kmeans_spark.py` với spark-submit
 - Đọc dữ liệu từ HDFS
 - **MLlib K-means với k-means++ initialization**
 - Lưu final centroids trên HDFS
-- **Thời gian**: 10-25 phút (nhanh hơn 30-50% nhờ MLlib!)
+- **Thời gian thực tế**: 6 phút 6 giây
 
 #### 5. Download Results (`download_from_hdfs.sh`)
 - Tải final centroids từ HDFS
 - Lưu vào `data/results/final_centroids.txt`
-- **Thời gian**: ~30 giây
+- **Thời gian thực tế**: 3 giây
 
 #### 6. Assign Clusters (`assign_clusters_polars.py`)
 - Đọc raw CSV + final centroids
 - Tính khoảng cách, gán cluster cho mỗi transaction
 - **Output**: `data/results/clustered_results.txt`
-- **Thời gian**: ~10 phút
+- **Thời gian thực tế**: 3 phút 21 giây
 
 #### 7. Analyze (`analyze_polars.py`)
 - Phân tích tỷ lệ laundering per cluster
 - Tìm high-risk clusters (>10% laundering)
 - Export suspicious transactions
 - **Output**: Reports, suspicious_transactions.csv
-- **Thời gian**: ~2 phút
+- **Thời gian thực tế**: 33 giây
 
 ---
 
@@ -165,9 +165,8 @@ Final/
 ### Cài đặt:
 
 ```bash
-# 1. Cài Spark
-./scripts/setup/install_spark.sh
-source ~/.zshrc
+# 1. Đảm bảo Spark/Hadoop đã cài và HDFS đang chạy
+#    (yêu cầu có sẵn spark-submit, hdfs trong PATH)
 
 # 2. Cài Python packages
 pip install polars numpy pyspark
@@ -189,7 +188,7 @@ cp /path/to/HI-Large_Trans.csv data/raw/
 
 ```bash
 # Reset toàn bộ
-./scripts/pipeline/clean_spark.sh
+./scripts/pipeline/clean_all.sh
 
 # Chỉ reset checkpoints
 ./scripts/pipeline/reset_pipeline.sh
@@ -225,25 +224,25 @@ hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 
 ## 🎯 Performance
 
-### Thời gian ước tính:
+### Thời gian thực tế (theo log `pipeline_log_20251030_093506.md`):
 
 | Bước | Thời gian | Tool |
 |------|-----------|------|
-| 1. Explore | 30s | Polars |
-| 2. Prepare | 10 min | Polars |
+| 1. Explore | 9s | Polars |
+| 2. Prepare | 33s | Polars |
 | ~~3. Init~~ | ~~30s~~ (loại bỏ) | ~~NumPy~~ |
-| 3. Upload | 5 min | HDFS |
-| 4. K-means | 10-25 min | Spark MLlib |
-| 5. Download | 30s | HDFS |
-| 6. Assign | 10 min | Polars + NumPy |
-| 7. Analyze | 2 min | Polars |
-| **TOTAL** | **~35-50 min** | (nhanh hơn 30-50%) |
+| 3. Upload | 41s | HDFS |
+| 4. K-means | 6m 6s | Spark MLlib |
+| 5. Download | 3s | HDFS |
+| 6. Assign | 3m 21s | Polars + NumPy |
+| 7. Analyze | 33s | Polars |
+| **TOTAL** | **11m 27s** | (log thực tế) |
 
 ### So sánh với Hadoop MapReduce:
 
 - Hadoop legacy: **1-2 giờ** (chỉ K-means)
 - Spark RDD (cũ): **15-30 phút** (chỉ K-means)
-- **Spark MLlib (mới)**: **10-25 phút** (chễ K-means)
+- **Spark MLlib (mới)**: **10-25 phút** (chạy K-means)
 - **Tăng tốc tổng**: 5-12x so với Hadoop, 30-50% so với RDD
 
 ---
@@ -254,10 +253,12 @@ hdfs dfs -cat /user/spark/hi_large/output_centroids/part-00000
 - Thời gian: `2025-10-30 09:50:37`
 - Thư mục: `snapshots/snapshot_20251030_095037/`
 - Thành phần:
-  - `final_centroids.txt`
-  - `clustered_results.txt`
-  - `suspicious_transactions.csv`
+  - `final_centroids.txt` (~436 B)
+  - `clustered_results.txt` (~342.75 MB)
+  - `suspicious_transactions.csv` (~558 B)
   - `pipeline_log.md`
+  - `metadata.json`
+- Tổng dung lượng (ước tính): ~342.75 MB
 
 Tham khảo báo cáo chi tiết: `bao_cao_du_an.md` (đã đồng bộ theo snapshot này).
 
@@ -348,11 +349,11 @@ grep "ERROR\|FAILED" logs/pipeline_log_*.md
 
 ```bash
 # Spark UI (nếu chạy)
-# Mở browser: http://localhost:4040
+# Mở browser: `http://localhost:4040`
 
 # Xem Spark history
 spark-history-server start
-# Browser: http://localhost:18080
+# Browser: `http://localhost:18080`
 ```
 
 ### Checkpoints:
@@ -417,9 +418,9 @@ Nếu gặp vấn đề:
 1. Kiểm tra logs: `logs/pipeline_log_*.md`
 2. Xem troubleshooting section ở trên
 3. Kiểm tra HDFS status: `hdfs dfsadmin -report`
-4. Check Spark UI: http://localhost:4040
+4. Check Spark UI: `http://localhost:4040`
 
 ---
 
-**Last Updated**: 2025-10-30  
+**Last Updated**: 2025-10-31  
 **Project Version**: 2.1 (Spark MLlib)

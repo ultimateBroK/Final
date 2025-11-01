@@ -396,14 +396,14 @@
 | Thành phần | Giải thích đơn giản | Số lượng |
 |------------|---------------------|----------|
 | **Driver memory** | Bộ nhớ cho ông chủ (Master) | 4GB (như RAM laptop) |
-| **Executor memory** | Bộ nhớ cho mỗi công nhân (Worker) | 4GB × 4 = 16GB tổng |
-| **Cores** | CPU cores (như số "tay" của máy tính) | 4 cores/worker × 4 = 16 cores |
-| **Parallelism** | Số việc làm cùng lúc | 16 (16 việc song song) |
+| **Executor memory** | Bộ nhớ cho mỗi công nhân (Worker) | 4GB × 8 = 32GB tổng |
+| **Cores** | CPU cores (như số "tay" của máy tính) | 4 cores/worker × 8 = 32 cores |
+| **Parallelism** | Số việc làm cùng lúc | 32 (32 việc song song) |
 
 > **Giải thích thêm**: 
 > - 1 core = như 1 tay làm việc. 4 cores = có 4 tay, làm được 4 việc cùng lúc
-> - 16GB RAM = như có 16 tủ sách để chứa dữ liệu
-> - Xử lý song song = như 16 người cùng đọc 16 quyển sách khác nhau, nhanh gấp 16 lần!
+> - 32GB RAM = như có 32 tủ sách để chứa dữ liệu
+> - Xử lý song song = như 32 người cùng đọc 32 quyển sách khác nhau, nhanh gấp 32 lần!
 
 ---
 
@@ -482,26 +482,26 @@ Giá trị giao dịch:
 
 **Chi tiết 6 bước xử lý (từ log thực tế)**:
 
-**Bước 2.1/6: Thiết lập đọc trì hoãn (Lazy Loading)**
+**Bước 1/6: Thiết lập đọc trì hoãn (Lazy Loading)**
 - Thời gian: 0.0s
 - Mục đích: Không tải toàn bộ vào RAM, chỉ đọc khi cần thiết
 - Sử dụng: `pl.scan_csv()` - Polars lazy evaluation
 
-**Bước 2.2/6: Trích xuất đặc trưng từ dữ liệu thô**
+**Bước 2/6: Trích xuất đặc trưng từ dữ liệu thô**
 - Thời gian: 0.0s (tính toán lazy, chưa thực thi)
 - Các đặc trưng được tạo:
   1. **Temporal Features**: Parse `Timestamp` → `hour` (0-23), `day_of_week` (0-6)
   2. **Amount Features**: `Amount Received`, `Amount Paid`, `amount_ratio = Received / Paid`
   3. **Route Feature**: `route_hash = hash(From Bank + To Bank)` - mã hóa tuyến chuyển tiền
 
-**Bước 2.3/6: Mã hóa biến phân loại (Categorical Encoding)**
+**Bước 3/6: Mã hóa biến phân loại (Categorical Encoding)**
 - Thời gian: 0.0s
 - Mã hóa Label Encoding cho:
   - `Receiving Currency` → `recv_curr_encoded` (số nguyên)
   - `Payment Currency` → `payment_curr_encoded` (số nguyên)
   - `Payment Format` → `payment_format_encoded` (số nguyên)
 
-**Bước 2.4/6: Chọn các đặc trưng số**
+**Bước 4/6: Chọn các đặc trưng số**
 - Thời gian: 0.0s
 - Kết quả: Chọn **9 đặc trưng số** cho K-means:
   1. `amount_received`
@@ -514,12 +514,12 @@ Giá trị giao dịch:
   8. `payment_curr_encoded`
   9. `payment_format_encoded`
 
-**Bước 2.5/6: Chuẩn hóa dữ liệu (Z-score Normalization)**
+**Bước 5/6: Chuẩn hóa dữ liệu (Z-score Normalization)**
 - Thời gian: 0.0s (tính toán lazy)
 - Công thức: `(x - mean) / std` (Z-score, không phải Min-Max)
 - Mục đích: Đưa tất cả features về cùng scale (mean=0, std=1)
 
-**Bước 2.6/6: Lưu tệp tạm thời cho HDFS**
+**Bước 6/6: Lưu tệp tạm thời cho HDFS**
 - Thời gian: **34.7 giây** (chiếm phần lớn thời gian của bước 2)
 - Đường dẫn: `/home/ultimatebrok/Downloads/Final/data/processed/hadoop_input_temp.txt`
 - Kích thước: **31.00 GB** (sau khi normalize)
@@ -626,19 +626,19 @@ Giá trị giao dịch:
 
 **Chi tiết 5 bước xử lý**:
 
-**Bước 4.1/5: Đọc dữ liệu từ HDFS** 📂
+**Bước 1: Đọc dữ liệu từ HDFS** 📂
 - Thời gian: **58.2 giây** (21:22:35 - 21:23:33)
 - Dữ liệu đọc: 179,702,229 bản ghi từ file 31GB trên HDFS
 - Định dạng: CSV không header, 9 cột số (features đã normalized)
 
-**Bước 4.2/5: Tạo vector đặc trưng** 🔧
+**Bước 2: Tạo vector đặc trưng** 🔧
 - Thời gian: **63.1 giây** (21:23:33 - 21:24:36)
 - Công việc:
   - Sử dụng `VectorAssembler` để ghép 9 cột thành 1 vector
   - Cache vào bộ nhớ/đĩa để tăng tốc các iteration tiếp theo
   - Kết quả: 179,702,229 vector đặc trưng
 
-**Bước 4.3/5: Cấu hình K-means** 🎯
+**Bước 3: Cấu hình K-means** 🎯
 - Thời gian: **0.1 giây** (rất nhanh!)
 - **Các tham số** (giống như cài đặt):
   - `K = 5`: Chia thành 5 nhóm (cụm) - như chia thành 5 lớp
@@ -654,7 +654,7 @@ Giá trị giao dịch:
 > - ... 
 > → Kết quả tốt hơn và nhanh hơn!
 
-**Bước 4.4/5: Huấn luyện K-means** 🚀 (Phần quan trọng nhất!)
+**Bước 4: Huấn luyện K-means** 🚀 (Phần quan trọng nhất!)
 - Thời gian: **3 phút 50.8 giây** - chiếm 63% tổng thời gian (nhưng xử lý được 179 triệu giao dịch!)
 
 **Quá trình K-means hoạt động** (giải thích đơn giản):
@@ -760,18 +760,18 @@ Giống như đo khoảng cách thẳng giữa 2 điểm trên bản đồ. Kho�
 
 **Chi tiết quy trình xử lý**:
 
-**Bước 6.1: Đọc tâm cụm cuối cùng**
+**Bước 1: Đọc tâm cụm cuối cùng**
 - File: `data/results/final_centroids.txt`
 - Kết quả: Load 5 tâm cụm, mỗi tâm có 9 đặc trưng
 - Thời gian: < 1 giây
 
-**Bước 6.2: Đọc dữ liệu từ HDFS (Streaming)**
+**Bước 2: Đọc dữ liệu từ HDFS (Streaming)**
 - Đường dẫn: `/user/spark/hi_large/input/hadoop_input.txt`
 - Cách đọc: **Streaming từ HDFS** - không load toàn bộ vào RAM
 - Kết quả: 179,702,229 bản ghi (đã normalized, 9 features)
 - Thời gian: ~30-40 giây
 
-**Bước 6.3: Chuyển sang NumPy và tính khoảng cách** 🔢
+**Bước 3: Chuyển sang NumPy và tính khoảng cách** 🔢
 - Dữ liệu: 179,702,229 dòng × 9 cột
 - Tâm cụm: 5 cụm × 9 đặc trưng
 - Phương pháp: **Batch Processing** với NumPy vectorization
@@ -817,7 +817,7 @@ Giống như đo khoảng cách thẳng giữa 2 điểm trên bản đồ. Kho�
 Đã xử lý 179,702,229/179,702,229 giao dịch (100.0%)
 ```
 
-**Bước 6.4: Lưu kết quả**
+**Bước 4: Lưu kết quả**
 - File: `data/results/clustered_results.txt`
 - Kích thước: **342.75 MB**
 - Định dạng: 1 dòng = 1 cluster_id (số nguyên 0-4)
@@ -859,22 +859,22 @@ Cluster 4: 3,905,021 giao dịch (2.17%)
 
 **Chi tiết các phân tích thực hiện**:
 
-**Bước 7.1: Đọc kết quả phân cụm**
+**Bước 1: Đọc kết quả phân cụm**
 - File: `data/results/clustered_results.txt`
 - Kết quả: Load 179,702,229 nhãn cụm (cluster_id từ 0-4)
 - Thời gian: ~5 giây
 
-**Bước 7.2: Đọc dữ liệu gốc (Lazy Mode)**
+**Bước 2: Đọc dữ liệu gốc (Lazy Mode)**
 - File: `data/raw/HI-Large_Trans.csv`
 - Cách đọc: **Lazy loading** với Polars - chỉ load metadata, không load toàn bộ vào RAM
 - Mục đích: Gắn cluster_id vào dữ liệu gốc để phân tích
 - Thời gian: ~10 giây
 
-**Bước 7.3: Gắn nhãn cụm vào dữ liệu**
+**Bước 3: Gắn nhãn cụm vào dữ liệu**
 - Kết quả: Mỗi giao dịch có thêm cột `cluster` (0-4)
 - Thời gian: ~2 giây
 
-**Bước 7.4: Phân tích thống kê**
+**Bước 4: Phân tích thống kê**
 
 **1. Kích thước mỗi cụm**:
 ```
